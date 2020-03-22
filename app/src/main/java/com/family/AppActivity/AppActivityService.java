@@ -1,4 +1,4 @@
-package com.family.AppAcitivy;
+package com.family.AppActivity;
 
 public class AppActivityService {
     //https://stackoverflow.com/questions/4212992/how-can-i-check-if-an-app-running-on-android
