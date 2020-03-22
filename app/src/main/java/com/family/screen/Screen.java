@@ -1,4 +1,4 @@
-package com.family;
+package com.family.screen;
 
 public class Screen {
 
