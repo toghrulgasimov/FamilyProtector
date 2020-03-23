@@ -149,6 +149,8 @@ public class MainActivity extends AppCompatActivity {
 
         setAdmin();
 
+        //TODO Wait for Intent
+        // https://developer.android.com/training/basics/intents/result.html
 
         //TODO Ignore Battery Optimisation. App Always in running
 
@@ -232,4 +234,18 @@ public class MainActivity extends AppCompatActivity {
 //                    1);
         }
     }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+//        if (requestCode == 1) {
+//            if(resultCode == Activity.RESULT_OK){
+//                String result=data.getStringExtra("result");
+//            }
+//            if (resultCode == Activity.RESULT_CANCELED) {
+//                //Write your code if there's no result
+//            }
+//        }
+        Log.d("salam","result came");
+    }//onActivityResult
 }
