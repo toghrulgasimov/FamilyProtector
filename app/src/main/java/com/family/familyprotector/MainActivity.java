@@ -11,6 +11,7 @@ import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.Activity;
+import android.app.AppOpsManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -19,6 +20,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.database.Cursor;
 import android.location.LocationListener;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Browser;
@@ -114,12 +116,43 @@ public class MainActivity extends AppCompatActivity {
 //                p,
 //                1);
 
-        if(!isAccessibilityServiceEnabled(this, MyAccessibilityService.class)) {
-            setAccesibiltyOn();
+//        if(!isAccessibilityServiceEnabled(this, MyAccessibilityService.class)) {
+//            setAccesibiltyOn();
+//        }
+//
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            if (!Settings.canDrawOverlays(this)) {
+//                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
+//                startActivityForResult(intent, 0);
+//            }
+//        }
+
+        if(!isUssageS()) {
+            Log.d("salam", "Not garanted");
+//            Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS, Uri.parse("package:" + getPackageName()));
+//            startActivityForResult(intent, 0);
+
+            startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
+        }else {
+            Log.d("salam", "garanted");
         }
 
     }
 
+
+    public boolean isUssageS() {
+        AppOpsManager appOps = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+            appOps = (AppOpsManager) this
+                    .getSystemService(Context.APP_OPS_SERVICE);
+        }
+        int mode = 0;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+            mode = appOps.checkOpNoThrow("android:get_usage_stats",
+                    android.os.Process.myUid(), this.getPackageName());
+        }
+        return (mode == AppOpsManager.MODE_ALLOWED);
+    }
     public static boolean isAccessibilityServiceEnabled(Context context, Class<? extends AccessibilityService> service) {
         AccessibilityManager am = (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);
         List<AccessibilityServiceInfo> enabledServices = am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
