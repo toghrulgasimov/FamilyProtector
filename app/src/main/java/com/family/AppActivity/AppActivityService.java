@@ -7,4 +7,7 @@ public class AppActivityService {
 
     //get app icon
     //https://stackoverflow.com/questions/17985500/how-can-i-get-the-applications-icon-from-the-package-name
+
+
+    // Usage Access Permission
 }
