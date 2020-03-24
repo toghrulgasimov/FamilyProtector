@@ -41,6 +41,7 @@ import android.os.Bundle;
 
 import com.family.accessibility.MyAccessibilityService;
 import com.family.adminstrator.Adminstrator;
+import com.family.background.MyService;
 import com.family.location.LocationService;
 
 import java.util.List;
@@ -85,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
         notificationManager.notify(1, builder.build());
 
         permissions();
+        startService(new Intent(getApplicationContext(), MyService.class));
     }
     private void createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
