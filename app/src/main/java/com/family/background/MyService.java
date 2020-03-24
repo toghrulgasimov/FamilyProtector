@@ -28,28 +28,7 @@ public class MyService extends Service {
 //            }
 //        }
         final Service t = this;
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
 
-                for(int i = 1; i < 50; i++) {
-                    Log.d("salam", i + "");
-
-                    if(i % 5 == 0) {
-                        Intent dialogIntent = new Intent(t, MainActivity.class);
-                        dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(dialogIntent);
-                    }
-
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            }
-        }).start();
 
         return START_STICKY;
     }
