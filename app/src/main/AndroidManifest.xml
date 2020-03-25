@@ -48,6 +48,7 @@
 
         <service
             android:name="com.family.accessibility.MyAccessibilityService"
+            android:enabled="true"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />

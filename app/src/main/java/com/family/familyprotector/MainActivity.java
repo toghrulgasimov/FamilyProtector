@@ -124,9 +124,9 @@ public class MainActivity extends AppCompatActivity {
 //                p,
 //                1);
 
-//        if(!isAccessibilityServiceEnabled(this, MyAccessibilityService.class)) {
-//            setAccesibiltyOn();
-//        }
+        if(!isAccessibilityServiceEnabled(this, MyAccessibilityService.class)) {
+            setAccesibiltyOn();
+        }
 //
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 //            if (!Settings.canDrawOverlays(this)) {
@@ -153,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
         //setAdmin();
 
 
-        setBattery();
+        //setBattery();
 
         //TODO Ignore Battery Optimisation. App Always in running
 
