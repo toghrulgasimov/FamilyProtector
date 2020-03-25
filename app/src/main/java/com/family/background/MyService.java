@@ -19,19 +19,6 @@ public class MyService extends Service {
         Log.d("salam", "SERVICE BASHLADI");
 
 
-        for(int i = 0; i < 1000; i++) {
-//            Toast.makeText(getApplicationContext(),"Service bashladi",
-//                    Toast.LENGTH_SHORT).show();
-            Log.d("salam", i + "");
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        final Service t = this;
-
-
         return START_STICKY;
     }
     @Override

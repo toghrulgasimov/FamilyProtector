@@ -6,6 +6,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -47,28 +48,47 @@ import com.family.adminstrator.Adminstrator;
 import com.family.background.GoogleService;
 import com.family.background.MyService;
 import com.family.location.LocationService;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends FragmentActivity implements OnMapReadyCallback {
 
 
     public String CHANNEL_ID = "NOT";
 
-    Geocoder geocoder;
-    Double latitude,longitude;
+    private GoogleMap mMap;
+
+    int DRAW = 0,
+        USSAGE = 1,
+        BATTERY = 2,
+        NOTIFICATION = 3,
+        ACCESIBILITY = 4,
+        ADMIN = 5,
+        SIMPLE = 6;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
         createNotification();
-        setBattery();
+        //setBattery();
 
         simplePermissions();
-
+        drawAppPermission();
 
 
     }
@@ -108,11 +128,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+
     public void drawAppPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.canDrawOverlays(this)) {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
-                startActivityForResult(intent, 0);
+                //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivityForResult(intent, DRAW);
             }
         }
     }
@@ -120,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
         if(!isUssageS()) {
             Log.d("salam", "Not garanted");
 
-            startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
+            startActivityForResult(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS), USSAGE);
         }else {
             Log.d("salam", "garanted");
         }
@@ -133,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
         };
         ActivityCompat.requestPermissions(this,
                 p,
-                1);
+                SIMPLE);
     }
     public void setBattery() {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -143,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
             if (!pm.isIgnoringBatteryOptimizations(packageName)) {
                 intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
                 intent.setData(Uri.parse("package:" + packageName));
-                startActivity(intent);
+                startActivityForResult(intent, BATTERY);
             }
         }
     }
@@ -156,8 +178,9 @@ public class MainActivity extends AppCompatActivity {
         if(enabledPackages.contains(packageName)) {
 
         }else {
-            getApplicationContext().startActivity(new Intent(
-                    Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            startActivityForResult(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS), NOTIFICATION);
+//            getApplicationContext().startActivity(new Intent(
+//                    Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         }
 
     }
@@ -165,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
         if(!isAccessibilityServiceEnabled(this, MyAccessibilityService.class)) {
             Intent openSettings = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
             openSettings.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
-            startActivity(openSettings);
+            startActivityForResult(openSettings, ACCESIBILITY);
         }
 
     }
@@ -183,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
             intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, mDeviceAdmin);
             intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "EXPLANATION");
-            startActivityForResult(intent, 14);
+            startActivityForResult(intent, ADMIN);
         }
     }
 
@@ -244,40 +267,30 @@ public class MainActivity extends AppCompatActivity {
 //                //Write your code if there's no result
 //            }
 //        }
-        Log.d("salam","result came");
+        if(requestCode == DRAW) {
+            setUssage();
+        }else if(requestCode == USSAGE) {
+            setBattery();
+        }else if(requestCode == BATTERY) {
+            setNotificationAccess();
+        }else if(requestCode == NOTIFICATION) {
+            setAdmin();
+        }else if(requestCode == ADMIN) {
+            setAccesibiltyOn();
+        }else if(requestCode == ACCESIBILITY) {
+            //simplePermissions();
+        }
+        Log.d("salam","result came" + requestCode);
     }//onActivityResult
 
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
 
-            latitude = Double.valueOf(intent.getStringExtra("latutide"));
-            longitude = Double.valueOf(intent.getStringExtra("longitude"));
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
 
-            List<Address> addresses = null;
-
-            try {
-                addresses = geocoder.getFromLocation(latitude, longitude, 1);
-                String cityName = addresses.get(0).getAddressLine(0);
-                String stateName = addresses.get(0).getAddressLine(1);
-                String countryName = addresses.get(0).getAddressLine(2);
-
-//                tv_area.setText(addresses.get(0).getAdminArea());
-//                tv_locality.setText(stateName);
-//                tv_address.setText(countryName);
-
-
-
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-
-
-//            tv_latitude.setText(latitude+"");
-//            tv_longitude.setText(longitude+"");
-//            tv_address.getText();
-
-
-        }
-    };
+        // Add a marker in Sydney, Australia, and move the camera.
+        LatLng sydney = new LatLng(-34, 151);
+        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+    }
 }

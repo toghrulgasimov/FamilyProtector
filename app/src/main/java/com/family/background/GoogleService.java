@@ -32,7 +32,7 @@ public class GoogleService extends Service implements LocationListener {
     Location location;
     private Handler mHandler = new Handler();
     private Timer mTimer = null;
-    long notify_interval = 1000;
+    long notify_interval = 10000;
     public static String str_receiver = "servicetutorial.service.receiver";
     Intent intent;
 
@@ -51,15 +51,27 @@ public class GoogleService extends Service implements LocationListener {
     public void onCreate() {
         super.onCreate();
 
+
         mTimer = new Timer();
-        mTimer.schedule(new TimerTaskToGetLocation(), 5, notify_interval);
-        intent = new Intent(str_receiver);
+        mTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        fn_getlocation();
+                    }
+                });
+            }
+        }, 10, notify_interval);
+        //intent = new Intent(str_receiver);
 //        fn_getlocation();
     }
 
     @Override
     public void onLocationChanged(Location location) {
 
+        Log.d("salam", "Changed called" + location.getLatitude() + " - " + location.getLongitude());
     }
 
     @Override
@@ -105,10 +117,6 @@ public class GoogleService extends Service implements LocationListener {
 
                         Log.e("latitude",location.getLatitude()+"");
                         Log.e("longitude",location.getLongitude()+"");
-
-                        latitude = location.getLatitude();
-                        longitude = location.getLongitude();
-                        fn_update(location);
                     }
                 }
 
@@ -123,9 +131,6 @@ public class GoogleService extends Service implements LocationListener {
                     if (location!=null){
                         Log.e("latitude",location.getLatitude()+"");
                         Log.e("longitude",location.getLongitude()+"");
-                        latitude = location.getLatitude();
-                        longitude = location.getLongitude();
-                        fn_update(location);
                     }
                 }
             }
@@ -135,26 +140,9 @@ public class GoogleService extends Service implements LocationListener {
 
     }
 
-    private class TimerTaskToGetLocation extends TimerTask{
-        @Override
-        public void run() {
 
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    fn_getlocation();
-                }
-            });
 
-        }
-    }
 
-    private void fn_update(Location location){
-
-        intent.putExtra("latutide",location.getLatitude()+"");
-        intent.putExtra("longitude",location.getLongitude()+"");
-        sendBroadcast(intent);
-    }
 
 
 }

@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.family.familyprotector">
 
+
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -37,6 +38,9 @@
         <meta-data
             android:name="android.accessibilityservice"
             android:resource="@xml/accessibility_service_config" />
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyAT8fPfM4fsk3kwvoxbSn4340zV4Gi6rko"/>
 
         <activity android:name=".MainActivity">
             <intent-filter>
