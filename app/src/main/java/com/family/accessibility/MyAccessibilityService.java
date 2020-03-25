@@ -49,6 +49,7 @@ public class MyAccessibilityService extends AccessibilityService {
             return;
         }
         int childCount = parentView.getChildCount();
+        Log.d("sagol", parentView.getClassName().toString());
         if (childCount == 0 && (parentView.getClassName().toString().contentEquals("android.widget.TextView"))) {
             textViewNodes.add(parentView);
         } else {
@@ -61,7 +62,7 @@ public class MyAccessibilityService extends AccessibilityService {
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
-        Log.d("salam", "EVENT cagrildi");
+        //Log.d("salam", "EVENT cagrildi");
 
         int eventType = accessibilityEvent.getEventType();
 
