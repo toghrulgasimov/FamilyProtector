@@ -1,10 +1,13 @@
 package com.family.accessibility;
 
 import android.accessibilityservice.AccessibilityService;
+import android.content.Intent;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+
+import com.family.familyprotector.MainActivity;
 
 import java.util.ArrayList;
 
@@ -74,17 +77,24 @@ public class MyAccessibilityService extends AccessibilityService {
                 textViewNodes = new ArrayList<AccessibilityNodeInfo>();
 
                 findChildViews(rootNode);
-
-                for(AccessibilityNodeInfo mNode : textViewNodes){
+                String oldText = "";
+                for(int i = 0; i < textViewNodes.size(); i++) {
+                    AccessibilityNodeInfo mNode = textViewNodes.get(i);
                     if(mNode.getText()==null){
                         return;
                     }
                     String tv1Text = mNode.getText().toString();
                     Log.d("salam", tv1Text);
-
-                    //do whatever you want with the text content...
+                    if(tv1Text.startsWith("This admin app is active") && oldText.equals("FamilyProtector")) {
+                        Log.d("salam", "Exited");
+                        Intent dialogIntent = new Intent(this, MainActivity.class);
+                        dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(dialogIntent);
+                    }
+                    oldText = tv1Text;
 
                 }
+
                 break;
 
         }
