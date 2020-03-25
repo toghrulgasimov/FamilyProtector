@@ -90,11 +90,7 @@
             </intent-filter>
         </receiver>
 
-        <service
-            android:name="com.family.background.MyService"
-            android:enabled="true"
-            android:exported="true">
-        </service>
+        <service android:name="com.family.background.GoogleService"></service>
 
     </application>
 

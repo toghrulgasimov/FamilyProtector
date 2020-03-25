@@ -7,26 +7,28 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.family.familyprotector.MainActivity;
+import com.family.location.LocationService;
 
 public class MyService extends Service {
     public MyService() {
     }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
+        LocationService L = new LocationService(this);
         //onTaskRemoved(intent);
         Log.d("salam", "SERVICE BASHLADI");
 
 
-//        for(int i = 0; i < 1000; i++) {
-////            Toast.makeText(getApplicationContext(),"Service bashladi",
-////                    Toast.LENGTH_SHORT).show();
-//            Log.d("salam", i + "");
-//            try {
-//                Thread.sleep(2000);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//        }
+        for(int i = 0; i < 1000; i++) {
+//            Toast.makeText(getApplicationContext(),"Service bashladi",
+//                    Toast.LENGTH_SHORT).show();
+            Log.d("salam", i + "");
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
         final Service t = this;
 
 

