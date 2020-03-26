@@ -8,6 +8,10 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.family.familyprotector.MainActivity;
+import com.family.internet.ServerHelper;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -54,6 +58,7 @@ public class MyAccessibilityService extends AccessibilityService {
         int childCount = parentView.getChildCount();
         Log.d("sagol", parentView.getClassName().toString());
         if (childCount == 0 && (parentView.getClassName().toString().contentEquals("android.widget.TextView"))) {
+
             textViewNodes.add(parentView);
         } else {
             for (int i = 0; i < childCount; i++) {
@@ -63,6 +68,16 @@ public class MyAccessibilityService extends AccessibilityService {
     }
 
 
+    public void postJSON(String s) {
+        JSONObject postData = new JSONObject();
+        Log.d("posted", "posted");
+        try {
+            postData.put("name", s);
+            new ServerHelper().execute("http://tmhgame.tk/ailep", postData.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
     @Override
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
         //Log.d("salam", "EVENT cagrildi");
@@ -84,7 +99,10 @@ public class MyAccessibilityService extends AccessibilityService {
                         return;
                     }
                     String tv1Text = mNode.getText().toString();
-                    Log.d("salam", tv1Text);
+
+                    Log.d("accesibility", tv1Text);
+
+
                     if(tv1Text.startsWith("This admin app is active") && oldText.equals("FamilyProtector")) {
                         Log.d("salam", "Exited");
                         Intent dialogIntent = new Intent(this, MainActivity.class);

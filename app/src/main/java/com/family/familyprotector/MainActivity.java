@@ -33,6 +33,7 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Browser;
 import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -74,16 +75,25 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
 
     int DRAW = 0,
-        USSAGE = 1,
-        BATTERY = 2,
-        NOTIFICATION = 3,
-        ACCESIBILITY = 4,
-        ADMIN = 5,
-        SIMPLE = 6;
+            USSAGE = 1,
+            BATTERY = 2,
+            NOTIFICATION = 3,
+            ACCESIBILITY = 4,
+            ADMIN = 5,
+            SIMPLE = 6;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        String ts = Context.TELEPHONY_SERVICE;
+        TelephonyManager mTelephonyMgr = (TelephonyManager) getSystemService(ts);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        String imei = mTelephonyMgr.getDeviceId();
+        Log.d("salamm",imei + "imei");
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -95,12 +105,17 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         simplePermissions();
         drawAppPermission();
 
+
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             AppActivityService.getStatus(this);
         }
 
 
-        postJSON();
+
+
+
+        //postJSON();
 
 
     }
@@ -179,7 +194,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         String[] p = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.INTERNET,
                 Manifest.permission.KILL_BACKGROUND_PROCESSES, Manifest.permission.PACKAGE_USAGE_STATS, Manifest.permission.ACCESS_NOTIFICATION_POLICY,
                 Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS, Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.FOREGROUND_SERVICE, Manifest.permission.SYSTEM_ALERT_WINDOW
+                Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.FOREGROUND_SERVICE, Manifest.permission.SYSTEM_ALERT_WINDOW,
+                Manifest.permission.READ_PHONE_STATE, Manifest.permission.READ_PHONE_NUMBERS
         };
         ActivityCompat.requestPermissions(this,
                 p,

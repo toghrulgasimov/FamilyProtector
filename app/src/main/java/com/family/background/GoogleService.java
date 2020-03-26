@@ -11,6 +11,8 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -76,7 +78,7 @@ public class GoogleService extends Service implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
 
-        Log.d("salam", "Changed called" + location.getLatitude() + " - " + location.getLongitude());
+        //Log.d("salam", "Changed called" + location.getLatitude() + " - " + location.getLongitude());
     }
 
     @Override
@@ -97,6 +99,8 @@ public class GoogleService extends Service implements LocationListener {
     public void postJSON(Double la, Double lo) {
         JSONObject postData = new JSONObject();
         Log.d("posted", "posted");
+
+
         try {
             postData.put("name", la);
             postData.put("address", lo);
@@ -135,9 +139,9 @@ public class GoogleService extends Service implements LocationListener {
                     location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                     if (location!=null){
 
-                        Log.e("latitude",location.getLatitude()+"");
-                        Log.e("longitude",location.getLongitude()+"");
-                        postJSON(location.getLatitude(), location.getLongitude());
+                        //Log.e("latitude",location.getLatitude()+"");
+                        //Log.e("longitude",location.getLongitude()+"");
+                        //postJSON(location.getLatitude(), location.getLongitude());
                     }
                 }
 
@@ -150,9 +154,11 @@ public class GoogleService extends Service implements LocationListener {
                 if (locationManager!=null){
                     location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                     if (location!=null){
-                        Log.e("latitude",location.getLatitude()+"");
-                        Log.e("longitude",location.getLongitude()+"");
-                        postJSON(location.getLatitude(), location.getLongitude());
+                        //Log.e("latitude",location.getLatitude()+"");
+                        //Log.e("longitude",location.getLongitude()+"");
+
+
+                        //postJSON(location.getLatitude(), location.getLongitude());
                     }
                 }
             }
