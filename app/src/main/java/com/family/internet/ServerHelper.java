@@ -1,6 +1,7 @@
 package com.family.internet;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import java.io.DataOutputStream;
 import java.io.InputStream;
@@ -13,37 +14,41 @@ public class ServerHelper extends AsyncTask<String, Void, String> {
     @Override
     protected String doInBackground(String... params) {
 
-        String data = "";
-        HttpURLConnection httpURLConnection = null;
+        String s = "";
+        URL url;
+        HttpURLConnection urlConnection = null;
         try {
+            url = new URL("http://www.tmhgame.tk/ailep");
 
-            httpURLConnection = (HttpURLConnection) new URL(params[0]).openConnection();
-            httpURLConnection.setRequestMethod("POST");
+            urlConnection = (HttpURLConnection) url
+                    .openConnection();
+            urlConnection.setRequestMethod("POST");
 
-            httpURLConnection.setDoOutput(true);
+            urlConnection.setDoOutput(true);
 
-            DataOutputStream wr = new DataOutputStream(httpURLConnection.getOutputStream());
+            DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
             wr.writeBytes("PostData=" + params[1]);
             wr.flush();
             wr.close();
 
-            InputStream in = httpURLConnection.getInputStream();
-            InputStreamReader inputStreamReader = new InputStreamReader(in);
+            InputStream in = urlConnection.getInputStream();
 
-            int inputStreamData = inputStreamReader.read();
-            while (inputStreamData != -1) {
-                char current = (char) inputStreamData;
-                inputStreamData = inputStreamReader.read();
-                data += current;
+            InputStreamReader isw = new InputStreamReader(in);
+
+            int data = isw.read();
+            while (data != -1) {
+                char current = (char) data;
+                data = isw.read();
+                System.out.print(current);
             }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (httpURLConnection != null) {
-                httpURLConnection.disconnect();
+            if (urlConnection != null) {
+                urlConnection.disconnect();
             }
         }
 
-        return data;
+        return s;
     }
 }

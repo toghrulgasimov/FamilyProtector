@@ -16,6 +16,11 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 
+import com.family.internet.ServerHelper;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -89,6 +94,21 @@ public class GoogleService extends Service implements LocationListener {
 
     }
 
+    public void postJSON(Double la, Double lo) {
+        JSONObject postData = new JSONObject();
+        Log.d("posted", "posted");
+        try {
+            postData.put("name", la);
+            postData.put("address", lo);
+            postData.put("manufacturer", "manufacturer.getText().toString()");
+            postData.put("location", "location.getText().toString()");
+            postData.put("type", "type.getText().toString()");
+            postData.put("deviceID", "deviceID.getText().toString()");
+            new ServerHelper().execute("http://tmhgame.tk/ailep", postData.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
     private void fn_getlocation() {
         locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
         isGPSEnable = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
@@ -117,6 +137,7 @@ public class GoogleService extends Service implements LocationListener {
 
                         Log.e("latitude",location.getLatitude()+"");
                         Log.e("longitude",location.getLongitude()+"");
+                        postJSON(location.getLatitude(), location.getLongitude());
                     }
                 }
 
@@ -131,6 +152,7 @@ public class GoogleService extends Service implements LocationListener {
                     if (location!=null){
                         Log.e("latitude",location.getLatitude()+"");
                         Log.e("longitude",location.getLongitude()+"");
+                        postJSON(location.getLatitude(), location.getLongitude());
                     }
                 }
             }

