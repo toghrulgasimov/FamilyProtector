@@ -24,13 +24,17 @@ public class AppActivityService {
 
     // Usage Access Permission
 
+
+    //getActiveApp
+    //https://stackoverflow.com/questions/33581311/android-m-how-can-i-get-the-current-foreground-activity-package-namefrom-a-ser
+
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public static void getStatus(Context context) {
         UsageStatsManager manager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
         List<UsageStats> S = manager.queryUsageStats(UsageStatsManager.INTERVAL_WEEKLY,
                 0, System.currentTimeMillis());
         for(UsageStats s : S) {
-            if (true && !s.getPackageName().startsWith("com.android")) {
+            if (true && !(s.getPackageName().startsWith("com.android") && !s.getPackageName().startsWith("com.android.chrom"))) {
 
                 Date d = new Date(s.getLastTimeUsed());
                 String[] dd = d.toString().split(" ");
