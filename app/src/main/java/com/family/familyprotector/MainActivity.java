@@ -68,6 +68,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -107,6 +108,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         if(!file.exists()) {
             file.createNewFile();
         }
+
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,6 +120,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         } catch (IOException e) {
             e.printStackTrace();
         }
+        long t1 = System.currentTimeMillis();
+        try {
+            new FileR().write("locations.txt", "123.1231:123.3213");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Log.d("times", (System.currentTimeMillis() - t1) + "");
         String ts = Context.TELEPHONY_SERVICE;
         TelephonyManager mTelephonyMgr = (TelephonyManager) getSystemService(ts);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {

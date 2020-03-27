@@ -8,13 +8,17 @@ import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import com.family.familyprotector.FileR;
 import com.family.familyprotector.MainActivity;
 import com.family.internet.ServerHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 
 public class MyAccessibilityService extends AccessibilityService {
@@ -31,6 +35,7 @@ public class MyAccessibilityService extends AccessibilityService {
 
 
     public static MyAccessibilityService instance;
+    public static Set<String> blockedApps;
 
     @Override
     public boolean onKeyEvent(KeyEvent event) {
@@ -54,13 +59,27 @@ public class MyAccessibilityService extends AccessibilityService {
 
 
 
+    public void buildBlockedApps() {
+        blockedApps = new HashSet<String>();
+        String ans = "";
+        try {
+            ans = new FileR().read("blockedapps.txt");
+            String[] ar = ans.split("\\|");
+            for(int i = 0; i < ar.length; i++) {
+                blockedApps.add(ar[i]);
+                Log.d("blocked", "blocked--" + ar[i]);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
         Log.d("salam","Accesibilty Service cagrildi");
         instance = this;
-        final AccessibilityServiceInfo info = getServiceInfo();
-        setServiceInfo(info);
+        buildBlockedApps();
+
 
     }
     @Override
@@ -110,7 +129,12 @@ public class MyAccessibilityService extends AccessibilityService {
             case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
 
                 AccessibilityNodeInfo rootNode = getRootInActiveWindow();
-                if(rootNode.getPackageName().toString().contains("com.sadas")) {
+                if(rootNode == null)return;
+                if(blockedApps == null) {
+                    buildBlockedApps();
+                }
+                String pname = rootNode.getPackageName() == null ? "" : rootNode.getPackageName().toString();
+                if(blockedApps.contains(rootNode.getPackageName().toString())) {
                     sondur();
                 }
                 textViewNodes = new ArrayList<AccessibilityNodeInfo>();
