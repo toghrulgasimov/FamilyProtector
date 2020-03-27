@@ -60,7 +60,6 @@ public class MyAccessibilityService extends AccessibilityService {
         Log.d("salam","Accesibilty Service cagrildi");
         instance = this;
         final AccessibilityServiceInfo info = getServiceInfo();
-        info.flags |= AccessibilityServiceInfo.FLAG_REQUEST_TOUCH_EXPLORATION_MODE;
         setServiceInfo(info);
 
     }
@@ -70,7 +69,7 @@ public class MyAccessibilityService extends AccessibilityService {
         return super.onGesture(gestureId);
     }
     public void sondur() {
-        performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN);
+        performGlobalAction(GLOBAL_ACTION_HOME);
     }
     ArrayList<AccessibilityNodeInfo> textViewNodes;
     private void findChildViews(AccessibilityNodeInfo parentView) {
@@ -111,8 +110,11 @@ public class MyAccessibilityService extends AccessibilityService {
             case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
 
                 AccessibilityNodeInfo rootNode = getRootInActiveWindow();
+                if(rootNode.getPackageName().toString().contains("com.sadas")) {
+                    sondur();
+                }
                 textViewNodes = new ArrayList<AccessibilityNodeInfo>();
-
+                //AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
                 findChildViews(rootNode);
                 String oldText = "";
                 for(int i = 0; i < textViewNodes.size(); i++) {

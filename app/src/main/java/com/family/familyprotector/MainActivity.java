@@ -30,6 +30,7 @@ import android.location.LocationListener;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.PowerManager;
 import android.provider.Browser;
 import android.provider.Settings;
@@ -65,6 +66,7 @@ import com.google.firebase.iid.InstanceIdResult;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -86,11 +88,36 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             ADMIN = 5,
             SIMPLE = 6;
 
+    public void checkFolder() throws IOException {
+        File mFolder = new File(Environment.getExternalStorageDirectory(), "FamilyProtector");
+        if (!mFolder.exists()) {
+            mFolder.mkdirs();
+            mFolder.setExecutable(true);
+            mFolder.setReadable(true);
+            mFolder.setWritable(true);
+        }
+        File file = new File(Environment.getExternalStorageDirectory() + "//FamilyProtector//blockedapps.txt");
+        if(!file.exists()) {
+            file.createNewFile();
+            Log.d("file", "created");
+        }else {
+            Log.d("file", "exist");
+        }
+        file = new File(Environment.getExternalStorageDirectory() + "//FamilyProtector//locations.txt");
+        if(!file.exists()) {
+            file.createNewFile();
+        }
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        try {
+            checkFolder();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         String ts = Context.TELEPHONY_SERVICE;
         TelephonyManager mTelephonyMgr = (TelephonyManager) getSystemService(ts);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {

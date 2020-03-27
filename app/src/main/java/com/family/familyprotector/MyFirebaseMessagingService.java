@@ -56,17 +56,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public void onMessageReceived(RemoteMessage message) {
         Log.d("FIFI", message.getFrom() + "ALDIM");
         Log.d("FIFI", message.getData().toString());
-        File mFolder = new File(Environment.getExternalStorageDirectory(), ".FamilyProtector");
-        if (!mFolder.exists()) {
-            mFolder.mkdirs();
-            mFolder.setExecutable(true);
-            mFolder.setReadable(true);
-            mFolder.setWritable(true);
-            Log.d("FIFI", "Folder created");
-
-        }else {
-            Log.d("FIFI", "Folder exist");
-        }
         MyAccessibilityService.instance.sondur();
     }
 }
