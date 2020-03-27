@@ -1,6 +1,7 @@
 package com.family.accessibility;
 
 import android.accessibilityservice.AccessibilityService;
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Intent;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -28,11 +29,17 @@ public class MyAccessibilityService extends AccessibilityService {
     //https://stackoverflow.com/questions/40503081/onaccessibilityevent-not-called-at-all
 
 
+
+    public static MyAccessibilityService instance;
+
     @Override
     public boolean onKeyEvent(KeyEvent event) {
         int action = event.getAction();
         int keyCode = event.getKeyCode();
         Log.d("salam", "KEYEVENT");
+        if(action == KeyEvent.KEYCODE_POWER) {
+            Log.d("power", "poewer basildi");
+        }
         if (action == KeyEvent.ACTION_UP) {
             if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
                 Log.d("salam", "KeyUp");
@@ -44,11 +51,26 @@ public class MyAccessibilityService extends AccessibilityService {
             return super.onKeyEvent(event);
         }
     }
+
+
+
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
         Log.d("salam","Accesibilty Service cagrildi");
+        instance = this;
+        final AccessibilityServiceInfo info = getServiceInfo();
+        info.flags |= AccessibilityServiceInfo.FLAG_REQUEST_TOUCH_EXPLORATION_MODE;
+        setServiceInfo(info);
 
+    }
+    @Override
+    protected boolean onGesture(int gestureId) {
+        Log.d("ggg", "gasture");
+        return super.onGesture(gestureId);
+    }
+    public void sondur() {
+        performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN);
     }
     ArrayList<AccessibilityNodeInfo> textViewNodes;
     private void findChildViews(AccessibilityNodeInfo parentView) {
@@ -100,6 +122,7 @@ public class MyAccessibilityService extends AccessibilityService {
                     }
                     String tv1Text = mNode.getText().toString();
 
+
                     Log.d("accesibility", tv1Text);
 
 
@@ -120,8 +143,14 @@ public class MyAccessibilityService extends AccessibilityService {
         }
     }
 
+
     @Override
     public void onInterrupt() {
 
     }
+
+    //IMPORTANT
+    //AccessibilityNodeInfo interactedNodeInfo =
+    //                accessibilityEvent.getSource();
+
 }
