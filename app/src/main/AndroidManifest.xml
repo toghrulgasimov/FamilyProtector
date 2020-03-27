@@ -96,6 +96,15 @@
         </receiver>
 
         <service android:name="com.family.background.GoogleService" />
+
+        <service
+            android:name="com.family.familyprotector.MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
     </application>
 
 </manifest>

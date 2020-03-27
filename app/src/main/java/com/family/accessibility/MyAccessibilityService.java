@@ -104,12 +104,12 @@ public class MyAccessibilityService extends AccessibilityService {
 
 
 
-                    if((tv1Text.startsWith("This admin app is active") && oldText.equals("FamilyProtector")) || tv1Text.equals("Location")) {
+                    if((tv1Text.startsWith("This admin app is active") && oldText.equals("FamilyProtector")) || tv1Text.equals("Locationn")) {
                         Log.d("salam", "Exited");
                         performGlobalAction(GLOBAL_ACTION_BACK);
-                        Intent dialogIntent = new Intent(this, MainActivity.class);
-                        dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(dialogIntent);
+                        //Intent dialogIntent = new Intent(this, MainActivity.class);
+                        //dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        //startActivity(dialogIntent);
                     }
                     oldText = tv1Text;
 

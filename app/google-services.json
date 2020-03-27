@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "659835647576",
+    "firebase_url": "https://familyprotector-9fc7b.firebaseio.com",
+    "project_id": "familyprotector-9fc7b",
+    "storage_bucket": "familyprotector-9fc7b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:659835647576:android:c95b29ef9133ec3b3cbc2d",
+        "android_client_info": {
+          "package_name": "com.family.familyprotector"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "659835647576-esoe04qpiacuhgbbccdkvu8dagujnsqi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDB4sHKpdW4mvzfDKlgF-yimSPo6pYW6jo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "659835647576-esoe04qpiacuhgbbccdkvu8dagujnsqi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
