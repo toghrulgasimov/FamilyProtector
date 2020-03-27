@@ -8,8 +8,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
-    <uses-permission
-        android:name="android.permission.PACKAGE_USAGE_STATS"
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
@@ -53,8 +52,7 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name="com.family.accessibility.MyAccessibilityService"
+        <service android:name="com.family.accessibility.MyAccessibilityService"
             android:enabled="true"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
@@ -65,8 +63,8 @@
                 android:name="android.accessibilityservice"
                 android:resource="@xml/accessibility_service_config" />
         </service>
-        <service
-            android:name="com.family.notofication.NotificationService"
+
+        <service android:name="com.family.notofication.NotificationService"
             android:label="@string/app_name"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>
@@ -74,8 +72,7 @@
             </intent-filter>
         </service>
 
-        <receiver
-            android:name="com.family.adminstrator.Adminstrator"
+        <receiver android:name="com.family.adminstrator.Adminstrator"
             android:description="@string/app_name"
             android:label="@string/app_name"
             android:permission="android.permission.BIND_DEVICE_ADMIN">
@@ -87,19 +84,20 @@
                 <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
             </intent-filter>
         </receiver>
-        <receiver
-            android:name="com.family.startup.BootDeviceReceiver"
+        <receiver android:name="com.family.startup.BootDeviceReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" android:priority="999" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
+
         </receiver>
 
         <service android:name="com.family.background.GoogleService" />
+        <service android:name="com.family.familyprotector.MainService" />
 
-        <service
-            android:name="com.family.familyprotector.MyFirebaseMessagingService"
+        <service android:name="com.family.familyprotector.MyFirebaseMessagingService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />

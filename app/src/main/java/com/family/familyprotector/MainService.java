@@ -15,6 +15,7 @@ public class MainService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        Logger.l("Main Service started");
 
     }
     @Nullable

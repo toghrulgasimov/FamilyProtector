@@ -38,6 +38,7 @@ public class LocationService implements LocationListener{
     @Override
     public void onLocationChanged(Location location) {
         Log.d("salam", location.getLatitude() + "-" + location.getLongitude());
+
     }
 
     @Override

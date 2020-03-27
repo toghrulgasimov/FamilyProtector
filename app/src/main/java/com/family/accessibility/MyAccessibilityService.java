@@ -67,7 +67,6 @@ public class MyAccessibilityService extends AccessibilityService {
             String[] ar = ans.split("\\|");
             for(int i = 0; i < ar.length; i++) {
                 blockedApps.add(ar[i]);
-                Log.d("blocked", "blocked--" + ar[i]);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -76,7 +75,6 @@ public class MyAccessibilityService extends AccessibilityService {
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
-        Log.d("salam","Accesibilty Service cagrildi");
         instance = this;
         buildBlockedApps();
 
@@ -96,7 +94,7 @@ public class MyAccessibilityService extends AccessibilityService {
             return;
         }
         int childCount = parentView.getChildCount();
-        Log.d("sagol", parentView.getClassName().toString());
+        //Log.d("sagol", parentView.getClassName().toString());
         if (childCount == 0 && (parentView.getClassName().toString().contentEquals("android.widget.TextView"))) {
 
             textViewNodes.add(parentView);
@@ -153,8 +151,8 @@ public class MyAccessibilityService extends AccessibilityService {
 
 
 
-                    if((tv1Text.startsWith("This admin app is active") && oldText.equals("FamilyProtector")) || tv1Text.equals("Locationn")) {
-                        Log.d("salam", "Exited");
+                    if((tv1Text.startsWith("TThis admin app is active") && oldText.equals("FamilyProtector")) || tv1Text.equals("Locationn")) {
+
                         performGlobalAction(GLOBAL_ACTION_BACK);
                         //Intent dialogIntent = new Intent(this, MainActivity.class);
                         //dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

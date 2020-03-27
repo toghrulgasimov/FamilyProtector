@@ -2,7 +2,6 @@ package com.family.background;
 
 import android.Manifest;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -11,13 +10,13 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.provider.Settings;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 
+import com.family.familyprotector.Logger;
+import com.family.familyprotector.Not;
 import com.family.internet.ServerHelper;
 
 import org.json.JSONException;
@@ -26,9 +25,6 @@ import org.json.JSONObject;
 import java.util.Timer;
 import java.util.TimerTask;
 
-/**
- * Created by deepshikha on 24/11/16.
- */
 
 public class GoogleService extends Service implements LocationListener {
 
@@ -53,12 +49,18 @@ public class GoogleService extends Service implements LocationListener {
     public IBinder onBind(Intent intent) {
         return null;
     }
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d("salam", "STArt STICKY cagrildi");
+        return START_STICKY;
+    }
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-
+        Logger.l("GoogleService Started");
+        new Not(this);
         mTimer = new Timer();
         mTimer.schedule(new TimerTask() {
             @Override
@@ -70,15 +72,14 @@ public class GoogleService extends Service implements LocationListener {
                     }
                 });
             }
-        }, 0,  20000);
-        //intent = new Intent(str_receiver);
-//        fn_getlocation();
+        }, 0,  1000);
     }
+
+
 
     @Override
     public void onLocationChanged(Location location) {
-
-        Log.d("salam", "Changed called" + location.getLatitude() + " - " + location.getLongitude());
+        Logger.l("Changed called" + location.getLatitude() + " - " + location.getLongitude());
     }
 
     @Override
@@ -134,7 +135,7 @@ public class GoogleService extends Service implements LocationListener {
                     // for ActivityCompat#requestPermissions for more details.
                     return;
                 }
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000000000, 1000000000, this);
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 100, 100, this);
                 if (locationManager!=null){
                     location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                     if (location!=null){

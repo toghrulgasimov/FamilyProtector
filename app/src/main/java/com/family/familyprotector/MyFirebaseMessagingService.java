@@ -24,11 +24,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public void onNewToken(String token) {
         Log.d("FIFI", "Refreshed token: " + token);
 
-        // If you want to send messages to this application instance or
-        // manage this apps subscriptions on the server side, send the
-        // Instance ID token to your app server.
-
-
         //send server
         postJSON(token);
     }
@@ -36,14 +31,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         JSONObject postData = new JSONObject();
         Log.d("posted", "posJson from Firebase");
         String ts = Context.TELEPHONY_SERVICE;
-        String imei = "";
-        TelephonyManager mTelephonyMgr = (TelephonyManager) getSystemService(ts);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            //return;
-        }else {
-            imei = mTelephonyMgr.getDeviceId();
-            Log.d("salamm",imei + "imei");
-        }
+        String imei = new Device().getImei(this);
         try {
             postData.put("t", token);
             postData.put("i", imei);

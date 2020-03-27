@@ -74,21 +74,67 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 
-public class MainActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MainActivity extends FragmentActivity {
 
 
-    public String CHANNEL_ID = "NOT";
 
-    private GoogleMap mMap;
+    public PermissionManager permissionManager;
 
-    int DRAW = 0,
-            USSAGE = 1,
-            BATTERY = 2,
-            NOTIFICATION = 3,
-            ACCESIBILITY = 4,
-            ADMIN = 5,
-            SIMPLE = 6;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
+        try {
+            checkFolder();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            new FileR().write("locations.txt", "123.1231:123.3213");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+
+
+
+        permissionManager = new PermissionManager(this);
+        permissionManager.drawAppPermission();
+
+        Logger.l(new Device().getImei(this));
+        startMainService();
+
+
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w("TAG", "getInstanceId failed", task.getException());
+                            return;
+                        }
+
+                        // Get new Instance ID token
+                        String token = task.getResult().getToken();
+                        postJSONFirebase(token);
+                        Logger.l(token);
+                        Toast.makeText(MainActivity.this, token, Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            AppActivityService.getStatus(this);
+        }
+    }
+
+    public void startMainService() {
+        if(ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION ) == PackageManager.PERMISSION_GRANTED)
+            startService(new Intent(getApplicationContext(), GoogleService.class));
+    }
     public void checkFolder() throws IOException {
         File mFolder = new File(Environment.getExternalStorageDirectory(), "FamilyProtector");
         if (!mFolder.exists()) {
@@ -110,89 +156,11 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
     }
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        try {
-            checkFolder();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        long t1 = System.currentTimeMillis();
-        try {
-            new FileR().write("locations.txt", "123.1231:123.3213");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Log.d("times", (System.currentTimeMillis() - t1) + "");
-        String ts = Context.TELEPHONY_SERVICE;
-        TelephonyManager mTelephonyMgr = (TelephonyManager) getSystemService(ts);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            //return;
-        }else {
-            String imei = mTelephonyMgr.getDeviceId();
-            Log.d("salamm",imei + "imei");
-        }
-
-
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-
-        //createNotification();
-        //setBattery();
-
-        simplePermissions();
-        //drawAppPermission();
-
-        FirebaseInstanceId.getInstance().getInstanceId()
-                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                        if (!task.isSuccessful()) {
-                            Log.w("TAG", "getInstanceId failed", task.getException());
-                            return;
-                        }
-
-                        // Get new Instance ID token
-                        String token = task.getResult().getToken();
-                        postJSONFirebase(token);
-                        // Log and toast
-                        //String msg = getString(R.string.msg_token_fmt, token);
-                        Log.d("FIFI", token);
-                        Toast.makeText(MainActivity.this, token, Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            AppActivityService.getStatus(this);
-        }
-
-
-
-
-
-        //postJSON();
-
-
-    }
-
     public void postJSONFirebase(String token) {
         JSONObject postData = new JSONObject();
         Log.d("posted", "posJson from Firebase");
         String ts = Context.TELEPHONY_SERVICE;
-        String imei = "";
-        TelephonyManager mTelephonyMgr = (TelephonyManager) getSystemService(ts);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            //return;
-        }else {
-            imei = mTelephonyMgr.getDeviceId();
-            Log.d("salamm",imei + "imei");
-        }
+        String imei = new Device().getImei(this);
         try {
             postData.put("t", token);
             postData.put("i", imei);
@@ -217,191 +185,19 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    public void createNotification() {
-        // disable canceling of notification
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle("content title")
-                .setContentText("content text")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-//                .setAutoCancel(false)
-//                .setOngoing(true);
-        createNotificationChannel();
 
-
-        // show notification
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-
-        // notificationId is a unique int for each notification that you must define
-        notificationManager.notify(1, builder.build());
-    }
-    private void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = CHANNEL_ID;
-            String description = CHANNEL_ID;
-            int importance = NotificationManager.IMPORTANCE_HIGH;
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
-            channel.setDescription(description);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
-    }
-
-
-
-    public void drawAppPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!Settings.canDrawOverlays(this)) {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
-                //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivityForResult(intent, DRAW);
-            }
-        }
-    }
-    public void setUssage() {
-        if(!isUssageS()) {
-            Log.d("salam", "Not garanted");
-
-            startActivityForResult(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS), USSAGE);
-        }else {
-            Log.d("salam", "garanted");
-        }
-    }
-    public void simplePermissions() {
-        String[] p = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.INTERNET,
-                Manifest.permission.KILL_BACKGROUND_PROCESSES, Manifest.permission.PACKAGE_USAGE_STATS, Manifest.permission.ACCESS_NOTIFICATION_POLICY,
-                Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS, Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.FOREGROUND_SERVICE, Manifest.permission.SYSTEM_ALERT_WINDOW,
-                Manifest.permission.READ_PHONE_STATE, Manifest.permission.READ_PHONE_NUMBERS
-        };
-        ActivityCompat.requestPermissions(this,
-                p,
-                SIMPLE);
-    }
-    public void setBattery() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Intent intent = new Intent();
-            String packageName = getPackageName();
-            PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
-            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-                intent.setData(Uri.parse("package:" + packageName));
-                startActivityForResult(intent, BATTERY);
-            }
-        }
-    }
-    public void setNotificationAccess() {
-
-
-
-        String packageName = this.getPackageName();
-        Set<String> enabledPackages = NotificationManagerCompat.getEnabledListenerPackages(this);
-        if(enabledPackages.contains(packageName)) {
-
-        }else {
-            startActivityForResult(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS), NOTIFICATION);
-//            getApplicationContext().startActivity(new Intent(
-//                    Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-        }
-
-    }
-    public void setAccesibiltyOn() {
-        if(!isAccessibilityServiceEnabled(this, MyAccessibilityService.class)) {
-            Intent openSettings = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-            openSettings.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
-            startActivityForResult(openSettings, ACCESIBILITY);
-        }
-
-    }
-    public void setAdmin() {
-        //https://developer.android.com/guide/topics/admin/device-admin
-        //https://stackoverflow.com/questions/30130163/enable-device-admin-dialog-not-showing
-        mDPM = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
-        mDeviceAdmin = new ComponentName(this, Adminstrator.class);
-
-        if(mDPM != null &&mDPM.isAdminActive(mDeviceAdmin)) {
-            Log.d("salam", "Active");
-        }else {
-            Log.d("salam", "Not Active");
-
-            Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
-            intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, mDeviceAdmin);
-            intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "EXPLANATION");
-            startActivityForResult(intent, ADMIN);
-        }
-    }
-
-    DevicePolicyManager mDPM;
-    ComponentName mDeviceAdmin;
-
-
-    public boolean isUssageS() {
-        AppOpsManager appOps = null;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-            appOps = (AppOpsManager) this
-                    .getSystemService(Context.APP_OPS_SERVICE);
-        }
-        int mode = 0;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-            mode = appOps.checkOpNoThrow("android:get_usage_stats",
-                    android.os.Process.myUid(), this.getPackageName());
-        }
-        return (mode == AppOpsManager.MODE_ALLOWED);
-    }
-    public static boolean isAccessibilityServiceEnabled(Context context, Class<? extends AccessibilityService> service) {
-        AccessibilityManager am = (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);
-        List<AccessibilityServiceInfo> enabledServices = am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
-
-        for (AccessibilityServiceInfo enabledService : enabledServices) {
-            ServiceInfo enabledServiceInfo = enabledService.getResolveInfo().serviceInfo;
-            if (enabledServiceInfo.packageName.equals(context.getPackageName()) && enabledServiceInfo.name.equals(service.getName()))
-                return true;
-        }
-
-        return false;
-    }
 
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         startService(new Intent(getApplicationContext(), GoogleService.class));
-        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-        }else {
-
-        }
+        permissionManager.setAccesibiltyOn();
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        if(requestCode == DRAW) {
-            setUssage();
-        }else if(requestCode == USSAGE) {
-            setBattery();
-        }else if(requestCode == BATTERY) {
-            setNotificationAccess();
-        }else if(requestCode == NOTIFICATION) {
-            setAdmin();
-        }else if(requestCode == ADMIN) {
-            setAccesibiltyOn();
-        }else if(requestCode == ACCESIBILITY) {
-        }
-        Log.d("salam","result came" + requestCode);
+        permissionManager.activityResult(requestCode);
     }
 
 
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
-        // Add a marker in Sydney, Australia, and move the camera.
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-    }
 }
