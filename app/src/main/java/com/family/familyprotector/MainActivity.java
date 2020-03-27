@@ -90,10 +90,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         String ts = Context.TELEPHONY_SERVICE;
         TelephonyManager mTelephonyMgr = (TelephonyManager) getSystemService(ts);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            return;
+            //return;
+        }else {
+            String imei = mTelephonyMgr.getDeviceId();
+            Log.d("salamm",imei + "imei");
         }
-        String imei = mTelephonyMgr.getDeviceId();
-        Log.d("salamm",imei + "imei");
+
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);

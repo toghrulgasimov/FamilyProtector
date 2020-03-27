@@ -70,7 +70,7 @@ public class GoogleService extends Service implements LocationListener {
                     }
                 });
             }
-        }, 10, notify_interval);
+        }, 0,  20000);
         //intent = new Intent(str_receiver);
 //        fn_getlocation();
     }
@@ -78,7 +78,7 @@ public class GoogleService extends Service implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
 
-        //Log.d("salam", "Changed called" + location.getLatitude() + " - " + location.getLongitude());
+        Log.d("salam", "Changed called" + location.getLatitude() + " - " + location.getLongitude());
     }
 
     @Override
@@ -134,13 +134,13 @@ public class GoogleService extends Service implements LocationListener {
                     // for ActivityCompat#requestPermissions for more details.
                     return;
                 }
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, this);
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000000000, 1000000000, this);
                 if (locationManager!=null){
                     location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                     if (location!=null){
 
-                        //Log.e("latitude",location.getLatitude()+"");
-                        //Log.e("longitude",location.getLongitude()+"");
+                        Log.e("latitude",location.getLatitude()+"");
+                        Log.e("longitude",location.getLongitude()+"");
                         //postJSON(location.getLatitude(), location.getLongitude());
                     }
                 }
@@ -150,12 +150,12 @@ public class GoogleService extends Service implements LocationListener {
 
             if (isGPSEnable){
                 location = null;
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000,0,this);
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000 * 60 * 5,0,this);
                 if (locationManager!=null){
                     location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                     if (location!=null){
-                        //Log.e("latitude",location.getLatitude()+"");
-                        //Log.e("longitude",location.getLongitude()+"");
+                        Log.e("latitude",location.getLatitude()+"");
+                        Log.e("longitude",location.getLongitude()+"");
 
 
                         //postJSON(location.getLatitude(), location.getLongitude());
