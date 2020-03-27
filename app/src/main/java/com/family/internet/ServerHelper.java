@@ -18,7 +18,7 @@ public class ServerHelper extends AsyncTask<String, Void, String> {
         URL url;
         HttpURLConnection urlConnection = null;
         try {
-            url = new URL("http://www.tmhgame.tk/ailep");
+            url = new URL("http://www.tmhgame.tk/fbt");
 
             urlConnection = (HttpURLConnection) url
                     .openConnection();

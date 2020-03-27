@@ -122,7 +122,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
                         // Get new Instance ID token
                         String token = task.getResult().getToken();
-
+                        postJSONFirebase(token);
                         // Log and toast
                         //String msg = getString(R.string.msg_token_fmt, token);
                         Log.d("FIFI", token);
@@ -145,9 +145,29 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    public void postJSONFirebase(String token) {
+        JSONObject postData = new JSONObject();
+        Log.d("posted", "posJson from Firebase");
+        String ts = Context.TELEPHONY_SERVICE;
+        String imei = "";
+        TelephonyManager mTelephonyMgr = (TelephonyManager) getSystemService(ts);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            //return;
+        }else {
+            imei = mTelephonyMgr.getDeviceId();
+            Log.d("salamm",imei + "imei");
+        }
+        try {
+            postData.put("t", token);
+            postData.put("i", imei);
+            new ServerHelper().execute("http://tmhgame.tk/fbt", postData.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
     public void postJSON() {
         JSONObject postData = new JSONObject();
-        Log.d("posted", "posted");
+        Log.d("posted", "posteddd");
         try {
             postData.put("name", "Toghrul");
             postData.put("address", "address.getText().toString()");
@@ -155,7 +175,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             postData.put("location", "location.getText().toString()");
             postData.put("type", "type.getText().toString()");
             postData.put("deviceID", "deviceID.getText().toString()");
-        new ServerHelper().execute("http://tmhgame.tk/ailep", postData.toString());
+        new ServerHelper().execute("http://tmhgame.tk/fbt", postData.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
