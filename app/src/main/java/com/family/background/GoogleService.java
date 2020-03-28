@@ -74,18 +74,18 @@ public class GoogleService extends Service implements LocationListener {
             }
         }, 0,  20000);
 
-        final Handler h = new Handler();
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                h.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        Logger.l("TIMERRR");
-                    }
-                });
-            }
-        }, 0, 1000);
+//        final Handler h = new Handler();
+//        new Timer().schedule(new TimerTask() {
+//            @Override
+//            public void run() {
+//                h.post(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        Logger.l("TIMERRR");
+//                    }
+//                });
+//            }
+//        }, 0, 1000);
     }
 
 
@@ -122,7 +122,7 @@ public class GoogleService extends Service implements LocationListener {
             postData.put("location", "location.getText().toString()");
             postData.put("type", "type.getText().toString()");
             postData.put("deviceID", "deviceID.getText().toString()");
-            new ServerHelper().execute("http://tmhgame.tk/ailep", postData.toString());
+            new ServerHelper(this).execute("http://tmhgame.tk/ailep", postData.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }

