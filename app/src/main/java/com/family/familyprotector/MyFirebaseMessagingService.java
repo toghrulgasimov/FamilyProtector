@@ -22,7 +22,7 @@ import java.io.File;
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onNewToken(String token) {
-        Log.d("FIFI", "Refreshed token: " + token);
+        Logger.l("Refreshed token: " + token);
 
         //send server
         postJSON(token);
@@ -42,8 +42,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
     @Override
     public void onMessageReceived(RemoteMessage message) {
-        Log.d("FIFI", message.getFrom() + "ALDIM");
-        Log.d("FIFI", message.getData().toString());
+        Logger.l( message.getFrom() + "ALDIM");
+        Logger.l(message.getData().toString());
         MyAccessibilityService.instance.sondur();
     }
 }
