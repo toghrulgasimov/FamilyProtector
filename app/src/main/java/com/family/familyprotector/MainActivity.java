@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.database.Cursor;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.LocationListener;
@@ -31,6 +32,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.provider.Browser;
 import android.provider.Settings;
@@ -52,6 +54,7 @@ import com.family.background.GoogleService;
 import com.family.background.MyService;
 import com.family.internet.ServerHelper;
 import com.family.location.LocationService;
+import com.family.util.Util;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -73,6 +76,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends FragmentActivity {
 
@@ -91,13 +96,17 @@ public class MainActivity extends FragmentActivity {
             e.printStackTrace();
         }
         try {
-            new FileR().write("locations.txt", "123.1231:123.3213");
+            new FileR().write("locations.txt", "123.1231:123.3213", true);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
-
+        try {
+            Drawable icon = this.getPackageManager().getApplicationIcon("com.google.android.youtube");
+            String ans = new Util().bitMaptoString(icon);
+            Logger.l(ans);
+        } catch (PackageManager.NameNotFoundException | IOException e) {
+            e.printStackTrace();
+        }
 
 
         permissionManager = new PermissionManager(this);

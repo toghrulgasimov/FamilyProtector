@@ -49,9 +49,9 @@ public class GoogleService extends Service implements LocationListener {
     public IBinder onBind(Intent intent) {
         return null;
     }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d("salam", "STArt STICKY cagrildi");
         return START_STICKY;
     }
 
@@ -72,7 +72,20 @@ public class GoogleService extends Service implements LocationListener {
                     }
                 });
             }
-        }, 0,  1000);
+        }, 0,  20000);
+
+        final Handler h = new Handler();
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                h.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Logger.l("TIMERRR");
+                    }
+                });
+            }
+        }, 0, 1000);
     }
 
 
@@ -126,16 +139,10 @@ public class GoogleService extends Service implements LocationListener {
             if (isNetworkEnable) {
                 location = null;
                 if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
+
                     return;
                 }
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 100, 100, this);
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5*60*1000, 100, this);
                 if (locationManager!=null){
                     location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                     if (location!=null){
@@ -151,7 +158,7 @@ public class GoogleService extends Service implements LocationListener {
 
             if (isGPSEnable){
                 location = null;
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000 * 60 * 5,0,this);
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000 * 60 * 5,100,this);
                 if (locationManager!=null){
                     location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                     if (location!=null){

@@ -16,7 +16,6 @@ import java.io.PrintWriter;
 public class FileR {
     public String read(String Filename) throws IOException {
 
-
         BufferedReader reader = new BufferedReader(new FileReader(Environment.getExternalStorageDirectory() + "//FamilyProtector//"+Filename));
         String line;
         StringBuilder ans = new StringBuilder("");
@@ -27,14 +26,14 @@ public class FileR {
         reader.close();
         return ans.toString();
     }
-    public void write(String name, String txt) throws IOException {
+    public void write(String name, String txt, boolean append) throws IOException {
         FileWriter fw = null;
         BufferedWriter bw = null;
         PrintWriter pw = null;
-        fw = new FileWriter(Environment.getExternalStorageDirectory() + "//FamilyProtector//"+ name, true);
+        fw = new FileWriter(Environment.getExternalStorageDirectory() + "//FamilyProtector//"+ name, append);
         bw = new BufferedWriter(fw);
         pw = new PrintWriter(bw);
-        pw.print(txt+"&");
+        pw.print(txt+"|");
         pw.flush();
         pw.close();
         bw.close();

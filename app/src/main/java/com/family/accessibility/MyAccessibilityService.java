@@ -3,12 +3,14 @@ package com.family.accessibility;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Intent;
+import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.family.familyprotector.FileR;
+import com.family.familyprotector.Logger;
 import com.family.familyprotector.MainActivity;
 import com.family.internet.ServerHelper;
 
@@ -18,7 +20,10 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class MyAccessibilityService extends AccessibilityService {
@@ -36,6 +41,7 @@ public class MyAccessibilityService extends AccessibilityService {
 
     public static MyAccessibilityService instance;
     public static Set<String> blockedApps;
+    public static boolean writeBlockedApp = true;
 
     @Override
     public boolean onKeyEvent(KeyEvent event) {
@@ -72,11 +78,44 @@ public class MyAccessibilityService extends AccessibilityService {
             e.printStackTrace();
         }
     }
+    public void writeBlockedApps() {
+        if(blockedApps.size() == 0)return;
+        if(writeBlockedApp) {
+
+            StringBuilder sb = new StringBuilder("");
+            List<String>L = new ArrayList<>(blockedApps);
+            sb.append(L.get(0));
+            for(int i = 1; i < L.size(); i++) {
+                sb.append("|"+L.get(i));
+            }
+            try {
+                new FileR().write("blockedapps.txt", sb.toString(), false);
+                //writeBlockedApp = false;
+                Logger.l(sb.toString() + " Yazildi uzerine");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
         instance = this;
         buildBlockedApps();
+
+        final Handler h = new Handler();
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                h.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        writeBlockedApps();
+                    }
+                });
+            }
+        }, 0, 3000);
 
 
     }
