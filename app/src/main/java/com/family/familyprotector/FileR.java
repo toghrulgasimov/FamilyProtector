@@ -1,12 +1,21 @@
 package com.family.familyprotector;
 
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Environment;
+import android.util.Base64;
 import android.util.Log;
+
+import org.json.JSONException;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -40,5 +49,49 @@ public class FileR {
         fw.close();
 
 
+    }
+    public void writeDrawableFile(Drawable drawable, String pname) throws IOException, JSONException {
+        Bitmap bitmap = null;
+
+        if (drawable instanceof BitmapDrawable) {
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+            if(bitmapDrawable.getBitmap() != null) {
+                bitmap= bitmapDrawable.getBitmap();
+            }
+        }
+
+        if(drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
+            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
+        } else {
+            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        }
+
+
+
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+        byte[] imageBytes = baos.toByteArray();
+
+        String encodedImage = Base64.encodeToString(imageBytes, Base64.DEFAULT);
+        encodedImage = encodedImage.replace("\n", "");
+        Logger.l("encoded", encodedImage);
+
+        imageBytes = Base64.decode(encodedImage, Base64.DEFAULT);
+        writeToFile(imageBytes, pname);
+    }
+    public void writeToFile(byte[] array, String pname) throws IOException {
+        try {
+            String path = Environment.getExternalStorageDirectory() + "//FamilyProtector//"+pname+".png";
+            FileOutputStream stream = new FileOutputStream(path);
+            stream.write(array);
+            stream.close();
+            Logger.l("-------fayla yazildi");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 }

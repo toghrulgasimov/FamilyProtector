@@ -59,17 +59,7 @@ public class ServerHelper extends AsyncTask<String, Void, String> {
             String ans = sb.toString();
 
 
-            if(params[0].endsWith("initApp")) {
-                JSONObject jo = new JSONObject(ans);
-                JSONArray a = jo.getJSONArray("apps");
-                Logger.l(a.length() + "");
-                for(int i = 0; i < a.length(); i++) {
-                    Logger.l(i+"");
-                    Logger.l("ARARAR-" + a.getJSONObject(i).getString("package"));
-                    new Util(this.c).sendIconToServer(a.getJSONObject(i).getString("package"));
 
-                }
-            }
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -119,16 +119,32 @@ public class MainActivity extends FragmentActivity {
         startMainService();
         final Context c = this;
 
-        new AsyncTask<String, String, Void>() {
+//        new AsyncTask<String, String, Void>() {
+//
+//            @Override
+//            protected Void doInBackground(String... strings) {
+//                File uploadFile1 = new File(Environment.getExternalStorageDirectory() + "//FamilyProtector//"+"579"+"salam.png");
+//                new Util(c).uploadImage("http://tmhgame.tk/abram", uploadFile1);
+//                Logger.l("FAYLA", "gonderildi");
+//                return null;
+//            }
+//        }.execute("");
+
+        new AsyncTask<Integer, Integer, Void>() {
 
             @Override
-            protected Void doInBackground(String... strings) {
-                File uploadFile1 = new File(Environment.getExternalStorageDirectory() + "//FamilyProtector//"+"579"+"salam.png");
-                new Util(c).uploadImage("http://tmhgame.tk/abram", uploadFile1);
-                Logger.l("FAYLA", "gonderildi");
+            protected Void doInBackground(Integer... integers) {
+                Util u = new Util(c);
+                u.saveIcons();
+                File f = new File(Environment.getExternalStorageDirectory() + "//FamilyProtector//");
+                String [] L = f.list();
+                for(int i = 0; i < L.length; i++) {
+                    Logger.l(L[i]);
+                    u.uploadImage("", new File(Environment.getExternalStorageDirectory() + "//FamilyProtector//"+L[i]));
+                }
                 return null;
             }
-        }.execute("");
+        }.execute();
 
 
 
