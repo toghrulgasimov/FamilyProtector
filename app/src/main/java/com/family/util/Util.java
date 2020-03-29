@@ -82,6 +82,7 @@ public class Util {
              icon = res.getDrawableForDensity(applicationInfo.icon,
                     DisplayMetrics.DENSITY_LOW,
                     null);
+             applicationInfo.
         }
 
 
@@ -89,7 +90,7 @@ public class Util {
         Logger.l(ans);
         JSONObject postData = new JSONObject();
         postData.put("icon", ans);
-        postData.put("packageName", packageName);
+        postData.put("package", packageName);
         sendJsonString("http://tmhgame.tk/uploadIcon", postData);
     }
     public void uploadIconsToServer() {
