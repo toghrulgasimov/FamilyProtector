@@ -31,11 +31,12 @@ public class ServerHelper extends AsyncTask<String, Void, String> {
             url = new URL(params[0]);
 
 
-            Logger.l(params[1] + "---------------");
+            Logger.l(params[1] + "-----------sffer----");
 
             urlConnection = (HttpURLConnection) url
                     .openConnection();
             urlConnection.setRequestMethod("POST");
+
 
             urlConnection.setDoOutput(true);
             DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
