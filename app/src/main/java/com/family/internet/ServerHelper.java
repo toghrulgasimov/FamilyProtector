@@ -30,21 +30,23 @@ public class ServerHelper extends AsyncTask<String, Void, String> {
         try {
             url = new URL(params[0]);
 
+
+            Logger.l(params[1] + "---------------");
+
             urlConnection = (HttpURLConnection) url
                     .openConnection();
             urlConnection.setRequestMethod("POST");
 
             urlConnection.setDoOutput(true);
-
             DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
             wr.writeBytes("PostData=" + params[1]);
             wr.flush();
             wr.close();
 
+
             InputStream in = urlConnection.getInputStream();
 
             InputStreamReader isw = new InputStreamReader(in);
-
             int data = isw.read();
             StringBuilder sb = new StringBuilder();
             while (data != -1) {
@@ -52,15 +54,18 @@ public class ServerHelper extends AsyncTask<String, Void, String> {
                 data = isw.read();
                 sb.append(current);
             }
+
             String ans = sb.toString();
 
-            Logger.l(ans);
+
             if(params[0].endsWith("initApp")) {
                 JSONObject jo = new JSONObject(ans);
                 JSONArray a = jo.getJSONArray("apps");
+                Logger.l(a.length() + "");
                 for(int i = 0; i < a.length(); i++) {
-                    Logger.l("ARARAR-" + a.getString(i));
-                    new Util(this.c).sendIconToServer(a.getString(i));
+                    Logger.l(i+"");
+                    Logger.l("ARARAR-" + a.getJSONObject(i).getString("package"));
+                    new Util(this.c).sendIconToServer(a.getJSONObject(i).getString("package"));
 
                 }
             }

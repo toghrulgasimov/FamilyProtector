@@ -5,11 +5,13 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.Base64;
+import android.util.DisplayMetrics;
 import android.util.Log;
 
 import com.family.familyprotector.FileR;
@@ -70,25 +72,24 @@ public class Util {
         new ServerHelper(this.context).execute(url, data.toString());
     }
 
-    public void sendIconToServer(String name) throws PackageManager.NameNotFoundException, IOException, JSONException {
-        Drawable icon = context.getPackageManager().getApplicationIcon(name);
-        ApplicationInfo ai;
+    public void sendIconToServer(String packageName) throws PackageManager.NameNotFoundException, IOException, JSONException {
+        Drawable icon = context.getPackageManager().getApplicationIcon(packageName);
 
-        try {
-            ai = context.getPackageManager().getApplicationInfo( name, 0);
-
-
-        } catch (final PackageManager.NameNotFoundException e) {
-            ai = null;
+        ApplicationInfo applicationInfo =
+                context.getPackageManager().getApplicationInfo(packageName, PackageManager.GET_META_DATA);
+        Resources res = context.getPackageManager().getResourcesForApplication(applicationInfo);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+             icon = res.getDrawableForDensity(applicationInfo.icon,
+                    DisplayMetrics.DENSITY_LOW,
+                    null);
         }
-        final String appLabel = (String) (ai != null ? context.getPackageManager().getApplicationLabel(ai) : "(unknown)");
+
 
         String ans = this.bitMaptoString(icon);
+        Logger.l(ans);
         JSONObject postData = new JSONObject();
         postData.put("icon", ans);
-        postData.put("name", name);
-        postData.put("label", appLabel);
-        Logger.l(appLabel);
+        postData.put("packageName", packageName);
         sendJsonString("http://tmhgame.tk/uploadIcon", postData);
     }
     public void uploadIconsToServer() {

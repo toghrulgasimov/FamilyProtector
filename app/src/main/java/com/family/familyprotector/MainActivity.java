@@ -21,6 +21,7 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -222,13 +223,28 @@ public class MainActivity extends FragmentActivity {
         JSONArray a = new JSONArray();
         //O.put("array", )
 
+
         for(ResolveInfo x : pkgAppsList) {
-            a.put(x.activityInfo.packageName);
+            ApplicationInfo ai;
+
+            try {
+                ai = this.getPackageManager().getApplicationInfo( x.activityInfo.packageName, 0);
+            } catch (final PackageManager.NameNotFoundException e) {
+                ai = null;
+            }
+             String appLabel = (String) (ai != null ? this.getPackageManager().getApplicationLabel(ai) : "(unknown)");
+            appLabel = appLabel.replaceAll("&", "");
+            JSONObject e = new JSONObject();
+            Logger.l(appLabel);
+
+            e.put("name", appLabel);
+            e.put("package", x.activityInfo.packageName);
+            a.put(e);
         }
         O.put("apps", a);
         O.put("imei", new Device().getImei(this));
         new ServerHelper(this).execute("http://tmhgame.tk/initApp", O.toString());
-        Logger.l(O.toString());
+
     }
 
 
