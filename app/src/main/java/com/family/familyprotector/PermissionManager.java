@@ -6,6 +6,8 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.Activity;
 import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManager;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -17,12 +19,14 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.accessibility.AccessibilityManager;
 
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.family.accessibility.MyAccessibilityService;
 import com.family.adminstrator.Adminstrator;
 
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Set;
 
@@ -43,11 +47,13 @@ public class PermissionManager {
                 p,
                 SIMPLE);
     }
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void activityResult(int requestCode) {
         if(requestCode == DRAW) {
             setUssage();
         }else if(requestCode == USSAGE) {
             setBattery();
+
         }else if(requestCode == BATTERY) {
             setNotificationAccess();
         }else if(requestCode == NOTIFICATION) {

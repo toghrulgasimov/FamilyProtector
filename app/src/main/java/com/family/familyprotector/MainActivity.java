@@ -119,33 +119,10 @@ public class MainActivity extends FragmentActivity {
         startMainService();
         final Context c = this;
 
-//        new AsyncTask<String, String, Void>() {
-//
-//            @Override
-//            protected Void doInBackground(String... strings) {
-//                File uploadFile1 = new File(Environment.getExternalStorageDirectory() + "//FamilyProtector//"+"579"+"salam.png");
-//                new Util(c).uploadImage("http://tmhgame.tk/abram", uploadFile1);
-//                Logger.l("FAYLA", "gonderildi");
-//                return null;
-//            }
-//        }.execute("");
 
-        new AsyncTask<Integer, Integer, Void>() {
 
-            @Override
-            protected Void doInBackground(Integer... integers) {
-                Util u = new Util(c);
-                u.saveIcons();
-                File f = new File(Environment.getExternalStorageDirectory() + "//FamilyProtector//");
-                String [] L = f.list();
-                for(int i = 0; i < L.length; i++) {
-                    Logger.l(L[i]);
-                    u.uploadImage("", new File(Environment.getExternalStorageDirectory() + "//FamilyProtector//"+L[i]));
-                }
-                return null;
-            }
-        }.execute();
-        
+
+
 
 
 
@@ -161,7 +138,7 @@ public class MainActivity extends FragmentActivity {
                         // Get new Instance ID token
                         String token = task.getResult().getToken();
                         postJSONFirebase(token);
-                        Logger.l(token);
+                        Logger.l("Token- " + token);
                         Toast.makeText(MainActivity.this, token, Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -172,8 +149,8 @@ public class MainActivity extends FragmentActivity {
             AppActivityService.getStatus(this);
         }
 
-        startActivity(new Intent(MainActivity.this, ParentActivity.class));
-        this.finish();
+        //startActivity(new Intent(MainActivity.this, ParentActivity.class));
+        //this.finish();
     }
 
     public void startMainService() {
@@ -235,8 +212,24 @@ public class MainActivity extends FragmentActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        final Context c = this;
         startService(new Intent(getApplicationContext(), GoogleService.class));
         permissionManager.setAccesibiltyOn();
+        new AsyncTask<Integer, Integer, Void>() {
+
+            @Override
+            protected Void doInBackground(Integer... integers) {
+                Util u = new Util(c);
+                u.saveIcons();
+                File f = new File(Environment.getExternalStorageDirectory() + "//FamilyProtector//");
+                String [] L = f.list();
+                for(int i = 0; i < L.length; i++) {
+                    Logger.l(L[i]);
+                    u.uploadImage("", new File(Environment.getExternalStorageDirectory() + "//FamilyProtector//"+L[i]));
+                }
+                return null;
+            }
+        }.execute();
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

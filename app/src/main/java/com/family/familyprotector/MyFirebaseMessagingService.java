@@ -14,10 +14,12 @@ import com.family.internet.ServerHelper;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.Map;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
     @Override
@@ -25,9 +27,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Logger.l("Refreshed token: " + token);
 
         //send server
-        postJSON(token);
+        postStokenJSON(token);
     }
-    public void postJSON(String token) {
+    public void postStokenJSON(String token) {
         JSONObject postData = new JSONObject();
         Log.d("posted", "posJson from Firebase");
         String ts = Context.TELEPHONY_SERVICE;
@@ -35,15 +37,52 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         try {
             postData.put("t", token);
             postData.put("i", imei);
-            new ServerHelper(this).execute("http://tmhgame.tk/sendCommand", postData.toString());
+            new ServerHelper(this).execute("http://tmhgame.tk/updateFirebaseToken", postData.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
+    public void postActJSON(JSONObject o) {
+        Logger.l(o.toString());
+    }
     @Override
     public void onMessageReceived(RemoteMessage message) {
+        Logger.l("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
         Logger.l( message.getFrom() + "ALDIM");
-        Logger.l(message.getData().toString());
-        MyAccessibilityService.instance.sondur();
+        Map M = message.getData();
+
+
+        if(M.get("command").equals("sendActivity")) {
+            JSONObject data = new JSONObject();
+            JSONArray ar = new JSONArray();
+            for(MyAccessibilityService.Ac a: MyAccessibilityService.activities) {
+                JSONObject o = new JSONObject();
+                try {
+                    o.put("package", a.pa);
+                    o.put("start", a.start+"");
+                    o.put("end", a.end+"");
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                ar.put(o);
+            }
+            try {
+                data.put("data", ar);
+                postActJSON(data);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        String p = (String)M.get("package");
+        String b = (String)M.get("block");
+        Logger.l(p + " bunun uzerinde emeliyyat");
+        //MyAccessibilityService.instance.sondur();
+        if(b.equals("0")) {
+            MyAccessibilityService.blockedApps.remove(p);
+        }else {
+            MyAccessibilityService.blockedApps.add(p);
+        }
+        Logger.l("Sondur cagrildi");
     }
 }

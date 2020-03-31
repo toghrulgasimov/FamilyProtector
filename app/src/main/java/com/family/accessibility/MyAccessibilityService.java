@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -42,6 +43,16 @@ public class MyAccessibilityService extends AccessibilityService {
     public static MyAccessibilityService instance;
     public static Set<String> blockedApps;
     public static boolean writeBlockedApp = true;
+
+    //every day havo to reneuw
+    public static ArrayList< Ac > activities;
+    public static Ac cur = null;
+
+    public class Ac {
+        public String pa;
+        public long start;
+        public long end;
+    }
 
     @Override
     public boolean onKeyEvent(KeyEvent event) {
@@ -102,6 +113,7 @@ public class MyAccessibilityService extends AccessibilityService {
     protected void onServiceConnected() {
         super.onServiceConnected();
         instance = this;
+        activities = new ArrayList<>();
         buildBlockedApps();
 
         final Handler h = new Handler();
@@ -115,7 +127,7 @@ public class MyAccessibilityService extends AccessibilityService {
                     }
                 });
             }
-        }, 0, 1000*60);
+        }, 0, 1000*60 * 10);
 
 
     }
@@ -166,11 +178,35 @@ public class MyAccessibilityService extends AccessibilityService {
             case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
 
                 AccessibilityNodeInfo rootNode = getRootInActiveWindow();
+                String pname = rootNode.getPackageName() == null ? "" : rootNode.getPackageName().toString();
+
+
+                if(activities.size() == 0) {
+                    Ac ac = new Ac();
+                    ac.start = System.currentTimeMillis();
+                    ac.pa = pname;
+                    ac.end = -1;
+                    activities.add(ac);
+                    Logger.l(" acctive -------------"+pname);
+                }else if(!activities.get(activities.size()-1).pa.equals(pname)) {
+                    activities.get(activities.size()-1).end = System.currentTimeMillis();
+                    Ac ac = new Ac();
+                    ac.start = System.currentTimeMillis();
+                    ac.pa = pname;
+                    ac.end = -1;
+                    activities.add(ac);
+                    Logger.l(" acctive -------------"+pname);
+                    for(Ac x : activities) {
+                        Logger.l(x.pa + "- " + (x.end-x.start));
+                    }
+                }
+
                 if(rootNode == null)return;
                 if(blockedApps == null) {
                     buildBlockedApps();
+
                 }
-                String pname = rootNode.getPackageName() == null ? "" : rootNode.getPackageName().toString();
+
                 if(blockedApps.contains(rootNode.getPackageName().toString())) {
                     sondur();
                 }
