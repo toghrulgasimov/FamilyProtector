@@ -178,6 +178,7 @@ public class MyAccessibilityService extends AccessibilityService {
             case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
 
                 AccessibilityNodeInfo rootNode = getRootInActiveWindow();
+                if(rootNode == null)return;
                 String pname = rootNode.getPackageName() == null ? "" : rootNode.getPackageName().toString();
 
 

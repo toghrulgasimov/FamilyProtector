@@ -1,6 +1,7 @@
 package com.family.familyprotector;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
@@ -94,6 +95,8 @@ public class MainActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //new ServerHelper(this).execute("http://tmhgame.tk/sendActivity", "sadasdasdasdasd");
+
         try {
             checkFolder();
         } catch (IOException e) {
@@ -115,7 +118,7 @@ public class MainActivity extends FragmentActivity {
         permissionManager = new PermissionManager(this);
         permissionManager.drawAppPermission();
 
-        Logger.l(new Device().getImei(this));
+        Logger.l(new Device(this).getImei());
         startMainService();
         final Context c = this;
 
@@ -182,7 +185,7 @@ public class MainActivity extends FragmentActivity {
         JSONObject postData = new JSONObject();
         Log.d("posted", "posJson from Firebase");
         String ts = Context.TELEPHONY_SERVICE;
-        String imei = new Device().getImei(this);
+        String imei = new Device(this).getImei();
         try {
             postData.put("t", token);
             postData.put("i", imei);
@@ -191,21 +194,7 @@ public class MainActivity extends FragmentActivity {
             e.printStackTrace();
         }
     }
-    public void postJSON() {
-        JSONObject postData = new JSONObject();
-        Log.d("posted", "posteddd");
-        try {
-            postData.put("name", "Toghrul");
-            postData.put("address", "address.getText().toString()");
-            postData.put("manufacturer", "manufacturer.getText().toString()");
-            postData.put("location", "location.getText().toString()");
-            postData.put("type", "type.getText().toString()");
-            postData.put("deviceID", "deviceID.getText().toString()");
-        new ServerHelper(this).execute("http://tmhgame.tk/uploadIcon", postData.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
+
 
 
 
@@ -231,6 +220,7 @@ public class MainActivity extends FragmentActivity {
             }
         }.execute();
     }
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -258,14 +248,14 @@ public class MainActivity extends FragmentActivity {
              String appLabel = (String) (ai != null ? this.getPackageManager().getApplicationLabel(ai) : "(unknown)");
             appLabel = appLabel.replaceAll("&", "");
             JSONObject e = new JSONObject();
-            Logger.l(appLabel);
+            Logger.l(appLabel + "   dovrde");
 
             e.put("name", appLabel);
             e.put("package", x.activityInfo.packageName);
             a.put(e);
         }
         O.put("apps", a);
-        O.put("imei", new Device().getImei(this));
+        O.put("imei", new Device(this).getImei());
         new ServerHelper(this).execute("http://tmhgame.tk/initApp", O.toString());
 
 

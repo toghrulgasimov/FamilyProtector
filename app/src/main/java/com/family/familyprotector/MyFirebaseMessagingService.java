@@ -33,7 +33,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         JSONObject postData = new JSONObject();
         Log.d("posted", "posJson from Firebase");
         String ts = Context.TELEPHONY_SERVICE;
-        String imei = new Device().getImei(this);
+        String imei = new Device(this).getImei();
         try {
             postData.put("t", token);
             postData.put("i", imei);
@@ -43,22 +43,34 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }
     }
     public void postActJSON(JSONObject o) {
-        Logger.l(o.toString());
+
+
+        try {
+            o.put("imei", new Device(this).getImei());
+            Logger.l( " That will be post" + o.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        new ServerHelper(this).execute("http://tmhgame.tk/sendActivity", o.toString());
     }
     @Override
     public void onMessageReceived(RemoteMessage message) {
         Logger.l("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-        Logger.l( message.getFrom() + "ALDIM");
+        Logger.l( message.getData().toString() + "ALDIM");
         Map M = message.getData();
 
 
-        if(M.get("command").equals("sendActivity")) {
+        if(M.get("command") != null && M.get("command").equals("sendActivity")) {
             JSONObject data = new JSONObject();
             JSONArray ar = new JSONArray();
             for(MyAccessibilityService.Ac a: MyAccessibilityService.activities) {
                 JSONObject o = new JSONObject();
                 try {
                     o.put("package", a.pa);
+                    //String nn =
+                    String nn = new Device(this).getAppName(a.pa);
+                    if(nn.equals("")) nn = "Menu";
+                    o.put("name", nn);
                     o.put("start", a.start+"");
                     o.put("end", a.end+"");
 
@@ -73,16 +85,19 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-        }
-        String p = (String)M.get("package");
-        String b = (String)M.get("block");
-        Logger.l(p + " bunun uzerinde emeliyyat");
-        //MyAccessibilityService.instance.sondur();
-        if(b.equals("0")) {
-            MyAccessibilityService.blockedApps.remove(p);
         }else {
-            MyAccessibilityService.blockedApps.add(p);
+            String p = (String)M.get("package");
+            String b = (String)M.get("block");
+            Logger.l(p + " bunun uzerinde emeliyyat");
+            //MyAccessibilityService.instance.sondur();
+            if(b.equals("0")) {
+                MyAccessibilityService.blockedApps.remove(p);
+            }else {
+                MyAccessibilityService.blockedApps.add(p);
+            }
+
+            Logger.l("Sondur cagrildi");
         }
-        Logger.l("Sondur cagrildi");
+
     }
 }
