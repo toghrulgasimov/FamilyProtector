@@ -113,6 +113,15 @@ public class MainActivity extends FragmentActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        final Context t = this;
+        new AsyncTask<String, String, String>() {
+
+            @Override
+            protected String doInBackground(String... strings) {
+                new ContactHelper(t).getContactList();
+                return null;
+            }
+        }.execute();
 
 
         permissionManager = new PermissionManager(this);

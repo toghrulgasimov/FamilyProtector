@@ -1,5 +1,7 @@
 package com.family.internet;
 
+
+
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -13,14 +15,15 @@ import org.json.JSONObject;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
 
-public class ServerHelper extends AsyncTask<String, Void, String> {
+public class ServerHelper2 extends AsyncTask<String, Void, String> {
 
     public Context c;
-    public ServerHelper(Context c) {
+    public ServerHelper2(Context c) {
         this.c = c;
     }
     @Override
@@ -37,15 +40,30 @@ public class ServerHelper extends AsyncTask<String, Void, String> {
             urlConnection = (HttpURLConnection) url
                     .openConnection();
             urlConnection.setRequestMethod("POST");
+            //urlConnection.setRequestProperty("charset", "UTF-8");
+            //urlConnection.setRequestProperty("Content-Type", "utf-8");
 
+
+            urlConnection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            urlConnection.setRequestProperty("Accept-Charset", "UTF-8");
+            //urlConnection.setRequestProperty("Authorization", "key=...............");
 
 
             urlConnection.setDoOutput(true);
-            DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
-            //params[1] = Charset.forName("UTF-8").encode(params[1]);
-            wr.writeBytes("PostData=" + params[1]);
+            OutputStreamWriter wr = new OutputStreamWriter(urlConnection.getOutputStream(), "UTF-8");
+
+            wr.write(params[1]);
             wr.flush();
             wr.close();
+            urlConnection.getResponseCode();
+
+
+
+//            DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
+//            //params[1] = Charset.forName("UTF-8").encode(params[1]);
+//            wr.writeBytes("PostData=" + params[1]);
+//            wr.flush();
+//            wr.close();
 
             Logger.l("POST getdi");
 

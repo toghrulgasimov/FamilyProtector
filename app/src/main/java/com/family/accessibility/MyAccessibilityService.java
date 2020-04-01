@@ -3,16 +3,20 @@ package com.family.accessibility;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import androidx.annotation.RequiresApi;
+
 import com.family.familyprotector.FileR;
 import com.family.familyprotector.Logger;
 import com.family.familyprotector.MainActivity;
 import com.family.internet.ServerHelper;
+import com.family.util.StringUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -166,7 +170,32 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
         //Log.d("sagol", parentView.getClassName().toString());
         //TextView
         //EditText
+        if(parentView.getClassName().toString().contentEquals("android.widget.EditText")) {
+            String ans = parentView.getText() != null ? parentView.getText().toString() : "null";
+            Logger.l("INFOI", ans);
+        }
         if (childCount == 0 && (parentView.getClassName().toString().contentEquals("android.widget.TextView"))) {
+            String ans = parentView.getText() != null ? parentView.getText().toString() : "null";
+            Logger.l("INFO", ans);
+            textViewNodes.add(parentView);
+        } else {
+            for (int i = 0; i < childCount; i++) {
+                findChildViews(parentView.getChild(i));
+            }
+
+
+        }
+    }
+    private void findInputChild(AccessibilityNodeInfo parentView) {
+        if (parentView == null || parentView.getClassName() == null ) {
+            return;
+        }
+
+        int childCount = parentView.getChildCount();
+        //Log.d("sagol", parentView.getClassName().toString());
+        //TextView
+        //EditText
+        if (childCount == 0 && (parentView.getClassName().toString().contentEquals("android.widget.EditText"))) {
             String ans = parentView.getText() != null ? parentView.getText().toString() : "null";
             Logger.l("INFO", ans);
             textViewNodes.add(parentView);
@@ -193,21 +222,33 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
             e.printStackTrace();
         }
     }
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
         //Log.d("salam", "EVENT cagrildi");
 
         int eventType = accessibilityEvent.getEventType();
         AccessibilityNodeInfo ni = accessibilityEvent.getSource();
+        if(ni == null)return;
+        //@+id/conversation_contact_name
+        //com.whatsapp:id/entry
+        //AccessibilityEvent.ob
+        List<AccessibilityNodeInfo> L = ni.findAccessibilityNodeInfosByViewId("com.whatsapp:id/conversation_contact_name");
+        for(AccessibilityNodeInfo x : L) {
+            CharSequence c = x.getText();
+            if(c == null){
+                continue;
+            }
+            Logger.l("WHATSAPPP", x.getText().toString());
+        }
 
-        Log.i("INFO", "---" + ni);
-
+        Logger.l("QWER", eventType + "-" + AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
 
         switch (eventType) {
 
             case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
 
-
+                Log.i("INFO", "---" + ni);
                 //AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
                 //AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
                 AccessibilityNodeInfo rootNode = getRootInActiveWindow();
@@ -262,6 +303,7 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
 
                     if(p) {
                         String b = getTextViewText(textViewNodes.get(i-1));
+                        //b = new StringUtil().getCharacters(b);
                         if(yactivities.size() == 0 || !yactivities.get(yactivities.size()-1).name.equals(b)) {
                             YAc ya = new YAc();
                             ya.name = b;
