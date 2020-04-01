@@ -30,6 +30,21 @@ import java.util.TimerTask;
 public class MyAccessibilityService extends AccessibilityService {
 
 
+
+
+    /*
+    Youtube baxilan vidyo
+    The First Love (ilk aşk - Azerbaijan tar) Ramiz Guliyev -- android.widget.TextView
+2020-04-01 09:17:08.498 8370-8370/com.family.familyprotector D/INFOOO: 611K baxış -- android.widget.TextView
+2020-04-01 09:17:08.499 8370-8370/com.family.familyprotector D/INFOOO: Paylaşın -- android.widget.TextView
+2020-04-01 09:17:08.499 8370-8370/com.family.familyprotector D/INFOOO: Burada saxlayın: -- android.widget.TextView
+2020-04-01 09:17:08.499 8370-8370/com.family.familyprotector D/INFOOO: Abe -- android.widget.TextView
+2020-04-01 09:17:08.499 8370-8370/com.family.familyprotector D/INFOOO: 828 abunəçi -- android.widget.TextView
+2020-04-01 09:17:08.499 8370-8370/com.family.familyprotector D/INFOOO: ABUNƏ OL -- android.widget.TextView
+
+Youtube search link
+https://www.youtube.com/results?search_query=the+show+must+go+on
+     */
     //read screen text;
     //https://stackoverflow.com/questions/30909926/get-text-content-of-the-android-screen
 
@@ -144,13 +159,19 @@ public class MyAccessibilityService extends AccessibilityService {
         if (parentView == null || parentView.getClassName() == null ) {
             return;
         }
+        if((parentView.getClassName().toString().contentEquals("android.widget.EditText") ||
+        parentView.getClassName().toString().contentEquals("android.widget.TextView"))) {
+            String ans = parentView.getText() != null ? parentView.getText().toString() : "null";
+            Logger.l("INFOOO", ans + " -- " + parentView.getClassName());
+        }
+
         int childCount = parentView.getChildCount();
         //Log.d("sagol", parentView.getClassName().toString());
         //TextView
         //EditText
-        if (childCount == 0 && (parentView.getClassName().toString().contentEquals("android.widget.EditText"))) {
-
-            textViewNodes.add(parentView);
+        if (childCount == 0) {
+            return;
+            //textViewNodes.add(parentView);
         } else {
             for (int i = 0; i < childCount; i++) {
                 findChildViews(parentView.getChild(i));
@@ -171,12 +192,17 @@ public class MyAccessibilityService extends AccessibilityService {
     }
     @Override
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
+
         //Log.d("salam", "EVENT cagrildi");
 
         int eventType = accessibilityEvent.getEventType();
         AccessibilityNodeInfo ni = accessibilityEvent.getSource();
 
+        findChildViews(ni);
+
         Log.i("INFO", "---" + ni);
+
+
 
         switch (eventType) {
 
