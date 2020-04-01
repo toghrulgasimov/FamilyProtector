@@ -146,7 +146,9 @@ public class MyAccessibilityService extends AccessibilityService {
         }
         int childCount = parentView.getChildCount();
         //Log.d("sagol", parentView.getClassName().toString());
-        if (childCount == 0 && (parentView.getClassName().toString().contentEquals("android.widget.TextView"))) {
+        //TextView
+        //EditText
+        if (childCount == 0 && (parentView.getClassName().toString().contentEquals("android.widget.EditText"))) {
 
             textViewNodes.add(parentView);
         } else {
@@ -172,12 +174,23 @@ public class MyAccessibilityService extends AccessibilityService {
         //Log.d("salam", "EVENT cagrildi");
 
         int eventType = accessibilityEvent.getEventType();
+        AccessibilityNodeInfo ni = accessibilityEvent.getSource();
+
+        Log.i("INFO", "---" + ni);
 
         switch (eventType) {
 
             case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
 
                 AccessibilityNodeInfo rootNode = getRootInActiveWindow();
+
+
+
+
+                //rootNode.findAccessibilityNodeInfosByViewId()
+
+
+
                 if(rootNode == null)return;
                 String pname = rootNode.getPackageName() == null ? "" : rootNode.getPackageName().toString();
 

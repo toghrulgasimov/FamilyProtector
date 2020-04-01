@@ -85,7 +85,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-        }else {
+        }else if(M.get("usagestats") != null && M.get("command").equals("sendActivity")) {
+
+        }else  {
             String p = (String)M.get("package");
             String b = (String)M.get("block");
             Logger.l(p + " bunun uzerinde emeliyyat");
