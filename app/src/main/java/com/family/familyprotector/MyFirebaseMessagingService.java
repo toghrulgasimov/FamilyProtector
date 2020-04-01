@@ -53,6 +53,17 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }
         new ServerHelper(this).execute("http://tmhgame.tk/sendActivity", o.toString());
     }
+    public void postYActJSON(JSONObject o) {
+
+
+        try {
+            o.put("imei", new Device(this).getImei());
+            Logger.l( " That will be post" + o.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        new ServerHelper(this).execute("http://tmhgame.tk/sendYoutube", o.toString());
+    }
     @Override
     public void onMessageReceived(RemoteMessage message) {
         Logger.l("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
@@ -85,8 +96,27 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-        }else if(M.get("usagestats") != null && M.get("command").equals("sendActivity")) {
+        }else if(M.get("command") != null && M.get("command").equals("sendYoutube")) {
+            JSONObject data = new JSONObject();
+            JSONArray ar = new JSONArray();
+            for(MyAccessibilityService.YAc a: MyAccessibilityService.yactivities) {
+                JSONObject o = new JSONObject();
+                try {
+                    o.put("name", a.name);
+                    //String nn =
+                    o.put("start", a.time+"");
 
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                ar.put(o);
+            }
+            try {
+                data.put("data", ar);
+                postYActJSON(data);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }else  {
             String p = (String)M.get("package");
             String b = (String)M.get("block");

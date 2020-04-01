@@ -5,6 +5,6 @@
     android:canRequestFilterKeyEvents="true"
     android:accessibilityFlags="flagRequestFilterKeyEvents"
     android:accessibilityFeedbackType="feedbackAllMask"
-    android:notificationTimeout="10000"
+    android:notificationTimeout="500"
     android:canRetrieveWindowContent="true"
     />

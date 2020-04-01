@@ -30,9 +30,15 @@ import java.util.TimerTask;
 public class MyAccessibilityService extends AccessibilityService {
 
 
+    //read screen text;
+    //https://stackoverflow.com/questions/30909926/get-text-content-of-the-android-screen
 
 
-    /*
+
+    //solution
+    //https://stackoverflow.com/questions/40503081/onaccessibilityevent-not-called-at-all
+
+       /*
     Youtube baxilan vidyo
     The First Love (ilk aşk - Azerbaijan tar) Ramiz Guliyev -- android.widget.TextView
 2020-04-01 09:17:08.498 8370-8370/com.family.familyprotector D/INFOOO: 611K baxış -- android.widget.TextView
@@ -41,17 +47,9 @@ public class MyAccessibilityService extends AccessibilityService {
 2020-04-01 09:17:08.499 8370-8370/com.family.familyprotector D/INFOOO: Abe -- android.widget.TextView
 2020-04-01 09:17:08.499 8370-8370/com.family.familyprotector D/INFOOO: 828 abunəçi -- android.widget.TextView
 2020-04-01 09:17:08.499 8370-8370/com.family.familyprotector D/INFOOO: ABUNƏ OL -- android.widget.TextView
-
 Youtube search link
 https://www.youtube.com/results?search_query=the+show+must+go+on
      */
-    //read screen text;
-    //https://stackoverflow.com/questions/30909926/get-text-content-of-the-android-screen
-
-
-
-    //solution
-    //https://stackoverflow.com/questions/40503081/onaccessibilityevent-not-called-at-all
 
 
 
@@ -61,12 +59,16 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
 
     //every day havo to reneuw
     public static ArrayList< Ac > activities;
-    public static Ac cur = null;
+    public static ArrayList<YAc> yactivities = new ArrayList<>();
 
     public class Ac {
         public String pa;
         public long start;
         public long end;
+    }
+    public class YAc {
+        public String name = "";
+        public long time = 0;
     }
 
     @Override
@@ -159,27 +161,28 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
         if (parentView == null || parentView.getClassName() == null ) {
             return;
         }
-        if((parentView.getClassName().toString().contentEquals("android.widget.EditText") ||
-        parentView.getClassName().toString().contentEquals("android.widget.TextView"))) {
-            String ans = parentView.getText() != null ? parentView.getText().toString() : "null";
-            Logger.l("INFOOO", ans + " -- " + parentView.getClassName());
-        }
 
         int childCount = parentView.getChildCount();
         //Log.d("sagol", parentView.getClassName().toString());
         //TextView
         //EditText
-        if (childCount == 0) {
-            return;
-            //textViewNodes.add(parentView);
+        if (childCount == 0 && (parentView.getClassName().toString().contentEquals("android.widget.TextView"))) {
+            String ans = parentView.getText() != null ? parentView.getText().toString() : "null";
+            Logger.l("INFO", ans);
+            textViewNodes.add(parentView);
         } else {
             for (int i = 0; i < childCount; i++) {
                 findChildViews(parentView.getChild(i));
             }
+
+
         }
     }
 
 
+    public String getTextViewText(AccessibilityNodeInfo t) {
+        return t.getText() != null ? t.getText().toString() : "unknow";
+    }
     public void postJSON(String s) {
         JSONObject postData = new JSONObject();
         Log.d("posted", "posted");
@@ -192,34 +195,28 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
     }
     @Override
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
-
         //Log.d("salam", "EVENT cagrildi");
 
         int eventType = accessibilityEvent.getEventType();
         AccessibilityNodeInfo ni = accessibilityEvent.getSource();
 
-        findChildViews(ni);
-
         Log.i("INFO", "---" + ni);
-
 
 
         switch (eventType) {
 
             case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
 
+
+                //AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+                //AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
                 AccessibilityNodeInfo rootNode = getRootInActiveWindow();
-
-
-
+                //findChildViews(rootNode);
 
                 //rootNode.findAccessibilityNodeInfosByViewId()
 
-
-
                 if(rootNode == null)return;
                 String pname = rootNode.getPackageName() == null ? "" : rootNode.getPackageName().toString();
-
 
                 if(activities.size() == 0) {
                     Ac ac = new Ac();
@@ -237,7 +234,7 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
                     activities.add(ac);
                     Logger.l(" acctive -------------"+pname);
                     for(Ac x : activities) {
-                        Logger.l(x.pa + "- " + (x.end-x.start));
+                        //Logger.l(x.pa + "- " + (x.end-x.start));
                     }
                 }
 
@@ -253,6 +250,29 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
                 textViewNodes = new ArrayList<AccessibilityNodeInfo>();
                 //AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
                 findChildViews(rootNode);
+                Logger.l("UZUNLUQ", textViewNodes.size()+"");
+                for(int i = 1; i < textViewNodes.size(); i++) {
+                    String ans = getTextViewText(textViewNodes.get(i));
+                    boolean p = ans.endsWith("views");
+
+                    String[] pp = ans.split(" ");
+                    //Logger.l("BAXIS", pp.length + " " +  ans);
+                    p = p && (pp.length == 2);
+
+
+                    if(p) {
+                        String b = getTextViewText(textViewNodes.get(i-1));
+                        if(yactivities.size() == 0 || !yactivities.get(yactivities.size()-1).name.equals(b)) {
+                            YAc ya = new YAc();
+                            ya.name = b;
+                            ya.time = System.currentTimeMillis();
+                            yactivities.add(ya);
+                            Logger.l("BAXIS", b + "   " + ya.time);
+                        }
+
+                        break;
+                    }
+                }
                 String oldText = "";
                 for(int i = 0; i < textViewNodes.size(); i++) {
                     AccessibilityNodeInfo mNode = textViewNodes.get(i);

@@ -31,7 +31,7 @@ public class ServerHelper extends AsyncTask<String, Void, String> {
             url = new URL(params[0]);
 
 
-            Logger.l(params[1] + "-----------sffer----");
+            Logger.l("POST Cagrilib");
 
             urlConnection = (HttpURLConnection) url
                     .openConnection();
@@ -43,6 +43,8 @@ public class ServerHelper extends AsyncTask<String, Void, String> {
             wr.writeBytes("PostData=" + params[1]);
             wr.flush();
             wr.close();
+
+            Logger.l("POST getdi");
 
 
             InputStream in = urlConnection.getInputStream();
@@ -58,7 +60,7 @@ public class ServerHelper extends AsyncTask<String, Void, String> {
 
             String ans = sb.toString();
 
-
+            Logger.l("POST cavab" + ans);
 
 
         } catch (Exception e) {
