@@ -61,9 +61,11 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
     public static Set<String> blockedApps;
     public static boolean writeBlockedApp = true;
 
+
     //every day havo to reneuw
     public static ArrayList< Ac > activities;
     public static ArrayList<YAc> yactivities = new ArrayList<>();
+    public static ArrayList<WAc> webSites = new ArrayList<>();
 
     public class Ac {
         public String pa;
@@ -73,6 +75,15 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
     public class YAc {
         public String name = "";
         public long time = 0;
+    }
+    public class WAc {
+        public String url = "";
+        public long time = 0;
+    }
+    public boolean isWebsite(String s) {
+        if(s.contains(".com/") || s.contains(".de/") || s.contains(".az/") || s.contains(".ru/") || s.contains(".tr/")) {
+            return true;
+        }else return false;
     }
 
     @Override
@@ -172,11 +183,24 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
         //EditText
         if(parentView.getClassName().toString().contentEquals("android.widget.EditText")) {
             String ans = parentView.getText() != null ? parentView.getText().toString() : "null";
-            Logger.l("INFOI", ans);
+
+            //Logger.l("INFOI", ans);
+            Logger.l("INFOO", isWebsite(ans) + "-" + ans);
+            if(isWebsite(ans)) {
+                if(webSites.size() == 0 || !webSites.get(webSites.size()-1).url.equals(ans)) {
+                    Logger.l("INFOOO", ans);
+                    WAc w = new WAc();
+                    w.time = System.currentTimeMillis();
+                    w.url = ans;
+                    webSites.add(w);
+                }
+            }
         }
         if (childCount == 0 && (parentView.getClassName().toString().contentEquals("android.widget.TextView"))) {
             String ans = parentView.getText() != null ? parentView.getText().toString() : "null";
-            Logger.l("INFO", ans);
+
+
+
             textViewNodes.add(parentView);
         } else {
             for (int i = 0; i < childCount; i++) {

