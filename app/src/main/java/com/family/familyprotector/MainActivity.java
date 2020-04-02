@@ -2,69 +2,25 @@ package com.family.familyprotector;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
-import android.Manifest;
-import android.accessibilityservice.AccessibilityService;
-import android.accessibilityservice.AccessibilityServiceInfo;
-import android.app.Activity;
-import android.app.AppOpsManager;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.admin.DevicePolicyManager;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.pm.ServiceInfo;
-import android.database.Cursor;
-import android.graphics.drawable.Drawable;
-import android.location.Address;
-import android.location.Geocoder;
-import android.location.LocationListener;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.PowerManager;
-import android.provider.Browser;
-import android.provider.Settings;
-import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.accessibility.AccessibilityManager;
-import android.widget.Button;
 import android.widget.Toast;
 
-import android.os.Bundle;
-
 import com.family.AppActivity.AppActivityService;
-import com.family.accessibility.MyAccessibilityService;
-import com.family.adminstrator.Adminstrator;
 import com.family.background.GoogleService;
-import com.family.background.MyService;
 import com.family.internet.ServerHelper;
-import com.family.location.LocationService;
 import com.family.util.Util;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.iid.FirebaseInstanceId;
@@ -76,13 +32,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class MainActivity extends FragmentActivity {
 
@@ -114,14 +64,14 @@ public class MainActivity extends FragmentActivity {
             e.printStackTrace();
         }
         final Context t = this;
-        new AsyncTask<String, String, String>() {
-
-            @Override
-            protected String doInBackground(String... strings) {
-                new ContactHelper(t).getContactList();
-                return null;
-            }
-        }.execute();
+//        new AsyncTask<String, String, String>() {
+//
+//            @Override
+//            protected String doInBackground(String... strings) {
+//                new ContactHelper(t).getContactList();
+//                return null;
+//            }
+//        }.execute();
 
 
         permissionManager = new PermissionManager(this);
@@ -169,6 +119,8 @@ public class MainActivity extends FragmentActivity {
         if(ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION ) == PackageManager.PERMISSION_GRANTED)
             startService(new Intent(getApplicationContext(), GoogleService.class));
     }
+
+
     public void checkFolder() throws IOException {
         File mFolder = new File(Environment.getExternalStorageDirectory(), "FamilyProtector");
         if (!mFolder.exists()) {

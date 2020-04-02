@@ -2,6 +2,7 @@ package com.family.background;
 
 import android.Manifest;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -15,18 +16,25 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 
+import com.family.familyprotector.Device;
+import com.family.familyprotector.LocationOnce;
 import com.family.familyprotector.Logger;
 import com.family.familyprotector.Not;
 import com.family.internet.ServerHelper;
+import com.family.internet.ServerHelper2;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
 
 public class GoogleService extends Service implements LocationListener {
+
+
+    public static ArrayList<Location> locations = new ArrayList<>();
 
     boolean isGPSEnable = false;
     boolean isNetworkEnable = false;
@@ -35,9 +43,13 @@ public class GoogleService extends Service implements LocationListener {
     Location location;
     private Handler mHandler = new Handler();
     private Timer mTimer = null;
-    long notify_interval = 10000;
-    public static String str_receiver = "servicetutorial.service.receiver";
-    Intent intent;
+    private Handler SecondHandler = new Handler();
+    private Timer SecondTimer = null;
+
+    public static boolean sendNow = false;
+
+
+    static LocationOnce LO = null;
 
 
     public GoogleService() {
@@ -68,31 +80,65 @@ public class GoogleService extends Service implements LocationListener {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        fn_getlocation();
+                        fn_getlocation(1000 * 60 * 10L,100L);
                     }
                 });
             }
-        }, 0,  20000);
+        }, 0,  20*60 * 1000);
 
-//        final Handler h = new Handler();
-//        new Timer().schedule(new TimerTask() {
-//            @Override
-//            public void run() {
-//                h.post(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        Logger.l("TIMERRR");
-//                    }
-//                });
-//            }
-//        }, 0, 1000);
+
+        SecondTimer = new Timer();
+        SecondTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                SecondHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(sendNow) {
+                            fn_getlocation(0L,0L);
+                        }
+
+                    }
+                });
+            }
+        }, 0,  1 * 1000);
+
+
+
     }
 
 
 
+    public void sendServer(Location l) {
+        JSONObject data = new JSONObject();
+
+        try {
+            data.put("imei", new Device(this).getImei());
+            data.put("time", System.currentTimeMillis() + "");
+            data.put("lo", l.getLongitude() + "");
+            data.put("la", l.getLatitude() + "");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        new ServerHelper2(this).execute("http://tmhgame.tk/sendLocation", data.toString());
+
+    }
     @Override
-    public void onLocationChanged(Location location) {
-        Logger.l("Changed called" + location.getLatitude() + " - " + location.getLongitude());
+    public void onLocationChanged(Location l) {
+        Logger.l("LOCATIONN","Changed called" + l.getLatitude() + " - " + l.getLongitude());
+        if(sendNow) {
+            sendNow = false;
+            sendServer(l);
+
+            locationManager.removeUpdates(this);
+
+        }
+        if(locations.size() == 0) {
+            locations.add(l);
+        }else {
+            locations.add(l);
+        }
     }
 
     @Override
@@ -110,27 +156,18 @@ public class GoogleService extends Service implements LocationListener {
 
     }
 
-    public void postJSON(Double la, Double lo) {
-        JSONObject postData = new JSONObject();
-        Log.d("posted", "posted");
 
-
-        try {
-            postData.put("name", la);
-            postData.put("address", lo);
-            postData.put("manufacturer", "manufacturer.getText().toString()");
-            postData.put("location", "location.getText().toString()");
-            postData.put("type", "type.getText().toString()");
-            postData.put("deviceID", "deviceID.getText().toString()");
-            new ServerHelper(this).execute("http://tmhgame.tk/ailep", postData.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
+    private void fn_getlocation(Long mt, Long md) {
+        if(locationManager != null) {
+            locationManager.removeUpdates(this);
+            locationManager = null;
+            Logger.l("Location Manager Silindi");
         }
-    }
-    private void fn_getlocation() {
         locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
         isGPSEnable = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         isNetworkEnable = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+
+
 
         if (!isGPSEnable && !isNetworkEnable) {
 
@@ -142,13 +179,14 @@ public class GoogleService extends Service implements LocationListener {
 
                     return;
                 }
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5*60*1000, 100, this);
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, mt, md, this);
                 if (locationManager!=null){
                     location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                     if (location!=null){
 
-                        Log.e("latitude",location.getLatitude()+"");
-                        Log.e("longitude",location.getLongitude()+"");
+                        //Log.e("latitude",location.getLatitude()+"");
+                        //Log.e("longitude",location.getLongitude()+"");
+                        Logger.l("LOCATIONN", "last know from NEtwork" + location.getLatitude() + "- " + location.getLongitude());
                         //postJSON(location.getLatitude(), location.getLongitude());
                     }
                 }
@@ -158,15 +196,12 @@ public class GoogleService extends Service implements LocationListener {
 
             if (isGPSEnable){
                 location = null;
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000 * 60 * 5,100,this);
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,mt, md,this);
+
                 if (locationManager!=null){
                     location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                     if (location!=null){
-                        Log.e("latitude",location.getLatitude()+"");
-                        Log.e("longitude",location.getLongitude()+"");
-
-
-                        //postJSON(location.getLatitude(), location.getLongitude());
+                        Logger.l("LOCATIONN", "last know from GPS" + location.getLatitude() + "- " + location.getLongitude());
                     }
                 }
             }
@@ -175,6 +210,8 @@ public class GoogleService extends Service implements LocationListener {
         }
 
     }
+
+
 
 
 

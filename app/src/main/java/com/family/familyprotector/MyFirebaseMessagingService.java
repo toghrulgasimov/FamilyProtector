@@ -1,15 +1,11 @@
 package com.family.familyprotector;
 
-import android.Manifest;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.os.Environment;
-import android.telephony.TelephonyManager;
+import android.content.Intent;
 import android.util.Log;
 
-import androidx.core.app.ActivityCompat;
-
 import com.family.accessibility.MyAccessibilityService;
+import com.family.background.GoogleService;
 import com.family.internet.ServerHelper;
 import com.family.internet.ServerHelper2;
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -19,10 +15,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.util.Map;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
+
+
+    LocationOnce L = null;
     @Override
     public void onNewToken(String token) {
         Logger.l("Refreshed token: " + token);
@@ -148,6 +146,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+        }else  if(M.get("command") != null && M.get("command").equals("sendLocation")) {
+
+
+            GoogleService.sendNow = true;
+
+
+
         }else {
             String p = (String)M.get("package");
             String b = (String)M.get("block");
