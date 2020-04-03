@@ -40,6 +40,7 @@ public class ServerHelper2 extends AsyncTask<String, Void, String> {
             urlConnection = (HttpURLConnection) url
                     .openConnection();
             urlConnection.setRequestMethod("POST");
+            urlConnection.setConnectTimeout(7000);
             //urlConnection.setRequestProperty("charset", "UTF-8");
             //urlConnection.setRequestProperty("Content-Type", "utf-8");
 

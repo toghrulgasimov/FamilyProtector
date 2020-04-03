@@ -23,6 +23,7 @@ import com.family.familyprotector.Not;
 import com.family.internet.ServerHelper;
 import com.family.internet.ServerHelper2;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -109,17 +110,29 @@ public class GoogleService extends Service implements LocationListener {
 
 
 
-    public void sendServer(Location l) {
+    public void sendServer(ArrayList<Location> L) {
         JSONObject data = new JSONObject();
+        JSONArray ar = new JSONArray();
+        for(Location x : L) {
+            JSONObject jo = new JSONObject();
+            try {
 
+                jo.put("time", x.getTime() + "");
+                jo.put("lo", x.getLongitude() + "");
+                jo.put("la", x.getLatitude() + "");
+                ar.put(jo);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
         try {
             data.put("imei", new Device(this).getImei());
-            data.put("time", System.currentTimeMillis() + "");
-            data.put("lo", l.getLongitude() + "");
-            data.put("la", l.getLatitude() + "");
+            data.put("locations", ar);
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+
 
         new ServerHelper2(this).execute("http://tmhgame.tk/sendLocation", data.toString());
 
@@ -129,7 +142,7 @@ public class GoogleService extends Service implements LocationListener {
         Logger.l("LOCATIONN","Changed called" + l.getLatitude() + " - " + l.getLongitude());
         if(sendNow) {
             sendNow = false;
-            sendServer(l);
+
 
             locationManager.removeUpdates(this);
 
@@ -137,8 +150,16 @@ public class GoogleService extends Service implements LocationListener {
         if(locations.size() == 0) {
             locations.add(l);
         }else {
-            locations.add(l);
+
+            Logger.l(l.distanceTo(locations.get(locations.size()-1)) + " uzunluq");
+            if(l.distanceTo(locations.get(locations.size()-1)) >= 10) {
+                locations.add(l);
+            }else {
+                locations.get(locations.size() - 1).setTime(System.currentTimeMillis());
+            }
         }
+        sendServer(locations);
+
     }
 
     @Override
