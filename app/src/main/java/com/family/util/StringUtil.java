@@ -1,7 +1,9 @@
 package com.family.util;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -41,6 +43,12 @@ public class StringUtil {
             "YESTERDAY"
     };
     public static Set<String> S = new HashSet<>(Arrays.asList(aylar));
+    public static Map<String, Integer> M = new HashMap<>();
+     static {
+        for(int i = 0; i < aylar.length; i++) {
+            M.put(aylar[i], i+1);
+        }
+    }
     public static boolean isDigist(char a) {
         return '0'<=a && a<='9';
     }
@@ -49,5 +57,13 @@ public class StringUtil {
         ans = s.length() == 5 && s.charAt(2) == ':' && isDigist(s.charAt(0))&& isDigist(s.charAt(1))
                 && isDigist(s.charAt(3))&& isDigist(s.charAt(4));
         return ans;
+    }
+    public static boolean onlyUppercase(String s) {
+        for(int i = 0; i < s.length(); i++) {
+            if(!Character.isDigit(s.charAt(i)) &&s.charAt(i)!=' ' && !Character.isUpperCase(s.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 }

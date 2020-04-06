@@ -15,6 +15,8 @@ import androidx.annotation.RequiresApi;
 import com.family.familyprotector.Conversation;
 import com.family.familyprotector.FileR;
 import com.family.familyprotector.Logger;
+import com.family.familyprotector.Message;
+import com.family.util.StringUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -117,9 +119,6 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
     @Override
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
         //Log.d("salam", "EVENT cagrildi");
-
-
-
         int eventType = accessibilityEvent.getEventType();
         AccessibilityNodeInfo ni = accessibilityEvent.getSource();
         if(ni == null)return;
@@ -127,9 +126,6 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
             //Logger.l(ni.getPackageName().toString());
             return;
         }
-
-
-
         //com.whatsapp:id/conversation_contact_name
         //com.whatsapp:id/entry
         //AccessibilityEvent.ob
@@ -137,8 +133,6 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
         if(ni.getText() != null) {
             //Logger.l("INFO", ni.getText().toString() + " " + ni.getClassName().toString());
         }
-
-
         //scrool button
 //        List<AccessibilityNodeInfo> Li = ni.findAccessibilityNodeInfosByViewId("com.whatsapp:id/scroll_bottom");
 //        Logger.l("SC", Li.size() + "");
@@ -247,6 +241,8 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
                 Logger.l("BEGIN=============");
                 Set<Integer> simpleSet = new HashSet<>();
                 for(int i = 0; i < textViewNodes.size(); i++) {
+
+
                     AccessibilityNodeInfo ti = textViewNodes.get(i);
 
                     String ans = ti.getText() != null ? ti.getText().toString() : "unknow";
@@ -273,7 +269,30 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
                 Logger.l("Size" + parentsW.size());
                 for(AccessibilityNodeInfo x : parentsW) {
                     Logger.l("B=======");
+                    ArrayList<AccessibilityNodeInfo> filtered1 = new ArrayList<>();
                     int c = x.getChildCount();
+                    Message m = new Message();
+
+                    if(c == 3 && StringUtil.isTime(getTextViewText(x.getChild(1))) && x.getChild(2).getClassName().toString().endsWith("ImageView")) {
+                        m.sender = "Men";
+                        m.content = getTextViewText(x.getChild(0));
+                        m.unclear = getTextViewText(x.getChild(1));
+                    }else if(c == 2 && StringUtil.isTime(getTextViewText(x.getChild(1)))) {
+                        m.sender = lastConversation;
+                        m.content = getTextViewText(x.getChild(1));
+                        m.unclear = getTextViewText(x.getChild(1));
+                    }else if(c == 3 && StringUtil.onlyUppercase(getTextViewText(x.getChild(0))) && StringUtil.isTime(getTextViewText(x.getChild(2)))) {
+                        m.sender = lastConversation;
+                        m.content = getTextViewText(x.getChild(1));
+                        m.unclear = getTextViewText(x.getChild(2));
+                    }else if(c == 4 && StringUtil.onlyUppercase(getTextViewText(x.getChild(0))) && StringUtil.isTime(getTextViewText(x.getChild(2))) &&
+                    x.getChild(x.getChildCount()-1).getClassName().toString().endsWith("ImageView")) {
+                        m.sender = "Men";
+                        m.content = getTextViewText(x.getChild(1));
+                        m.unclear = getTextViewText(x.getChild(2));
+                    }else if(c == 12) {
+
+                    }
                     for(int i = 0; i < c; i++) {
                         AccessibilityNodeInfo child = x.getChild(i);
                         if(child == null) continue;
