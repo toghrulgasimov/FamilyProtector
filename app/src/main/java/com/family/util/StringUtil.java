@@ -38,9 +38,7 @@ public class StringUtil {
             "SEPTEMBER",
             "OCTOBER",
             "NOVEMBER",
-            "DECEMBER",
-            "TODAY",
-            "YESTERDAY"
+            "DECEMBER"
     };
     public static Set<String> S = new HashSet<>(Arrays.asList(aylar));
     public static Map<String, Integer> M = new HashMap<>();
@@ -48,6 +46,20 @@ public class StringUtil {
         for(int i = 0; i < aylar.length; i++) {
             M.put(aylar[i], i+1);
         }
+    }
+    public String getDate(String s) {
+         String[] a = s.split(" ");
+         if(a.length == 0) {
+             if(a[0].equals("YESTERDAY")) {
+
+             }else if(a[0].equals("TUDAY")) {
+                 long cur = System.currentTimeMillis();
+
+             }
+         }else {
+
+         }
+         return "";
     }
     public static boolean isDigist(char a) {
         return '0'<=a && a<='9';
