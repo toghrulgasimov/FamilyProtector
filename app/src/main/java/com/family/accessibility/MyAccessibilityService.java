@@ -20,6 +20,7 @@ import com.family.util.StringUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +67,7 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
     public static ArrayList< Ac > activities;
     public static ArrayList<YAc> yactivities = new ArrayList<>();
     public static ArrayList<WAc> webSites = new ArrayList<>();
+    public static String oldEntry = null;
 
     public class Ac {
         public String pa;
@@ -149,6 +151,12 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
             //Logger.l("WHATSAPPP", );
 
         }
+
+        List<AccessibilityNodeInfo> entry = ni.findAccessibilityNodeInfosByViewId("com.whatsapp:id/entry");
+        if(entry.size() != 0) {
+            Logger.l("---------------" + getTextViewText(entry.get(0)));
+        }
+
 
 
         switch (eventType) {
@@ -256,13 +264,6 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
                         parentsW.add(p);
                         simpleSet.add(phc);
                     }
-
-                    if(p.getChildCount() == 5) {//ses ya shekil ya vidyo atib bashqasi
-
-                    }else if(p.getChildCount() == 6) {//ses ya shekil ya vidyo atmisham
-
-                    }
-
                     //Logger.l("TAG", "" + p);
                     //Logger.l((ti.getParent().getChildCount() == 2 ? lastConversation : "Men") + ": " + ans + "--" + ti.getParent().getChildCount());
                 }
@@ -273,18 +274,34 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
                     ArrayList<AccessibilityNodeInfo> filtered1 = new ArrayList<>();
                     int c = x.getChildCount();
                     Message m = new Message();
-                    messages.add(m);
+                    Logger.l("SIZE = " + c);
+                    if(c == 1) {
+                        lastConversation = getTextViewText(x.getChild(0));
+                    }
 
-                    if(c == 3 && StringUtil.isTime(getTextViewText(x.getChild(1))) && x.getChild(2).getClassName().toString().endsWith("ImageView")) {
+
+                    if(c > 0 && StringUtil.onlyUppercase(getTextViewText(x.getChild(0)))) {
+                        m.date = StringUtil.getDate(getTextViewText(x.getChild(0)));
+                    }
+                    if(c == 3 && StringUtil.isTime(getTextViewText(x.getChild(1))) &&
+                            x.getChild(2) != null && x.getChild(2).getClassName().toString().endsWith("ImageView")) {
                         //vaxti ozun tap
                         m.sender = "Men";
                         m.content = getTextViewText(x.getChild(0));
                         m.unclear = getTextViewText(x.getChild(1));
+                        if(messages.size() != 0 && messages.get(messages.size()-1).date != null) {
+                            m.date = (Date) messages.get(messages.size()-1).date.clone();
+                            StringUtil.setDateTime(m.date, m.unclear);
+                        }
                     }else if(c == 2 && StringUtil.isTime(getTextViewText(x.getChild(1)))) {
                         //vacxti ozun tap
                         m.sender = lastConversation;
-                        m.content = getTextViewText(x.getChild(1));
+                        m.content = getTextViewText(x.getChild(0));
                         m.unclear = getTextViewText(x.getChild(1));
+                        if(messages.size() != 0 && messages.get(messages.size()-1).date != null) {
+                            m.date = (Date) messages.get(messages.size()-1).date.clone();
+                            StringUtil.setDateTime(m.date, m.unclear);
+                        }
                     }else if(c == 3 && StringUtil.onlyUppercase(getTextViewText(x.getChild(0))) && StringUtil.isTime(getTextViewText(x.getChild(2)))) {
                         m.sender = lastConversation;
                         m.date = StringUtil.getDate(getTextViewText(x.getChild(0)));
@@ -298,9 +315,23 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
                         StringUtil.setDateTime(m.date, getTextViewText(x.getChild(2)));
                         m.content = getTextViewText(x.getChild(1));
                         //m.unclear = getTextViewText(x.getChild(2));
-                    }else if(c == 12) {// time yuxarida cixib apply ele evvelden meluma qeder
+                    }else if(c == 12|| c == 13) {// time yuxarida cixib apply ele evvelden meluma qeder
+                        String t = getTextViewText(x.getChild(6));
+                        for(Message me : messages) {
+                            if(me.date == null) {
 
+                                me.date = StringUtil.getDate(t);
+                                if(me.unclear == null){
+                                    continue;
+                                }
+                                StringUtil.setDateTime(me.date, me.unclear);
+                                me.unclear = null;
+                            }else {
+                                break;
+                            }
+                        }
                     }
+                    messages.add(m);
                     for(int i = 0; i < c; i++) {
                         AccessibilityNodeInfo child = x.getChild(i);
                         if(child == null) continue;
@@ -308,7 +339,13 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
                     }
                     Logger.l("E=======");
                 }
+                Logger.l("bb---");
+                for(Message x : messages) {
+                    Logger.l(x.toString());
+                }
+                Logger.l("ee---");
                 Logger.l("END=============");
+
 
 
                 break;

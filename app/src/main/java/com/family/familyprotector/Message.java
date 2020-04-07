@@ -17,4 +17,8 @@ public class Message {
         this.content = content;
         this.time = time;
     }
+    @Override
+    public String toString() {
+        return sender + ": " + content + " - " + date;
+    }
 }
