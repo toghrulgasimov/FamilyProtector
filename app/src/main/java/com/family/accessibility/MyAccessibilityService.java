@@ -21,6 +21,7 @@ import com.family.util.StringUtil;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +69,7 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
     public static ArrayList<YAc> yactivities = new ArrayList<>();
     public static ArrayList<WAc> webSites = new ArrayList<>();
     public static String oldEntry = null;
+    public static Map<String, Conversation> conversationMap = new HashMap<>();
 
     public class Ac {
         public String pa;
@@ -325,6 +327,7 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
                                     continue;
                                 }
                                 StringUtil.setDateTime(me.date, me.unclear);
+                                me.saat = me.unclear;
                                 me.unclear = null;
                             }else {
                                 break;
@@ -378,6 +381,7 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
 
 
     public String getTextViewText(AccessibilityNodeInfo t) {
+        if(t == null) return "unknow";
         return t.getText() != null ? t.getText().toString() : "unknow";
     }
     @Override

@@ -8,6 +8,7 @@ public class Message {
     public String sender = null;
     public String content = null;
     public Date date = null;
+    public String saat = null;
     public String type = "simple";
     public Message() {
 
@@ -16,6 +17,9 @@ public class Message {
         this.sender = sender;
         this.content = content;
         this.time = time;
+    }
+    public String toUnique() {
+        return sender+content+saat;
     }
     @Override
     public String toString() {
