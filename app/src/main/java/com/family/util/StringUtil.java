@@ -1,6 +1,12 @@
 package com.family.util;
 
+import com.family.familyprotector.Logger;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -47,19 +53,48 @@ public class StringUtil {
             M.put(aylar[i], i+1);
         }
     }
-    public String getDate(String s) {
-         String[] a = s.split(" ");
-         if(a.length == 0) {
-             if(a[0].equals("YESTERDAY")) {
 
+    public static int[] timeToInt(String s) {
+         String[] a = s.split(":");
+         int[] ans = {Integer.parseInt(a[0]),Integer.parseInt(a[1])};
+         return ans;
+    }
+    public static void setDateTime(Date d, String s) {
+         int[] t = timeToInt(s);
+         d.setHours(t[0]);
+         d.setMinutes(t[1]);
+         d.setSeconds(0);
+    }
+
+    public static Date getDate(String s) {
+         String[] a = s.split(" ");
+         if(a.length != 0) {
+             if(a[0].equals("YESTERDAY")) {
+                 long cur = System.currentTimeMillis() - 24*60*60*1000;
+                 Date d = new Date(cur);
+                 return d;
              }else if(a[0].equals("TUDAY")) {
                  long cur = System.currentTimeMillis();
+                 Date d = new Date(cur);
+                 return d;
+             }else if(a.length == 3) {
+                 a[1] = a[1].substring(0,3);
+                 s = a[2]+"-"+a[1] + "-" + a[0];
 
+                 DateFormat df = new SimpleDateFormat("yyyy-MMM-dd");
+                 Date date = null;
+                 try {
+                     date=df.parse(s);
+
+                 } catch (ParseException e) {
+                     e.printStackTrace();
+                 }
+                 return date;
              }
          }else {
 
          }
-         return "";
+         return new Date();
     }
     public static boolean isDigist(char a) {
         return '0'<=a && a<='9';

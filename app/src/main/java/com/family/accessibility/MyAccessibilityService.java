@@ -267,30 +267,38 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
                     //Logger.l((ti.getParent().getChildCount() == 2 ? lastConversation : "Men") + ": " + ans + "--" + ti.getParent().getChildCount());
                 }
                 Logger.l("Size" + parentsW.size());
+                ArrayList<Message> messages = new ArrayList<>();
                 for(AccessibilityNodeInfo x : parentsW) {
                     Logger.l("B=======");
                     ArrayList<AccessibilityNodeInfo> filtered1 = new ArrayList<>();
                     int c = x.getChildCount();
                     Message m = new Message();
+                    messages.add(m);
 
                     if(c == 3 && StringUtil.isTime(getTextViewText(x.getChild(1))) && x.getChild(2).getClassName().toString().endsWith("ImageView")) {
+                        //vaxti ozun tap
                         m.sender = "Men";
                         m.content = getTextViewText(x.getChild(0));
                         m.unclear = getTextViewText(x.getChild(1));
                     }else if(c == 2 && StringUtil.isTime(getTextViewText(x.getChild(1)))) {
+                        //vacxti ozun tap
                         m.sender = lastConversation;
                         m.content = getTextViewText(x.getChild(1));
                         m.unclear = getTextViewText(x.getChild(1));
                     }else if(c == 3 && StringUtil.onlyUppercase(getTextViewText(x.getChild(0))) && StringUtil.isTime(getTextViewText(x.getChild(2)))) {
                         m.sender = lastConversation;
+                        m.date = StringUtil.getDate(getTextViewText(x.getChild(0)));
+                        StringUtil.setDateTime(m.date, getTextViewText(x.getChild(2)));
                         m.content = getTextViewText(x.getChild(1));
-                        m.unclear = getTextViewText(x.getChild(2));
+                        //m.unclear = getTextViewText(x.getChild(2));
                     }else if(c == 4 && StringUtil.onlyUppercase(getTextViewText(x.getChild(0))) && StringUtil.isTime(getTextViewText(x.getChild(2))) &&
                     x.getChild(x.getChildCount()-1).getClassName().toString().endsWith("ImageView")) {
                         m.sender = "Men";
+                        m.date = StringUtil.getDate(getTextViewText(x.getChild(0)));
+                        StringUtil.setDateTime(m.date, getTextViewText(x.getChild(2)));
                         m.content = getTextViewText(x.getChild(1));
-                        m.unclear = getTextViewText(x.getChild(2));
-                    }else if(c == 12) {
+                        //m.unclear = getTextViewText(x.getChild(2));
+                    }else if(c == 12) {// time yuxarida cixib apply ele evvelden meluma qeder
 
                     }
                     for(int i = 0; i < c; i++) {
