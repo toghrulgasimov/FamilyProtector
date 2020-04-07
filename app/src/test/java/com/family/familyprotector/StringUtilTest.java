@@ -28,11 +28,14 @@ public class StringUtilTest {
 //
 
         DoublyLinkedList<String> L = new DoublyLinkedList<>();
+
         L.addLast("salam");
         L.addLast("sagol");
         L.addFirst("aaa");
         L.addFirst("bb");
 
-        L.iterateForward();
+        for(DoublyLinkedList.Node x = L.head; x != null; x = x.next) {
+            System.out.println(x.element);
+        }
     }
 }

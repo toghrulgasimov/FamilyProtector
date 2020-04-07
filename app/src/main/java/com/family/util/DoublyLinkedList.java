@@ -18,9 +18,9 @@ public class DoublyLinkedList<E> {
      * @author java2novice
      */
     public class Node {
-        E element;
-        Node next;
-        Node prev;
+        public E element;
+        public Node next;
+        public Node prev;
 
         public Node(E element, Node next, Node prev) {
             this.element = element;
