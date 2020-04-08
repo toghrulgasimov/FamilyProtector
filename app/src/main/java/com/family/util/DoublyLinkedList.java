@@ -46,6 +46,11 @@ public class DoublyLinkedList<E> {
     public boolean isEmpty() {
         return size == 0;
     }
+    public void clear() {
+        size = 0;
+        head = null;
+        tail = null;
+    }
 
     /**
      * adds element at the starting of the linked list
@@ -62,7 +67,7 @@ public class DoublyLinkedList<E> {
             tail = tmp;
         }
         size++;
-        System.out.println("adding: " + element);
+        System.out.println("adding first: " + element.toString());
     }
 
     /**
@@ -81,7 +86,7 @@ public class DoublyLinkedList<E> {
             head = tmp;
         }
         size++;
-        System.out.println("adding: " + element);
+        System.out.println("adding last: " + element.toString());
     }
 
     /**

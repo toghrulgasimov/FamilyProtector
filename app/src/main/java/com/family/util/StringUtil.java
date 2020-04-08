@@ -1,10 +1,13 @@
 package com.family.util;
 
+import android.view.accessibility.AccessibilityNodeInfo;
+
 import com.family.familyprotector.Logger;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -110,11 +113,30 @@ public class StringUtil {
          if(s == null || s.length() == 1) {
              return false;
          }
-        for(int i = 0; i < s.length(); i++) {
-            if(!Character.isDigit(s.charAt(i)) &&s.charAt(i)!=' ' && !Character.isUpperCase(s.charAt(i))) {
-                return false;
-            }
-        }
-        return true;
+         String[] a = s.split(" ");
+         if(a.length == 1 && (a[0].equals("YESTERDAY") || a[0].equals("TODAY"))) {
+             return true;
+         }else if(a.length == 3 && S.contains(a[1])) {
+             return true;
+         }
+
+        return false;
     }
+    public static String findTime(AccessibilityNodeInfo n) {
+         if(n == null) {
+             return null;
+         }
+         int c = n.getChildCount();
+         for(int i = 0; i < c; i++) {
+             if(n.getChild(i) == null)
+                 continue;
+             String txt = n.getChild(i).getText() != null ? n.getChild(i).getText().toString() : null;
+             if(txt == null) continue;
+             if(isTime(txt)) {
+                 return txt;
+             }
+         }
+         return null;
+    }
+
 }
