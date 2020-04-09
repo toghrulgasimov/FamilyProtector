@@ -548,7 +548,7 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
                                 try {
                                     o.put("sender", message.sender);
                                     o.put("content", message.content);
-                                    o.put("time", message.date.toString());
+                                    o.put("time", message.date.getTime());
                                     ma.put(o);
                                 } catch (JSONException e) {
                                     e.printStackTrace();
