@@ -122,7 +122,6 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
-        //Log.d("salam", "EVENT cagrildi");
         int eventType = accessibilityEvent.getEventType();
         AccessibilityNodeInfo ni = accessibilityEvent.getSource();
         if(ni == null)return;
@@ -254,8 +253,6 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
 
 
                     AccessibilityNodeInfo ti = textViewNodes.get(i);
-
-                    String ans = ti.getText() != null ? ti.getText().toString() : "unknow";
                     AccessibilityNodeInfo p = ti.getParent();
                     // whatsapi chavlandiranda 2 dene text dalbadal gelir. sonra vaxt;
                     //whatsapda yuxarida vaxt informasiyasi olanda parent yazanda 3 mende 4
@@ -266,21 +263,26 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
                         parentsW.add(p);
                         simpleSet.add(phc);
                     }
-                    //Logger.l("TAG", "" + p);
-                    //Logger.l((ti.getParent().getChildCount() == 2 ? lastConversation : "Men") + ": " + ans + "--" + ti.getParent().getChildCount());
                 }
                 Logger.l("Size" + parentsW.size());
                 if(parentsW.size() > 0 && parentsW.get(0).getChildCount() == 1) {
                     lastConversation = getTextViewText(parentsW.get(0).getChild(0));
                 }
+                Conversation cc = conversationMap.get(lastConversation);
+                if(cc == null) {
+                    cc = new Conversation();
+                    conversationMap.put(lastConversation, cc);
+                }
                 ArrayList<Message> messages = new ArrayList<>();
+                int index = -1;
                 for(AccessibilityNodeInfo x : parentsW) {
+                    index++;
                     Logger.l("B=======");
                     int c = x.getChildCount();
                     Message m = new Message();
                     Logger.l("SIZE = " + c);
                     if(c == 1) {
-                        lastConversation = getTextViewText(x.getChild(0));
+                        //lastConversation = getTextViewText(x.getChild(0));
                     }
 
 
@@ -295,6 +297,7 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
                         m.unclear = getTextViewText(x.getChild(1));
                         m.saat = m.unclear;
                         if(messages.size() != 0 && messages.get(messages.size()-1).date != null) {
+                            // bu silinmelidi cunki messagelerin date lerini hamsi nulldu mapdan getirmek lazimdi
                             m.date = (Date) messages.get(messages.size()-1).date.clone();
                             StringUtil.setDateTime(m.date, m.unclear);
                         }
@@ -306,7 +309,7 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
                         m.saat = m.unclear;
                         if(messages.size() != 0 && messages.get(messages.size()-1).date != null) {
                             m.date = (Date) messages.get(messages.size()-1).date.clone();
-                            StringUtil.setDateTime(m.date, m.unclear);
+                            StringUtil.setDateTime(m.date, m.saat);
                         }
                     }else if(c == 3 && StringUtil.onlyUppercase(getTextViewText(x.getChild(0))) && StringUtil.isTime(getTextViewText(x.getChild(2)))) {
                         m.sender = lastConversation;
@@ -340,7 +343,13 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
                         }
                     }else {
                         String time = StringUtil.findTime(x);
+
+                        Logger.l("-------------------------------------------------------------"+time + m.date);
                         if(time != null) {
+                            m.sender = "whatsapp::";
+                            m.content = "----";
+                            m.saat = time;
+                            m.unclear = time;
                             if(m.date == null) {
                                 if(messages.size() != 0 && messages.get(messages.size()-1).date != null) {
                                     m.date = (Date) messages.get(messages.size()-1).date.clone();
@@ -349,19 +358,23 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
                             }else {
                                 StringUtil.setDateTime(m.date, time);
                             }
-                            if(m.date != null) {
-                                m.sender = "whatsapp::";
-                                m.content = "----";
-                                m.saat = time;
-                            }
 
-
+                        }else if(c != 0 && StringUtil.onlyUppercase(getTextViewText(x.getChild(0)))) {
+                            m.sender = "whatsapp::";
+                            m.content = "----";
+                            m.saat = "00:00";
+                            m.unclear = "00:00";
                         }
+                    }
+                    if(messages.size() == 0 && m.saat != null && cc.M.get(m.toUnique()) != null) {
+                        m.date = (Date) cc.M.get(m.toUnique()).clone();
+                        StringUtil.setDateTime(m.date, m.saat);
                     }
 //                    if(m.sender == null) {
 //                        continue;
 //                    }
-                    messages.add(m);
+                    if(m.sender!= null)
+                        messages.add(m);
                     for(int i = 0; i < c; i++) {
                         AccessibilityNodeInfo child = x.getChild(i);
                         if(child == null) continue;
@@ -372,15 +385,12 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
                 Logger.l("bb---");
                 ArrayList<Message> al = new ArrayList<>();
                 for(Message x : messages) {
+                    Logger.l("TOGHRUL", x.toString());
                     if(x.sender != null)
                         al.add(x);
-                    Logger.l(x.toString());
+
                 }
-                Conversation cc = conversationMap.get(lastConversation);
-                if(cc == null) {
-                    cc = new Conversation();
-                    conversationMap.put(lastConversation, cc);
-                }
+
                 cc.addAll(al);
                 Logger.l("SIZE = " + cc.messages.size);
                 cc.messages.iterateForward();

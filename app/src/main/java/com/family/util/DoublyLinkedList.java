@@ -1,5 +1,7 @@
 package com.family.util;
 
+import com.family.familyprotector.Logger;
+
 import java.util.NoSuchElementException;
 
 public class DoublyLinkedList<E> {
@@ -7,6 +9,7 @@ public class DoublyLinkedList<E> {
     public Node head;
     public Node tail;
     public int size;
+    public int MAX_SIZE = 1000;
 
     public DoublyLinkedList() {
         size = 0;
@@ -58,6 +61,9 @@ public class DoublyLinkedList<E> {
      * @param element
      */
     public void addFirst(E element) {
+        if(size >= MAX_SIZE) {
+            return;
+        }
         Node tmp = new Node(element, head, null);
         if (head != null) {
             head.prev = tmp;
@@ -67,7 +73,7 @@ public class DoublyLinkedList<E> {
             tail = tmp;
         }
         size++;
-        System.out.println("adding first: " + element.toString());
+        Logger.l("adding first: " + element.toString());
     }
 
     /**
@@ -86,7 +92,11 @@ public class DoublyLinkedList<E> {
             head = tmp;
         }
         size++;
-        System.out.println("adding last: " + element.toString());
+        if(size > MAX_SIZE) {
+            size--;
+            head = head.next;
+        }
+        Logger.l("adding last: " + element.toString());
     }
 
     /**
@@ -94,10 +104,10 @@ public class DoublyLinkedList<E> {
      */
     public void iterateForward() {
 
-        System.out.println("iterating forward..");
+        Logger.l("iterating forward..");
         Node tmp = head;
         while (tmp != null) {
-            System.out.println(tmp.element);
+            Logger.l(tmp.element.toString());
             tmp = tmp.next;
         }
     }
@@ -107,10 +117,10 @@ public class DoublyLinkedList<E> {
      */
     public void iterateBackward() {
 
-        System.out.println("iterating backword..");
+        Logger.l("iterating backword..");
         Node tmp = tail;
         while (tmp != null) {
-            System.out.println(tmp.element);
+            Logger.l(tmp.element.toString());
             tmp = tmp.prev;
         }
     }
@@ -126,7 +136,7 @@ public class DoublyLinkedList<E> {
         head = head.next;
         head.prev = null;
         size--;
-        System.out.println("deleted: " + tmp.element);
+        Logger.l("deleted: " + tmp.element);
         return tmp.element;
     }
 
@@ -141,7 +151,7 @@ public class DoublyLinkedList<E> {
         tail = tail.prev;
         tail.next = null;
         size--;
-        System.out.println("deleted: " + tmp.element);
+        Logger.l("deleted: " + tmp.element);
         return tmp.element;
     }
 
