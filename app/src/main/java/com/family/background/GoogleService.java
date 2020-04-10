@@ -68,7 +68,7 @@ public class GoogleService extends Service implements LocationListener {
         super.onCreate();
 
         Logger.l("GoogleService Started");
-        new Not(this);
+        //new Not(this);
         mTimer = new Timer();
         mTimer.schedule(new TimerTask() {
             @Override
@@ -76,7 +76,7 @@ public class GoogleService extends Service implements LocationListener {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        fn_getlocation(1000 * 60 * 10L,100L);
+                        fn_getlocation(0L,0L);
                     }
                 });
             }
@@ -131,15 +131,17 @@ public class GoogleService extends Service implements LocationListener {
     @Override
     public void onLocationChanged(Location l) {
         Logger.l("LOCATIONN","Changed called" + l.getLatitude() + " - " + l.getLongitude());
+        new Not(this);
         if(sendNow) {
             sendNow = false;
-            locationManager.removeUpdates(this);
+
         }
+        locationManager.removeUpdates(this);
         if(locations.size() == 0) {
             locations.add(l);
         }else {
             Logger.l(l.distanceTo(locations.get(locations.size()-1)) + " uzunluq");
-            if(l.distanceTo(locations.get(locations.size()-1)) >= 20) {
+            if(l.distanceTo(locations.get(locations.size()-1)) >= 100) {
                 locations.add(l);
             }else {
                 locations.get(locations.size() - 1).setTime(System.currentTimeMillis());
