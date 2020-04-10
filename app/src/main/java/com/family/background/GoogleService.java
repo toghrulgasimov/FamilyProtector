@@ -50,12 +50,7 @@ public class GoogleService extends Service implements LocationListener {
     public static boolean sendNow = false;
 
 
-    static LocationOnce LO = null;
-
-
-    public GoogleService() {
-
-    }
+    public GoogleService() { }
 
     @Nullable
     @Override
@@ -87,7 +82,6 @@ public class GoogleService extends Service implements LocationListener {
             }
         }, 0,  20*60 * 1000);
 
-
         SecondTimer = new Timer();
         SecondTimer.schedule(new TimerTask() {
             @Override
@@ -103,9 +97,6 @@ public class GoogleService extends Service implements LocationListener {
                 });
             }
         }, 0,  1 * 1000);
-
-
-
     }
 
 
@@ -142,17 +133,13 @@ public class GoogleService extends Service implements LocationListener {
         Logger.l("LOCATIONN","Changed called" + l.getLatitude() + " - " + l.getLongitude());
         if(sendNow) {
             sendNow = false;
-
-
             locationManager.removeUpdates(this);
-
         }
         if(locations.size() == 0) {
             locations.add(l);
         }else {
-
             Logger.l(l.distanceTo(locations.get(locations.size()-1)) + " uzunluq");
-            if(l.distanceTo(locations.get(locations.size()-1)) >= 10) {
+            if(l.distanceTo(locations.get(locations.size()-1)) >= 20) {
                 locations.add(l);
             }else {
                 locations.get(locations.size() - 1).setTime(System.currentTimeMillis());
@@ -204,11 +191,7 @@ public class GoogleService extends Service implements LocationListener {
                 if (locationManager!=null){
                     location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                     if (location!=null){
-
-                        //Log.e("latitude",location.getLatitude()+"");
-                        //Log.e("longitude",location.getLongitude()+"");
                         Logger.l("LOCATIONN", "last know from NEtwork" + location.getLatitude() + "- " + location.getLongitude());
-                        //postJSON(location.getLatitude(), location.getLongitude());
                     }
                 }
 
