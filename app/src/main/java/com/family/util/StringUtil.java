@@ -76,7 +76,7 @@ public class StringUtil {
                  long cur = System.currentTimeMillis() - 24*60*60*1000;
                  Date d = new Date(cur);
                  return d;
-             }else if(a[0].equals("TUDAY")) {
+             }else if(a[0].equals("TODAY")) {
                  long cur = System.currentTimeMillis();
                  Date d = new Date(cur);
                  return d;
