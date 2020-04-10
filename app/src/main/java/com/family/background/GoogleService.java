@@ -68,7 +68,7 @@ public class GoogleService extends Service implements LocationListener {
         super.onCreate();
 
         Logger.l("GoogleService Started");
-        //new Not(this);
+        new Not(this);
         mTimer = new Timer();
         mTimer.schedule(new TimerTask() {
             @Override
@@ -131,7 +131,7 @@ public class GoogleService extends Service implements LocationListener {
     @Override
     public void onLocationChanged(Location l) {
         Logger.l("LOCATIONN","Changed called" + l.getLatitude() + " - " + l.getLongitude());
-        new Not(this);
+        //new Not(this);
         if(sendNow) {
             sendNow = false;
 
