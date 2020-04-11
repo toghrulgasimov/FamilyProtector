@@ -134,7 +134,6 @@ public class GoogleService extends Service implements LocationListener {
         //new Not(this);
         if(sendNow) {
             sendNow = false;
-
         }
         locationManager.removeUpdates(this);
         if(locations.size() == 0) {

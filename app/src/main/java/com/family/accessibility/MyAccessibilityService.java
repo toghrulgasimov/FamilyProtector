@@ -2,6 +2,9 @@ package com.family.accessibility;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.app.Activity;
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Handler;
@@ -41,26 +44,7 @@ import java.util.TimerTask;
 public class MyAccessibilityService extends AccessibilityService {
 
 
-    //read screen text;
-    //https://stackoverflow.com/questions/30909926/get-text-content-of-the-android-screen
 
-
-
-    //solution
-    //https://stackoverflow.com/questions/40503081/onaccessibilityevent-not-called-at-all
-
-       /*
-    Youtube baxilan vidyo
-    The First Love (ilk aşk - Azerbaijan tar) Ramiz Guliyev -- android.widget.TextView
-2020-04-01 09:17:08.498 8370-8370/com.family.familyprotector D/INFOOO: 611K baxış -- android.widget.TextView
-2020-04-01 09:17:08.499 8370-8370/com.family.familyprotector D/INFOOO: Paylaşın -- android.widget.TextView
-2020-04-01 09:17:08.499 8370-8370/com.family.familyprotector D/INFOOO: Burada saxlayın: -- android.widget.TextView
-2020-04-01 09:17:08.499 8370-8370/com.family.familyprotector D/INFOOO: Abe -- android.widget.TextView
-2020-04-01 09:17:08.499 8370-8370/com.family.familyprotector D/INFOOO: 828 abunəçi -- android.widget.TextView
-2020-04-01 09:17:08.499 8370-8370/com.family.familyprotector D/INFOOO: ABUNƏ OL -- android.widget.TextView
-Youtube search link
-https://www.youtube.com/results?search_query=the+show+must+go+on
-     */
 
 
 
@@ -298,7 +282,99 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
         Logger.l("ee---");
         Logger.l("END=============");
     }
+    public void youtubeFilter() {
+        for(int i = 1; i < textViewNodes.size(); i++) {
+            String ans = getTextViewText(textViewNodes.get(i));
+            boolean p = ans.endsWith("views");
 
+            String[] pp = ans.split(" ");
+            //Logger.l("BAXIS", pp.length + " " +  ans);
+            p = p && (pp.length == 2);
+
+
+            if(p) {
+                String b = getTextViewText(textViewNodes.get(i-1));
+                //b = new StringUtil().getCharacters(b);
+                if(yactivities.size() == 0 || !yactivities.get(yactivities.size()-1).name.equals(b)) {
+                    YAc ya = new YAc();
+                    ya.name = b;
+                    ya.time = System.currentTimeMillis();
+                    yactivities.add(ya);
+                    Logger.l("BAXIS", b + "   " + ya.time);
+                }
+
+                break;
+            }
+        }
+    }
+    public void blockSetting() {
+        String oldText = "";
+        for(int i = 0; i < textViewNodes.size(); i++) {
+            AccessibilityNodeInfo mNode = textViewNodes.get(i);
+            if(mNode.getText()==null){
+                return;
+            }
+            String tv1Text = mNode.getText().toString();
+            if((tv1Text.startsWith("TThis admin app is active") && oldText.equals("FamilyProtector")) || tv1Text.equals("Locationn")) {
+
+                performGlobalAction(GLOBAL_ACTION_BACK);
+                //Intent dialogIntent = new Intent(this, MainActivity.class);
+                //dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                //startActivity(dialogIntent);
+            }
+            oldText = tv1Text;
+
+        }
+    }
+    public void sondur() {
+        performGlobalAction(GLOBAL_ACTION_HOME);
+    }
+    public void sondur2(String pn) {
+        ActivityManager am = (ActivityManager) getSystemService(Activity.ACTIVITY_SERVICE);
+        am.killBackgroundProcesses(pn);
+        Logger.l("Sondurulmelidir:--" + pn);
+    }
+    public void sondur3(String process)
+    {
+        ActivityManager am = (ActivityManager) this.getSystemService(Context.ACTIVITY_SERVICE);
+        final List<ActivityManager.RunningAppProcessInfo> runningProcesses = am.getRunningAppProcesses();
+
+        for(ActivityManager.RunningAppProcessInfo runningProcess : runningProcesses)
+        {
+            if(runningProcess.processName.equals(process))
+            {
+                android.os.Process.sendSignal(runningProcess.pid, android.os.Process.SIGNAL_KILL);
+                Logger.l("Sondurulmelidir3:--" + process);
+            }
+        }
+    }
+    public void blockApps(AccessibilityNodeInfo rootNode) {
+        if(blockedApps == null) {
+            buildBlockedApps();
+        }
+
+        if(rootNode.getPackageName() != null && blockedApps.contains(rootNode.getPackageName().toString())) {
+            sondur();
+        }
+    }
+    public void activityFilter(AccessibilityNodeInfo rootNode) {
+        String pname = rootNode.getPackageName() == null ? "" : rootNode.getPackageName().toString();
+        if(activities.size() == 0) {
+            Ac ac = new Ac();
+            ac.start = System.currentTimeMillis();
+            ac.pa = pname;
+            ac.end = -1;
+            activities.add(ac);
+        }else if(!activities.get(activities.size()-1).pa.equals(pname)) {
+            activities.get(activities.size()-1).end = System.currentTimeMillis();
+            Ac ac = new Ac();
+            ac.start = System.currentTimeMillis();
+            ac.pa = pname;
+            ac.end = -1;
+            activities.add(ac);
+
+        }
+    }
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
@@ -306,118 +382,23 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
         AccessibilityNodeInfo ni = accessibilityEvent.getSource();
         if(ni == null || ni.getPackageName() == null)return;
 
-        //com.whatsapp:id/conversation_contact_name
-        //com.whatsapp:id/entry
-        //AccessibilityEvent.ob
-       //Log.i("INFO", "---"+eventType + "--" + ni);
-        if(ni.getText() != null) {
-            //Logger.l("INFO", ni.getText().toString() + " " + ni.getClassName().toString());
-        }
-        //scrool button
-//        List<AccessibilityNodeInfo> Li = ni.findAccessibilityNodeInfosByViewId("com.whatsapp:id/scroll_bottom");
-//        Logger.l("SC", Li.size() + "");
-
-
-
-
-
-
-
-
         switch (eventType) {
 
             case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
 
-                //AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
-                //AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
                 AccessibilityNodeInfo rootNode = getRootInActiveWindow();
-                //findChildViews(rootNode);
-                //rootNode.findAccessibilityNodeInfosByViewId()
                 if(rootNode == null)return;
-                String pname = rootNode.getPackageName() == null ? "" : rootNode.getPackageName().toString();
-                if(activities.size() == 0) {
-                    Ac ac = new Ac();
-                    ac.start = System.currentTimeMillis();
-                    ac.pa = pname;
-                    ac.end = -1;
-                    activities.add(ac);
-                }else if(!activities.get(activities.size()-1).pa.equals(pname)) {
-                    activities.get(activities.size()-1).end = System.currentTimeMillis();
-                    Ac ac = new Ac();
-                    ac.start = System.currentTimeMillis();
-                    ac.pa = pname;
-                    ac.end = -1;
-                    activities.add(ac);
-                    for(Ac x : activities) {
-                        //Logger.l(x.pa + "- " + (x.end-x.start));
-                    }
-                }
-                if(rootNode == null)return;
-                if(blockedApps == null) {
-                    buildBlockedApps();
-                }
+                activityFilter(rootNode);
+                blockApps(rootNode);
 
-                if(blockedApps.contains(rootNode.getPackageName().toString())) {
-                    sondur();
-                }
-
-                textViewNodes = new ArrayList<AccessibilityNodeInfo>();
-
-                //AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+                textViewNodes = new ArrayList<>();
                 findChildViews(rootNode);
 
-                //findInputChild(rootNode);
-                // youtube
-                for(int i = 1; i < textViewNodes.size(); i++) {
-                    String ans = getTextViewText(textViewNodes.get(i));
-                    boolean p = ans.endsWith("views");
-
-                    String[] pp = ans.split(" ");
-                    //Logger.l("BAXIS", pp.length + " " +  ans);
-                    p = p && (pp.length == 2);
-
-
-                    if(p) {
-                        String b = getTextViewText(textViewNodes.get(i-1));
-                        //b = new StringUtil().getCharacters(b);
-                        if(yactivities.size() == 0 || !yactivities.get(yactivities.size()-1).name.equals(b)) {
-                            YAc ya = new YAc();
-                            ya.name = b;
-                            ya.time = System.currentTimeMillis();
-                            yactivities.add(ya);
-                            Logger.l("BAXIS", b + "   " + ya.time);
-                        }
-
-                        break;
-                    }
-                }
-                //Blocking Apps
-                String oldText = "";
-                for(int i = 0; i < textViewNodes.size(); i++) {
-                    AccessibilityNodeInfo mNode = textViewNodes.get(i);
-                    if(mNode.getText()==null){
-                        return;
-                    }
-                    String tv1Text = mNode.getText().toString();
-                    if((tv1Text.startsWith("TThis admin app is active") && oldText.equals("FamilyProtector")) || tv1Text.equals("Locationn")) {
-
-                        performGlobalAction(GLOBAL_ACTION_BACK);
-                        //Intent dialogIntent = new Intent(this, MainActivity.class);
-                        //dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        //startActivity(dialogIntent);
-                    }
-                    oldText = tv1Text;
-
-                }
-
+                youtubeFilter();
+                blockSetting();
                 if(ni.getPackageName() != null && ni.getPackageName().toString().equals("com.whatsapp")) {
-                    //Logger.l(ni.getPackageName().toString());
                     whatsappFilter(ni);
                 }
-
-
-
-
                 break;
 
         }
@@ -590,9 +571,7 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
         }, 0, 1000*15);
     }
 
-    public void sondur() {
-        performGlobalAction(GLOBAL_ACTION_HOME);
-    }
+
 
     //IMPORTANT
     //AccessibilityNodeInfo interactedNodeInfo =
