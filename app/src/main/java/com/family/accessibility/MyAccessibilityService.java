@@ -128,27 +128,7 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
-    @Override
-    public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
-        int eventType = accessibilityEvent.getEventType();
-        AccessibilityNodeInfo ni = accessibilityEvent.getSource();
-        if(ni == null)return;
-        if(ni.getPackageName() == null || !ni.getPackageName().toString().equals("com.whatsapp")) {
-            //Logger.l(ni.getPackageName().toString());
-            return;
-        }
-        //com.whatsapp:id/conversation_contact_name
-        //com.whatsapp:id/entry
-        //AccessibilityEvent.ob
-       //Log.i("INFO", "---"+eventType + "--" + ni);
-        if(ni.getText() != null) {
-            //Logger.l("INFO", ni.getText().toString() + " " + ni.getClassName().toString());
-        }
-        //scrool button
-//        List<AccessibilityNodeInfo> Li = ni.findAccessibilityNodeInfosByViewId("com.whatsapp:id/scroll_bottom");
-//        Logger.l("SC", Li.size() + "");
-
-
+    public void whatsappFilter(AccessibilityNodeInfo ni) {
         List<AccessibilityNodeInfo> L = ni.findAccessibilityNodeInfosByViewId("com.whatsapp:id/conversation_contact_name");
         for(AccessibilityNodeInfo x : L) {
             CharSequence c = x.getText();
@@ -165,6 +145,182 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
         if(entry.size() != 0) {
             Logger.l("---------------" + getTextViewText(entry.get(0)));
         }
+
+        Logger.l("BEGIN=============");
+        Set<Integer> simpleSet = new HashSet<>();
+        parentsW = new ArrayList<>();
+        for(int i = 0; i < textViewNodes.size(); i++) {
+
+
+            AccessibilityNodeInfo ti = textViewNodes.get(i);
+            AccessibilityNodeInfo p = ti.getParent();
+            // whatsapi chavlandiranda 2 dene text dalbadal gelir. sonra vaxt;
+            //whatsapda yuxarida vaxt informasiyasi olanda parent yazanda 3 mende 4
+            AccessibilityNodeInfo pp = p.getParent();
+            //if(pp == null) continue;
+            int phc = p.hashCode();
+            if(!simpleSet.contains(phc)) {
+                parentsW.add(p);
+                simpleSet.add(phc);
+            }
+        }
+        Logger.l("Size" + parentsW.size());
+        if(parentsW.size() > 0 && parentsW.get(0).getChildCount() == 1) {
+            lastConversation = getTextViewText(parentsW.get(0).getChild(0));
+        }
+        Conversation cc = conversationMap.get(lastConversation);
+        if(cc == null) {
+            cc = new Conversation();
+            conversationMap.put(lastConversation, cc);
+        }
+        ArrayList<Message> messages = new ArrayList<>();
+        int index = -1;
+        for(AccessibilityNodeInfo x : parentsW) {
+            index++;
+            Logger.l("B=======");
+            int c = x.getChildCount();
+            Message m = new Message();
+            Logger.l("SIZE = " + c);
+            if(c == 1) {
+                //lastConversation = getTextViewText(x.getChild(0));
+            }
+
+
+            if(c > 0 && StringUtil.onlyUppercase(getTextViewText(x.getChild(0)))) {
+                m.date = StringUtil.getDate(getTextViewText(x.getChild(0)));
+            }
+            if(c == 3 && StringUtil.isTime(getTextViewText(x.getChild(1))) &&
+                    x.getChild(2) != null && x.getChild(2).getClassName().toString().endsWith("ImageView")) {
+                //vaxti ozun tap
+                m.sender = "Men";
+                m.content = getTextViewText(x.getChild(0));
+                m.unclear = getTextViewText(x.getChild(1));
+                m.saat = m.unclear;
+                if(messages.size() != 0 && messages.get(messages.size()-1).date != null) {
+                    // bu silinmelidi cunki messagelerin date lerini hamsi nulldu mapdan getirmek lazimdi
+                    m.date = (Date) messages.get(messages.size()-1).date.clone();
+                    StringUtil.setDateTime(m.date, m.unclear);
+                }
+            }else if(c == 2 && StringUtil.isTime(getTextViewText(x.getChild(1)))) {
+                //vacxti ozun tap
+                m.sender = lastConversation;
+                m.content = getTextViewText(x.getChild(0));
+                m.unclear = getTextViewText(x.getChild(1));
+                m.saat = m.unclear;
+                if(messages.size() != 0 && messages.get(messages.size()-1).date != null) {
+                    m.date = (Date) messages.get(messages.size()-1).date.clone();
+                    StringUtil.setDateTime(m.date, m.saat);
+                }
+            }else if(c == 3 && StringUtil.onlyUppercase(getTextViewText(x.getChild(0))) && StringUtil.isTime(getTextViewText(x.getChild(2)))) {
+                m.sender = lastConversation;
+                m.date = StringUtil.getDate(getTextViewText(x.getChild(0)));
+                StringUtil.setDateTime(m.date, getTextViewText(x.getChild(2)));
+                m.content = getTextViewText(x.getChild(1));
+                m.saat = getTextViewText(x.getChild(2));
+
+            }else if(c == 4 && StringUtil.onlyUppercase(getTextViewText(x.getChild(0))) && StringUtil.isTime(getTextViewText(x.getChild(2))) &&
+                    x.getChild(x.getChildCount()-1).getClassName().toString().endsWith("ImageView")) {
+                m.sender = "Men";
+                m.date = StringUtil.getDate(getTextViewText(x.getChild(0)));
+                StringUtil.setDateTime(m.date, getTextViewText(x.getChild(2)));
+                m.content = getTextViewText(x.getChild(1));
+                m.saat = getTextViewText(x.getChild(2));
+            }else if(c == 12|| c == 13) {// time yuxarida cixib apply ele evvelden meluma qeder
+                String t = getTextViewText(x.getChild(6));
+                for(Message me : messages) {
+                    if(me.date == null) {
+
+                        me.date = StringUtil.getDate(t);
+                        if(me.unclear == null){
+                            continue;
+                        }
+                        StringUtil.setDateTime(me.date, me.unclear);
+                        me.saat = me.unclear;
+                        me.unclear = null;
+                    }else {
+                        break;
+                    }
+                }
+            }else {
+                String time = StringUtil.findTime(x);
+
+                Logger.l("-------------------------------------------------------------"+time + m.date);
+                if(time != null) {
+                    m.sender = "whatsapp::";
+                    m.content = "----";
+                    m.saat = time;
+                    m.unclear = time;
+                    if(m.date == null) {
+                        if(messages.size() != 0 && messages.get(messages.size()-1).date != null) {
+                            m.date = (Date) messages.get(messages.size()-1).date.clone();
+                            StringUtil.setDateTime(m.date, time);
+                        }
+                    }else {
+                        StringUtil.setDateTime(m.date, time);
+                    }
+
+                }else if(c != 0 && StringUtil.onlyUppercase(getTextViewText(x.getChild(0)))) {
+                    //burda problem var
+                    m.sender = "whatsapp::";
+                    m.content = "----";
+                    m.saat = "00:00";
+                    m.unclear = "00:00";
+                }
+            }
+            if(messages.size() == 0 && m.saat != null && cc.M.get(m.toUnique()) != null) {
+                m.date = (Date) cc.M.get(m.toUnique()).clone();
+                StringUtil.setDateTime(m.date, m.saat);
+            }
+//                    if(m.sender == null) {
+//                        continue;
+//                    }
+            if(m.sender!= null)
+                messages.add(m);
+            for(int i = 0; i < c; i++) {
+                AccessibilityNodeInfo child = x.getChild(i);
+                if(child == null) continue;
+                Logger.l(child.getClassName().toString() + " - " + getTextViewText(child));
+            }
+            Logger.l("E=======");
+        }
+        Logger.l("bb---");
+        ArrayList<Message> al = new ArrayList<>();
+        for(Message x : messages) {
+            Logger.l("TOGHRUL", x.toString());
+            if(x.sender != null)
+                al.add(x);
+
+        }
+
+        cc.addAll(al);
+        Logger.l("SIZE = " + cc.messages.size);
+        cc.messages.iterateForward();
+        Logger.l("ee---");
+        Logger.l("END=============");
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
+    @Override
+    public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
+        int eventType = accessibilityEvent.getEventType();
+        AccessibilityNodeInfo ni = accessibilityEvent.getSource();
+        if(ni == null || ni.getPackageName() == null)return;
+
+        //com.whatsapp:id/conversation_contact_name
+        //com.whatsapp:id/entry
+        //AccessibilityEvent.ob
+       //Log.i("INFO", "---"+eventType + "--" + ni);
+        if(ni.getText() != null) {
+            //Logger.l("INFO", ni.getText().toString() + " " + ni.getClassName().toString());
+        }
+        //scrool button
+//        List<AccessibilityNodeInfo> Li = ni.findAccessibilityNodeInfosByViewId("com.whatsapp:id/scroll_bottom");
+//        Logger.l("SC", Li.size() + "");
+
+
+
+
+
 
 
 
@@ -206,7 +362,7 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
                 }
 
                 textViewNodes = new ArrayList<AccessibilityNodeInfo>();
-                parentsW = new ArrayList<>();
+
                 //AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
                 findChildViews(rootNode);
 
@@ -254,156 +410,11 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
 
                 }
 
-
-                Logger.l("BEGIN=============");
-                Set<Integer> simpleSet = new HashSet<>();
-                for(int i = 0; i < textViewNodes.size(); i++) {
-
-
-                    AccessibilityNodeInfo ti = textViewNodes.get(i);
-                    AccessibilityNodeInfo p = ti.getParent();
-                    // whatsapi chavlandiranda 2 dene text dalbadal gelir. sonra vaxt;
-                    //whatsapda yuxarida vaxt informasiyasi olanda parent yazanda 3 mende 4
-                    AccessibilityNodeInfo pp = p.getParent();
-                    //if(pp == null) continue;
-                    int phc = p.hashCode();
-                    if(!simpleSet.contains(phc)) {
-                        parentsW.add(p);
-                        simpleSet.add(phc);
-                    }
-                }
-                Logger.l("Size" + parentsW.size());
-                if(parentsW.size() > 0 && parentsW.get(0).getChildCount() == 1) {
-                    lastConversation = getTextViewText(parentsW.get(0).getChild(0));
-                }
-                Conversation cc = conversationMap.get(lastConversation);
-                if(cc == null) {
-                    cc = new Conversation();
-                    conversationMap.put(lastConversation, cc);
-                }
-                ArrayList<Message> messages = new ArrayList<>();
-                int index = -1;
-                for(AccessibilityNodeInfo x : parentsW) {
-                    index++;
-                    Logger.l("B=======");
-                    int c = x.getChildCount();
-                    Message m = new Message();
-                    Logger.l("SIZE = " + c);
-                    if(c == 1) {
-                        //lastConversation = getTextViewText(x.getChild(0));
-                    }
-
-
-                    if(c > 0 && StringUtil.onlyUppercase(getTextViewText(x.getChild(0)))) {
-                        m.date = StringUtil.getDate(getTextViewText(x.getChild(0)));
-                    }
-                    if(c == 3 && StringUtil.isTime(getTextViewText(x.getChild(1))) &&
-                            x.getChild(2) != null && x.getChild(2).getClassName().toString().endsWith("ImageView")) {
-                        //vaxti ozun tap
-                        m.sender = "Men";
-                        m.content = getTextViewText(x.getChild(0));
-                        m.unclear = getTextViewText(x.getChild(1));
-                        m.saat = m.unclear;
-                        if(messages.size() != 0 && messages.get(messages.size()-1).date != null) {
-                            // bu silinmelidi cunki messagelerin date lerini hamsi nulldu mapdan getirmek lazimdi
-                            m.date = (Date) messages.get(messages.size()-1).date.clone();
-                            StringUtil.setDateTime(m.date, m.unclear);
-                        }
-                    }else if(c == 2 && StringUtil.isTime(getTextViewText(x.getChild(1)))) {
-                        //vacxti ozun tap
-                        m.sender = lastConversation;
-                        m.content = getTextViewText(x.getChild(0));
-                        m.unclear = getTextViewText(x.getChild(1));
-                        m.saat = m.unclear;
-                        if(messages.size() != 0 && messages.get(messages.size()-1).date != null) {
-                            m.date = (Date) messages.get(messages.size()-1).date.clone();
-                            StringUtil.setDateTime(m.date, m.saat);
-                        }
-                    }else if(c == 3 && StringUtil.onlyUppercase(getTextViewText(x.getChild(0))) && StringUtil.isTime(getTextViewText(x.getChild(2)))) {
-                        m.sender = lastConversation;
-                        m.date = StringUtil.getDate(getTextViewText(x.getChild(0)));
-                        StringUtil.setDateTime(m.date, getTextViewText(x.getChild(2)));
-                        m.content = getTextViewText(x.getChild(1));
-                        m.saat = getTextViewText(x.getChild(2));
-
-                    }else if(c == 4 && StringUtil.onlyUppercase(getTextViewText(x.getChild(0))) && StringUtil.isTime(getTextViewText(x.getChild(2))) &&
-                    x.getChild(x.getChildCount()-1).getClassName().toString().endsWith("ImageView")) {
-                        m.sender = "Men";
-                        m.date = StringUtil.getDate(getTextViewText(x.getChild(0)));
-                        StringUtil.setDateTime(m.date, getTextViewText(x.getChild(2)));
-                        m.content = getTextViewText(x.getChild(1));
-                        m.saat = getTextViewText(x.getChild(2));
-                    }else if(c == 12|| c == 13) {// time yuxarida cixib apply ele evvelden meluma qeder
-                        String t = getTextViewText(x.getChild(6));
-                        for(Message me : messages) {
-                            if(me.date == null) {
-
-                                me.date = StringUtil.getDate(t);
-                                if(me.unclear == null){
-                                    continue;
-                                }
-                                StringUtil.setDateTime(me.date, me.unclear);
-                                me.saat = me.unclear;
-                                me.unclear = null;
-                            }else {
-                                break;
-                            }
-                        }
-                    }else {
-                        String time = StringUtil.findTime(x);
-
-                        Logger.l("-------------------------------------------------------------"+time + m.date);
-                        if(time != null) {
-                            m.sender = "whatsapp::";
-                            m.content = "----";
-                            m.saat = time;
-                            m.unclear = time;
-                            if(m.date == null) {
-                                if(messages.size() != 0 && messages.get(messages.size()-1).date != null) {
-                                    m.date = (Date) messages.get(messages.size()-1).date.clone();
-                                    StringUtil.setDateTime(m.date, time);
-                                }
-                            }else {
-                                StringUtil.setDateTime(m.date, time);
-                            }
-
-                        }else if(c != 0 && StringUtil.onlyUppercase(getTextViewText(x.getChild(0)))) {
-                            m.sender = "whatsapp::";
-                            m.content = "----";
-                            m.saat = "00:00";
-                            m.unclear = "00:00";
-                        }
-                    }
-                    if(messages.size() == 0 && m.saat != null && cc.M.get(m.toUnique()) != null) {
-                        m.date = (Date) cc.M.get(m.toUnique()).clone();
-                        StringUtil.setDateTime(m.date, m.saat);
-                    }
-//                    if(m.sender == null) {
-//                        continue;
-//                    }
-                    if(m.sender!= null)
-                        messages.add(m);
-                    for(int i = 0; i < c; i++) {
-                        AccessibilityNodeInfo child = x.getChild(i);
-                        if(child == null) continue;
-                        Logger.l(child.getClassName().toString() + " - " + getTextViewText(child));
-                    }
-                    Logger.l("E=======");
-                }
-                Logger.l("bb---");
-                ArrayList<Message> al = new ArrayList<>();
-                for(Message x : messages) {
-                    Logger.l("TOGHRUL", x.toString());
-                    if(x.sender != null)
-                        al.add(x);
-
+                if(ni.getPackageName() != null && ni.getPackageName().toString().equals("com.whatsapp")) {
+                    //Logger.l(ni.getPackageName().toString());
+                    whatsappFilter(ni);
                 }
 
-                cc.addAll(al);
-                Logger.l("SIZE = " + cc.messages.size);
-                cc.messages.iterateForward();
-                Logger.l("ee---");
-                Logger.l("END=============");
 
 
 
@@ -446,7 +457,7 @@ https://www.youtube.com/results?search_query=the+show+must+go+on
     }
 
     public boolean isWebsite(String s) {
-        if(s.contains(".com/") || s.contains(".de/") || s.contains(".az/") || s.contains(".ru/") || s.contains(".tr/")) {
+        if(s.contains(".com/") || s.contains(".de/") || s.contains(".az/") || s.contains(".ru/") || s.contains(".tr/")|| s.contains(".org/")) {
             return true;
         }else return false;
     }
