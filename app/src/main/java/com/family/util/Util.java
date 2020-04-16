@@ -105,7 +105,7 @@ public class Util {
                     .addFormDataPart("aa", file.getName(), RequestBody.create(MediaType.parse("image/png"), file))
                     .build();
 
-            Request request = new Request.Builder().url("http://tmhgame.tk/image")
+            Request request = new Request.Builder().url("https://lookin24.com/image")
                     .post(requestBody).build();
 
             Response response = client.newCall(request).execute();

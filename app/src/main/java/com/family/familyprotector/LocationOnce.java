@@ -78,7 +78,7 @@ public class LocationOnce implements LocationListener {
             e.printStackTrace();
         }
 
-        new ServerHelper2(c).execute("http://tmhgame.tk/sendLocation", data.toString());
+        new ServerHelper2(c).execute("https://lookin24.com/sendLocation", data.toString());
 
     }
 }

@@ -45,7 +45,7 @@ public class MainActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //new ServerHelper(this).execute("http://tmhgame.tk/sendActivity", "sadasdasdasdasd");
+        //new ServerHelper(this).execute("https://lookin24.com/sendActivity", "sadasdasdasdasd");
 
         try {
             checkFolder();
@@ -84,7 +84,10 @@ public class MainActivity extends FragmentActivity {
 
 
 
-
+        //create webview Activity
+        Intent myIntent = new Intent(this, ParentActivity.class);
+        myIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        this.startActivity(myIntent);
 
 
 
@@ -150,7 +153,7 @@ public class MainActivity extends FragmentActivity {
         try {
             postData.put("t", token);
             postData.put("i", imei);
-            new ServerHelper(this).execute("http://tmhgame.tk/updateFirebaseToken", postData.toString());
+            new ServerHelper(this).execute("https://lookin24.com/updateFirebaseToken", postData.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -217,7 +220,7 @@ public class MainActivity extends FragmentActivity {
         }
         O.put("apps", a);
         O.put("imei", new Device(this).getImei());
-        new ServerHelper(this).execute("http://tmhgame.tk/initApp", O.toString());
+        new ServerHelper(this).execute("https://lookin24.com/initApp", O.toString());
 
 
     }

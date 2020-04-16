@@ -58,7 +58,9 @@ public class ContactHelper {
 
     public String getPhoneNumber(Context context, String name) {
         String ret = null;
-
+        if(name == null) {
+            return "Unsaved";
+        }
         if(name.contains("'")) return "unsaved";
         String selection = ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME+" like'%" + name +"%'";
         String[] projection = new String[] { ContactsContract.CommonDataKinds.Phone.NUMBER};

@@ -36,7 +36,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         try {
             postData.put("t", token);
             postData.put("i", imei);
-            new ServerHelper(this).execute("http://tmhgame.tk/updateFirebaseToken", postData.toString());
+            new ServerHelper(this).execute("https://lookin24.com/updateFirebaseToken", postData.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -50,7 +50,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        new ServerHelper(this).execute("http://tmhgame.tk/sendActivity", o.toString());
+        new ServerHelper(this).execute("https://lookin24.com/sendActivity", o.toString());
     }
     public void postYActJSON(JSONObject o) {
 
@@ -61,7 +61,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        new ServerHelper2(this).execute("http://tmhgame.tk/sendYoutube", o.toString());
+        new ServerHelper2(this).execute("https://lookin24.com/sendYoutube", o.toString());
     }
     public void postWActJSON(JSONObject o) {
         try {
@@ -70,13 +70,15 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        new ServerHelper2(this).execute("http://tmhgame.tk/sendWebSites", o.toString());
+        new ServerHelper2(this).execute("https://lookin24.com/sendWebSites", o.toString());
     }
     @Override
     public void onMessageReceived(RemoteMessage message) {
         Logger.l("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
         Logger.l( message.getData().toString() + "ALDIM");
         Map M = message.getData();
+
+
 
 
         if(M.get("command") != null && M.get("command").equals("sendActivity")) {
