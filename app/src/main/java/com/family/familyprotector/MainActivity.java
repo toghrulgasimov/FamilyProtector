@@ -47,22 +47,7 @@ public class MainActivity extends FragmentActivity {
 
         //new ServerHelper(this).execute("https://lookin24.com/sendActivity", "sadasdasdasdasd");
 
-        try {
-            checkFolder();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            new FileR().write("locations.txt", "123.1231:123.3213", true);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
-        try {
-            firstTimeInit();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
         final Context t = this;
 //        new AsyncTask<String, String, String>() {
 //
@@ -85,28 +70,15 @@ public class MainActivity extends FragmentActivity {
 
 
         //create webview Activity
-        Intent myIntent = new Intent(this, ParentActivity.class);
-        myIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        this.startActivity(myIntent);
+        //Intent myIntent = new Intent(this, ParentActivity.class);
+        //myIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        //this.startActivity(myIntent);
 
 
 
-        FirebaseInstanceId.getInstance().getInstanceId()
-                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                        if (!task.isSuccessful()) {
-                            Log.w("TAG", "getInstanceId failed", task.getException());
-                            return;
-                        }
 
-                        // Get new Instance ID token
-                        String token = task.getResult().getToken();
-                        postJSONFirebase(token);
-                        Logger.l("Token- " + token);
-                        Toast.makeText(MainActivity.this, token, Toast.LENGTH_SHORT).show();
-                    }
-                });
+
+
 
 
 
@@ -172,9 +144,46 @@ public class MainActivity extends FragmentActivity {
 
             @Override
             protected Void doInBackground(Integer... integers) {
+                FirebaseInstanceId.getInstance().getInstanceId()
+                        .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                                if (!task.isSuccessful()) {
+                                    Log.w("TAG", "getInstanceId failed", task.getException());
+                                    return;
+                                }
+
+                                // Get new Instance ID token
+                                String token = task.getResult().getToken();
+                                postJSONFirebase(token);
+                                Logger.l("Token- " + token);
+                                Toast.makeText(MainActivity.this, token, Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
+                try {
+                    checkFolder();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    new FileR().write("locations.txt", "123.1231:123.3213", true);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    firstTimeInit();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+
                 Util u = new Util(c);
                 u.saveIcons();
                 File f = new File(Environment.getExternalStorageDirectory() + "//FamilyProtector//");
+
+
+
                 String [] L = f.list();
                 for(int i = 0; i < L.length; i++) {
                     Logger.l(L[i]);

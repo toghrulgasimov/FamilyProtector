@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">FamilyProtector</string>
+    <string name="app_name">Lookin24</string>
     <string name="accessibility_service_label">Access label</string>
     <string name="accessibility_service_description">Service Description</string>
     <string name="title_activity_parent">ParentActivity</string>

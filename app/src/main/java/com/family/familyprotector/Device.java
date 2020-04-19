@@ -36,7 +36,8 @@ public class Device {
         String ts = Context.TELEPHONY_SERVICE;
         TelephonyManager mTelephonyMgr = (TelephonyManager) context.getSystemService(ts);
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            //return;
+
+            return "erorrororororroro";
         }else {
             ans =  mTelephonyMgr.getDeviceId();
         }

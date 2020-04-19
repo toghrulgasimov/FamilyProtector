@@ -158,6 +158,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }else {
             String p = (String)M.get("package");
             String b = (String)M.get("block");
+            if(p == null) return;
             Logger.l(p + " bunun uzerinde emeliyyat");
             //MyAccessibilityService.instance.sondur();
             if(b.equals("0")) {
