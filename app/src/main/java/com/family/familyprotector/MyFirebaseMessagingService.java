@@ -50,7 +50,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        new ServerHelper(this).execute("https://lookin24.com/sendActivity", o.toString());
+        new ServerHelper2(this).execute("https://lookin24.com/sendActivity", o.toString());
     }
     public void postYActJSON(JSONObject o) {
 

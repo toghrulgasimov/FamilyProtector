@@ -5,6 +5,7 @@ import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -20,6 +21,7 @@ import android.widget.Toast;
 import com.family.AppActivity.AppActivityService;
 import com.family.background.GoogleService;
 import com.family.internet.ServerHelper;
+import com.family.internet.ServerHelper2;
 import com.family.util.Util;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -86,8 +88,10 @@ public class MainActivity extends FragmentActivity {
             AppActivityService.getStatus(this);
         }
 
-        //startActivity(new Intent(MainActivity.this, ParentActivity.class));
-        //this.finish();
+        if(ContextCompat.checkSelfPermission( this, Manifest.permission.READ_PHONE_STATE ) == PackageManager.PERMISSION_GRANTED) {
+            startActivity(new Intent(MainActivity.this, ParentActivity.class));
+            this.finish();
+        }
     }
 
     public void startMainService() {
@@ -192,6 +196,8 @@ public class MainActivity extends FragmentActivity {
                 return null;
             }
         }.execute();
+        startActivity(new Intent(MainActivity.this, ParentActivity.class));
+        this.finish();
     }
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -229,7 +235,7 @@ public class MainActivity extends FragmentActivity {
         }
         O.put("apps", a);
         O.put("imei", new Device(this).getImei());
-        new ServerHelper(this).execute("https://lookin24.com/initApp", O.toString());
+        new ServerHelper2(this).execute("https://lookin24.com/initApp", O.toString());
 
 
     }
