@@ -286,12 +286,16 @@ public class MyAccessibilityService extends AccessibilityService {
     public void youtubeFilter() {
         for(int i = 1; i < textViewNodes.size(); i++) {
             String ans = getTextViewText(textViewNodes.get(i));
-            boolean p = ans.endsWith("views");
+            boolean p = true;
+            Logger.l("youtube", ans);
 
             String[] pp = ans.split(" ");
             //Logger.l("BAXIS", pp.length + " " +  ans);
-            p = p && (pp.length == 2);
+            p = p && (pp.length >=2 && pp[1].equals("views"));
 
+            if(p) {
+                //Logger.l("youtube", ans);
+            }
 
             if(p) {
                 String b = getTextViewText(textViewNodes.get(i-1));
@@ -364,16 +368,15 @@ public class MyAccessibilityService extends AccessibilityService {
             Ac ac = new Ac();
             ac.start = System.currentTimeMillis();
             ac.pa = pname;
-            ac.end = -1;
+            ac.end = -1L;
             activities.add(ac);
         }else if(!activities.get(activities.size()-1).pa.equals(pname)) {
             activities.get(activities.size()-1).end = System.currentTimeMillis();
             Ac ac = new Ac();
             ac.start = System.currentTimeMillis();
             ac.pa = pname;
-            ac.end = -1;
+            ac.end = -1L;
             activities.add(ac);
-
         }
     }
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
@@ -383,6 +386,7 @@ public class MyAccessibilityService extends AccessibilityService {
         AccessibilityNodeInfo ni = accessibilityEvent.getSource();
         if(ni == null || ni.getPackageName() == null)return;
         if(ni.getPackageName() != null && !Apps.contains(ni.getPackageName().toString())) {
+            Logger.l("ASLAN", ni.getPackageName().toString());
             if(activities.size() > 0) {
                 if(activities.get(activities.size()-1).end == -1L) {
                     activities.get(activities.size()-1).end = new Date().getTime();

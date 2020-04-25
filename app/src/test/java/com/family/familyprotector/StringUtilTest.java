@@ -27,15 +27,19 @@ public class StringUtilTest {
 //
 //
 
-        DoublyLinkedList<String> L = new DoublyLinkedList<>();
-
-        L.addLast("salam");
-        L.addLast("sagol");
-        L.addFirst("aaa");
-        L.addFirst("bb");
-
-        for(DoublyLinkedList.Node x = L.head; x != null; x = x.next) {
-            System.out.println(x.element);
-        }
+//        DoublyLinkedList<String> L = new DoublyLinkedList<>();
+//
+//        L.addLast("salam");
+//        L.addLast("sagol");
+//        L.addFirst("aaa");
+//        L.addFirst("bb");
+//
+//        for(DoublyLinkedList.Node x = L.head; x != null; x = x.next) {
+//            System.out.println(x.element);
+//        }
+        long l = -1;
+        boolean p;
+        p = l == -1L;
+        System.out.println((p ? "true" : "false"));
     }
 }

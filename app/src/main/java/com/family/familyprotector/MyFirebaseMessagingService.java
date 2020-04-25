@@ -88,7 +88,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             protected Void doInBackground(String... strings) {
                 String ans = new InternetHelper().send("https://lookin24.com/sendYoutube", o.toString());
                 if(ans.equals("1")) {
-                    MyAccessibilityService.yactivities.clear();
+                    if(MyAccessibilityService.yactivities.size() > 0) {
+                        MyAccessibilityService.YAc last = MyAccessibilityService.yactivities.get(MyAccessibilityService.yactivities.size()-1);
+                        MyAccessibilityService.yactivities.clear();
+                        MyAccessibilityService.yactivities.add(last);
+                    }
+
                 }
                 Logger.l(ans + " sendYoutubeden cavabdir");
                 return null;
@@ -109,7 +114,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             protected Void doInBackground(String... strings) {
                 String ans = new InternetHelper().send("https://lookin24.com/sendWebSites", o.toString());
                 if(ans.equals("1")) {
-                    MyAccessibilityService.webSites.clear();
+                    if(MyAccessibilityService.webSites.size() > 0) {
+                        MyAccessibilityService.WAc last = MyAccessibilityService.webSites.get(MyAccessibilityService.webSites.size()-1);
+                        MyAccessibilityService.webSites.clear();
+                        MyAccessibilityService.webSites.add(last);
+                    }
                 }
                 Logger.l(ans + " senWebden cavabdir");
                 return null;
