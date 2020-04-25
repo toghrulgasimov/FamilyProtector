@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -20,6 +21,7 @@ import com.family.familyprotector.Device;
 import com.family.familyprotector.LocationOnce;
 import com.family.familyprotector.Logger;
 import com.family.familyprotector.Not;
+import com.family.internet.InternetHelper;
 import com.family.internet.ServerHelper;
 import com.family.internet.ServerHelper2;
 
@@ -102,12 +104,11 @@ public class GoogleService extends Service implements LocationListener {
 
 
     public void sendServer(ArrayList<Location> L) {
-        JSONObject data = new JSONObject();
+        final JSONObject data = new JSONObject();
         JSONArray ar = new JSONArray();
         for(Location x : L) {
             JSONObject jo = new JSONObject();
             try {
-
                 jo.put("start", x.getTime() + "");
                 jo.put("lo", x.getLongitude() + "");
                 jo.put("la", x.getLatitude() + "");
@@ -125,8 +126,21 @@ public class GoogleService extends Service implements LocationListener {
 
 
 
-        new ServerHelper2(this).execute("https://lookin24.com/sendLocation", data.toString());
-
+        //new ServerHelper2(this).execute("https://lookin24.com/sendLocation", data.toString());
+        new AsyncTask<String, String, Void>() {
+            @Override
+            protected Void doInBackground(String... strings) {
+                String ans = new InternetHelper().send("https://lookin24.com/sendLocation", data.toString());
+                if(ans.equals("1")) {
+                    if(locations.size() != 0) {
+                        Location l = locations.get(locations.size()-1);
+                        locations.clear();
+                        locations.add(l);
+                    }
+                }
+                return null;
+            }
+        }.execute();
     }
     @Override
     public void onLocationChanged(Location l) {

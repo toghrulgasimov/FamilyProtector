@@ -3,6 +3,7 @@ package com.family.familyprotector;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.util.Log;
 
 import com.family.accessibility.MyAccessibilityService;
@@ -18,6 +19,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
@@ -43,6 +46,76 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             e.printStackTrace();
         }
     }
+    public  void sendAct() {
+        JSONObject data = new JSONObject();
+        JSONArray ar = new JSONArray();
+        for(MyAccessibilityService.Ac a: MyAccessibilityService.activities) {
+            JSONObject o = new JSONObject();
+            try {
+                o.put("package", a.pa);
+                //String nn =
+                String nn = new Device(this).getAppName(a.pa);
+                if(nn.equals("")) nn = "Menu";
+                o.put("name", nn);
+                o.put("start", a.start+"");
+                o.put("end", a.end+"");
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            ar.put(o);
+        }
+        try {
+            data.put("data", ar);
+            postActJSON(data);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+    public void sendYoutube() {
+        JSONObject data = new JSONObject();
+        JSONArray ar = new JSONArray();
+        for(MyAccessibilityService.YAc a: MyAccessibilityService.yactivities) {
+            JSONObject o = new JSONObject();
+            try {
+                o.put("name", a.name);
+                //String nn =
+                o.put("start", a.time+"");
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            ar.put(o);
+        }
+        try {
+            data.put("data", ar);
+            postYActJSON(data);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+    public void sendWeb() {
+        JSONObject data = new JSONObject();
+        JSONArray ar = new JSONArray();
+        for(MyAccessibilityService.WAc a: MyAccessibilityService.webSites) {
+            JSONObject o = new JSONObject();
+            try {
+                o.put("url", a.url);
+                //String nn =
+                o.put("start", a.time+"");
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            ar.put(o);
+        }
+        try {
+            data.put("data", ar);
+            postWActJSON(data);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
     public void postActJSON(final JSONObject o) {
 
 
@@ -62,9 +135,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     if(MyAccessibilityService.activities.size() > 0) {
                         MyAccessibilityService.Ac l = MyAccessibilityService.activities.get(MyAccessibilityService.activities.size()-1);
                         MyAccessibilityService.activities.clear();
-                        if(l.end == -1L) {
-                            MyAccessibilityService.activities.add(l);
-                        }
+                        MyAccessibilityService.activities.add(l);
                     }
                 }
                 Logger.l(ans + " sendActivitydan cavabdir");
@@ -125,6 +196,40 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             }
         }.execute();
     }
+
+    public MyFirebaseMessagingService() {
+        final Handler h = new Handler();
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                h.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        new AsyncTask<String, String, Void>() {
+                            @Override
+                            protected Void doInBackground(String... strings) {
+                                if(MyAccessibilityService.activities == null) {
+                                    return null;
+                                }
+                                if(MyAccessibilityService.activities.size() > 1) {
+                                    sendAct();
+                                }
+                                if(MyAccessibilityService.webSites.size() > 1) {
+                                    sendWeb();
+                                }
+                                if(MyAccessibilityService.yactivities.size() > 1) {
+                                    sendYoutube();
+                                }
+
+                                Logger.l("Activity sended");
+                                return null;
+                            }
+                        }.execute();
+                    }
+                });
+            }
+        }, 0, 1000 * 60 * 20);
+    }
     @Override
     public void onMessageReceived(RemoteMessage message) {
         Logger.l("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
@@ -133,81 +238,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
 
 
-
         if(M.get("command") != null && M.get("command").equals("sendActivity")) {
-            JSONObject data = new JSONObject();
-            JSONArray ar = new JSONArray();
-            for(MyAccessibilityService.Ac a: MyAccessibilityService.activities) {
-                JSONObject o = new JSONObject();
-                try {
-                    o.put("package", a.pa);
-                    //String nn =
-                    String nn = new Device(this).getAppName(a.pa);
-                    if(nn.equals("")) nn = "Menu";
-                    o.put("name", nn);
-                    o.put("start", a.start+"");
-                    o.put("end", a.end+"");
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                ar.put(o);
-            }
-            try {
-                data.put("data", ar);
-                postActJSON(data);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            sendAct();
         }else if(M.get("command") != null && M.get("command").equals("sendYoutube")) {
-            JSONObject data = new JSONObject();
-            JSONArray ar = new JSONArray();
-            for(MyAccessibilityService.YAc a: MyAccessibilityService.yactivities) {
-                JSONObject o = new JSONObject();
-                try {
-                    o.put("name", a.name);
-                    //String nn =
-                    o.put("start", a.time+"");
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                ar.put(o);
-            }
-            try {
-                data.put("data", ar);
-                postYActJSON(data);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            sendYoutube();
         }else  if(M.get("command") != null && M.get("command").equals("sendWebsites")) {
-            JSONObject data = new JSONObject();
-            JSONArray ar = new JSONArray();
-            for(MyAccessibilityService.WAc a: MyAccessibilityService.webSites) {
-                JSONObject o = new JSONObject();
-                try {
-                    o.put("url", a.url);
-                    //String nn =
-                    o.put("start", a.time+"");
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                ar.put(o);
-            }
-            try {
-                data.put("data", ar);
-                postWActJSON(data);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            sendWeb();
         }else  if(M.get("command") != null && M.get("command").equals("sendLocation")) {
-
-
             GoogleService.sendNow = true;
-
-
-
         }else {
             String p = (String)M.get("package");
             String b = (String)M.get("block");

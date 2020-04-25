@@ -21,6 +21,7 @@ import com.family.familyprotector.Device;
 import com.family.familyprotector.FileR;
 import com.family.familyprotector.Logger;
 import com.family.familyprotector.Message;
+import com.family.familyprotector.MyFirebaseMessagingService;
 import com.family.internet.ServerHelper2;
 import com.family.util.DoublyLinkedList;
 import com.family.util.StringUtil;
@@ -535,6 +536,11 @@ public class MyAccessibilityService extends AccessibilityService {
                 });
             }
         }, 0, 1000*60 * 10);
+
+
+
+
+
 
         new Timer().schedule(new TimerTask() {
             @Override
