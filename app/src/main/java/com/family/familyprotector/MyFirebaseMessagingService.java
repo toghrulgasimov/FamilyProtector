@@ -2,10 +2,12 @@ package com.family.familyprotector;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import com.family.accessibility.MyAccessibilityService;
 import com.family.background.GoogleService;
+import com.family.internet.InternetHelper;
 import com.family.internet.ServerHelper;
 import com.family.internet.ServerHelper2;
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -41,7 +43,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             e.printStackTrace();
         }
     }
-    public void postActJSON(JSONObject o) {
+    public void postActJSON(final JSONObject o) {
 
 
         try {
@@ -50,9 +52,27 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        new ServerHelper2(this).execute("https://lookin24.com/sendActivity", o.toString());
+        //new ServerHelper2(this).execute("https://lookin24.com/sendActivity", o.toString());
+        new AsyncTask<String, String, Void>() {
+
+            @Override
+            protected Void doInBackground(String... strings) {
+                String ans = new InternetHelper().send("https://lookin24.com/sendActivity", o.toString());
+                if(ans.equals("1")) {
+                    if(MyAccessibilityService.activities.size() > 0) {
+                        MyAccessibilityService.Ac l = MyAccessibilityService.activities.get(MyAccessibilityService.activities.size()-1);
+                        MyAccessibilityService.activities.clear();
+                        if(l.end == -1L) {
+                            MyAccessibilityService.activities.add(l);
+                        }
+                    }
+                }
+                Logger.l(ans + " sendActivitydan cavabdir");
+                return null;
+            }
+        }.execute();
     }
-    public void postYActJSON(JSONObject o) {
+    public void postYActJSON(final JSONObject o) {
 
 
         try {
@@ -61,16 +81,40 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        new ServerHelper2(this).execute("https://lookin24.com/sendYoutube", o.toString());
+        //new ServerHelper2(this).execute("https://lookin24.com/sendYoutube", o.toString());
+        new AsyncTask<String, String, Void>() {
+
+            @Override
+            protected Void doInBackground(String... strings) {
+                String ans = new InternetHelper().send("https://lookin24.com/sendYoutube", o.toString());
+                if(ans.equals("1")) {
+                    MyAccessibilityService.yactivities.clear();
+                }
+                Logger.l(ans + " sendYoutubeden cavabdir");
+                return null;
+            }
+        }.execute();
     }
-    public void postWActJSON(JSONObject o) {
+    public void postWActJSON(final JSONObject o) {
         try {
             o.put("imei", new Device(this).getImei());
             Logger.l( " That will be post for WebSites " + o.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        new ServerHelper2(this).execute("https://lookin24.com/sendWebSites", o.toString());
+        //new ServerHelper2(this).execute("https://lookin24.com/sendWebSites", o.toString());
+        new AsyncTask<String, String, Void>() {
+
+            @Override
+            protected Void doInBackground(String... strings) {
+                String ans = new InternetHelper().send("https://lookin24.com/sendWebSites", o.toString());
+                if(ans.equals("1")) {
+                    MyAccessibilityService.webSites.clear();
+                }
+                Logger.l(ans + " senWebden cavabdir");
+                return null;
+            }
+        }.execute();
     }
     @Override
     public void onMessageReceived(RemoteMessage message) {

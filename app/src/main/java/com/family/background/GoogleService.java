@@ -108,7 +108,7 @@ public class GoogleService extends Service implements LocationListener {
             JSONObject jo = new JSONObject();
             try {
 
-                jo.put("time", x.getTime() + "");
+                jo.put("start", x.getTime() + "");
                 jo.put("lo", x.getLongitude() + "");
                 jo.put("la", x.getLatitude() + "");
                 ar.put(jo);
@@ -118,7 +118,7 @@ public class GoogleService extends Service implements LocationListener {
         }
         try {
             data.put("imei", new Device(this).getImei());
-            data.put("locations", ar);
+            data.put("data", ar);
         } catch (JSONException e) {
             e.printStackTrace();
         }

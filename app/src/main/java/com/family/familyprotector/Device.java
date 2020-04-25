@@ -2,12 +2,23 @@ package com.family.familyprotector;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
+
+import com.family.internet.ServerHelper2;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class Device {
 
@@ -40,6 +51,16 @@ public class Device {
             return "erorrororororroro";
         }else {
             ans =  mTelephonyMgr.getDeviceId();
+        }
+        return ans;
+    }
+    public Set<String> getApps() {
+        Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
+        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        List<ResolveInfo> pkgAppsList = context.getPackageManager().queryIntentActivities( mainIntent, 0);
+        Set<String> ans = new HashSet<>();
+        for(ResolveInfo x : pkgAppsList) {
+            ans.add(x.activityInfo.packageName);
         }
         return ans;
     }

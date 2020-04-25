@@ -62,6 +62,7 @@ public class MyAccessibilityService extends AccessibilityService {
     public static String oldEntry = null;
     public static Map<String, Conversation> conversationMap = new HashMap<>();
     public static Conversation simpleConversation = new Conversation();
+    public static Set<String> Apps = new HashSet<>();
 
     public class Ac {
         public String pa;
@@ -381,7 +382,14 @@ public class MyAccessibilityService extends AccessibilityService {
         int eventType = accessibilityEvent.getEventType();
         AccessibilityNodeInfo ni = accessibilityEvent.getSource();
         if(ni == null || ni.getPackageName() == null)return;
-
+        if(ni.getPackageName() != null && !Apps.contains(ni.getPackageName().toString())) {
+            if(activities.size() > 0) {
+                if(activities.get(activities.size()-1).end == -1L) {
+                    activities.get(activities.size()-1).end = new Date().getTime();
+                }
+            }
+            return;
+        }
         switch (eventType) {
 
             case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
@@ -508,6 +516,9 @@ public class MyAccessibilityService extends AccessibilityService {
         activities = new ArrayList<>();
         buildBlockedApps();
 
+        Apps = new Device(this).getApps();
+        Logger.l(Apps.toString());
+
         final Handler h = new Handler();
         new Timer().schedule(new TimerTask() {
             @Override
@@ -568,7 +579,7 @@ public class MyAccessibilityService extends AccessibilityService {
                     }
                 });
             }
-        }, 0, 1000*15);
+        }, 0, 1000*60);
     }
 
 
