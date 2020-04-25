@@ -371,7 +371,7 @@ public class MyAccessibilityService extends AccessibilityService {
             ac.pa = pname;
             ac.end = -1L;
             activities.add(ac);
-        }else if(!activities.get(activities.size()-1).pa.equals(pname)) {
+        }else if(activities.get(activities.size()-1).end!=-1L) {
             activities.get(activities.size()-1).end = System.currentTimeMillis();
             Ac ac = new Ac();
             ac.start = System.currentTimeMillis();
