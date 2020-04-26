@@ -1,5 +1,6 @@
 package com.family.familyprotector;
 
+import java.util.Calendar;
 import java.util.Date;
 
 public class Message {
@@ -7,7 +8,7 @@ public class Message {
     public String unclear = null;
     public String sender = null;
     public String content = null;
-    public Date date = null;
+    public Calendar date = null;
     public String saat = null;
     public String type = "simple";
     public Message() {
@@ -23,6 +24,6 @@ public class Message {
     }
     @Override
     public String toString() {
-        return sender + ": " + content + " - " + date;
+        return sender + ": " + content + " - " + (date == null ? "NULL" : date.getTime());
     }
 }

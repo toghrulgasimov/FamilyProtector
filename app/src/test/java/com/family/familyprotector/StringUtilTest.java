@@ -6,6 +6,7 @@ import com.family.util.StringUtil;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 
 import static com.family.util.StringUtil.*;
@@ -41,5 +42,20 @@ public class StringUtilTest {
         boolean p;
         p = l == -1L;
         System.out.println((p ? "true" : "false"));
+        Date d = new Date();
+        System.out.println(d);
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.add(Calendar.DATE, -1);
+        d = cal.getTime();
+
+        System.out.println(d);
+
+        Date b = (Date) d.clone();
+        b.setHours(12);
+        System.out.println(d);
+        System.out.println(b);
     }
 }

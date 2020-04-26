@@ -32,6 +32,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -55,6 +56,7 @@ public class MyAccessibilityService extends AccessibilityService {
     public static boolean writeBlockedApp = true;
     public static String lastConversation;
     public static ArrayList<AccessibilityNodeInfo> parentsW = new ArrayList<>();
+    public static String imei = null;
 
 
     //every day havo to reneuw
@@ -115,6 +117,38 @@ public class MyAccessibilityService extends AccessibilityService {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
+    public void whatsappFilter2(AccessibilityNodeInfo ni) {
+        List<AccessibilityNodeInfo> L = ni.findAccessibilityNodeInfosByViewId("com.whatsapp:id/conversation_contact_name");
+        for(AccessibilityNodeInfo x : L) {
+            CharSequence c = x.getText();
+            if(c == null){
+                continue;
+            }
+            lastConversation = x.getText().toString();
+            break;
+        }
+        Logger.l("BEGIN=============");
+        Set<Integer> simpleSet = new HashSet<>();
+        parentsW = new ArrayList<>();
+        for(int i = 0; i < textViewNodes.size(); i++) {
+            AccessibilityNodeInfo ti = textViewNodes.get(i);
+            AccessibilityNodeInfo p = ti.getParent();
+            // whatsapi chavlandiranda 2 dene text dalbadal gelir. sonra vaxt;
+            //whatsapda yuxarida vaxt informasiyasi olanda parent yazanda 3 mende 4
+            //if(pp == null) continue;
+            int phc = p.hashCode();
+            if(!simpleSet.contains(phc)) {
+                parentsW.add(p);
+                simpleSet.add(phc);
+            }
+        }
+        Logger.l("Size" + parentsW.size());
+        if(parentsW.size() > 0 && parentsW.get(0).getChildCount() == 1) {
+            lastConversation = getTextViewText(parentsW.get(0).getChild(0));
+        }
+
+    }
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     public void whatsappFilter(AccessibilityNodeInfo ni) {
         List<AccessibilityNodeInfo> L = ni.findAccessibilityNodeInfosByViewId("com.whatsapp:id/conversation_contact_name");
         for(AccessibilityNodeInfo x : L) {
@@ -128,22 +162,19 @@ public class MyAccessibilityService extends AccessibilityService {
 
         }
 
-        List<AccessibilityNodeInfo> entry = ni.findAccessibilityNodeInfosByViewId("com.whatsapp:id/entry");
-        if(entry.size() != 0) {
-            Logger.l("---------------" + getTextViewText(entry.get(0)));
-        }
+        //List<AccessibilityNodeInfo> entry = ni.findAccessibilityNodeInfosByViewId("com.whatsapp:id/entry");
+//        if(entry.size() != 0) {
+//            //Logger.l("---------------" + getTextViewText(entry.get(0)));
+//        }
 
         Logger.l("BEGIN=============");
         Set<Integer> simpleSet = new HashSet<>();
         parentsW = new ArrayList<>();
         for(int i = 0; i < textViewNodes.size(); i++) {
-
-
             AccessibilityNodeInfo ti = textViewNodes.get(i);
             AccessibilityNodeInfo p = ti.getParent();
             // whatsapi chavlandiranda 2 dene text dalbadal gelir. sonra vaxt;
             //whatsapda yuxarida vaxt informasiyasi olanda parent yazanda 3 mende 4
-            AccessibilityNodeInfo pp = p.getParent();
             //if(pp == null) continue;
             int phc = p.hashCode();
             if(!simpleSet.contains(phc)) {
@@ -158,12 +189,12 @@ public class MyAccessibilityService extends AccessibilityService {
         Conversation cc = conversationMap.get(lastConversation);
         if(cc == null) {
             cc = new Conversation();
+            cc.number = new ContactHelper(this).getPhoneNumber(this, lastConversation);
             conversationMap.put(lastConversation, cc);
         }
         ArrayList<Message> messages = new ArrayList<>();
-        int index = -1;
+
         for(AccessibilityNodeInfo x : parentsW) {
-            index++;
             Logger.l("B=======");
             int c = x.getChildCount();
             Message m = new Message();
@@ -171,7 +202,6 @@ public class MyAccessibilityService extends AccessibilityService {
             if(c == 1) {
                 //lastConversation = getTextViewText(x.getChild(0));
             }
-
 
             if(c > 0 && StringUtil.onlyUppercase(getTextViewText(x.getChild(0)))) {
                 m.date = StringUtil.getDate(getTextViewText(x.getChild(0)));
@@ -185,8 +215,8 @@ public class MyAccessibilityService extends AccessibilityService {
                 m.saat = m.unclear;
                 if(messages.size() != 0 && messages.get(messages.size()-1).date != null) {
                     // bu silinmelidi cunki messagelerin date lerini hamsi nulldu mapdan getirmek lazimdi
-                    m.date = (Date) messages.get(messages.size()-1).date.clone();
-                    StringUtil.setDateTime(m.date, m.unclear);
+                    m.date = (Calendar) messages.get(messages.size()-1).date.clone();
+                    m.date = StringUtil.setDateTime2(m.date, m.unclear);
                 }
             }else if(c == 2 && StringUtil.isTime(getTextViewText(x.getChild(1)))) {
                 //vacxti ozun tap
@@ -195,13 +225,13 @@ public class MyAccessibilityService extends AccessibilityService {
                 m.unclear = getTextViewText(x.getChild(1));
                 m.saat = m.unclear;
                 if(messages.size() != 0 && messages.get(messages.size()-1).date != null) {
-                    m.date = (Date) messages.get(messages.size()-1).date.clone();
-                    StringUtil.setDateTime(m.date, m.saat);
+                    m.date = (Calendar) messages.get(messages.size()-1).date.clone();
+                    m.date = StringUtil.setDateTime2(m.date, m.saat);
                 }
             }else if(c == 3 && StringUtil.onlyUppercase(getTextViewText(x.getChild(0))) && StringUtil.isTime(getTextViewText(x.getChild(2)))) {
                 m.sender = lastConversation;
                 m.date = StringUtil.getDate(getTextViewText(x.getChild(0)));
-                StringUtil.setDateTime(m.date, getTextViewText(x.getChild(2)));
+                m.date = StringUtil.setDateTime2(m.date, getTextViewText(x.getChild(2)));
                 m.content = getTextViewText(x.getChild(1));
                 m.saat = getTextViewText(x.getChild(2));
 
@@ -209,41 +239,84 @@ public class MyAccessibilityService extends AccessibilityService {
                     x.getChild(x.getChildCount()-1).getClassName().toString().endsWith("ImageView")) {
                 m.sender = "Men";
                 m.date = StringUtil.getDate(getTextViewText(x.getChild(0)));
-                StringUtil.setDateTime(m.date, getTextViewText(x.getChild(2)));
+                m.date = StringUtil.setDateTime2(m.date, getTextViewText(x.getChild(2)));
                 m.content = getTextViewText(x.getChild(1));
                 m.saat = getTextViewText(x.getChild(2));
             }else if(c == 12|| c == 13) {// time yuxarida cixib apply ele evvelden meluma qeder
-                String t = getTextViewText(x.getChild(6));
-                for(Message me : messages) {
-                    if(me.date == null) {
-
-                        me.date = StringUtil.getDate(t);
-                        if(me.unclear == null){
-                            continue;
-                        }
-                        StringUtil.setDateTime(me.date, me.unclear);
-                        me.saat = me.unclear;
-                        me.unclear = null;
-                    }else {
-                        break;
-                    }
+//                String t = getTextViewText(x.getChild(6));
+//                for(Message me : messages) {
+//                    if(me.date == null) {
+//
+//                        me.date = StringUtil.getDate(t);
+//                        if(me.unclear == null){
+//                            continue;
+//                        }
+//                        StringUtil.setDateTime(me.date, me.unclear);
+//                        me.saat = me.unclear;
+//                        me.unclear = null;
+//                    }else {
+//                        break;
+//                    }
+//                }
+            }else if(c == 3 && StringUtil.isTime(getTextViewText(x.getChild(2))) && (x.getChild(0).getClassName().toString().
+                    endsWith("FrameLayout") || x.getChild(0).getClassName().toString().
+                    endsWith("LinearLayout"))){
+                m.sender = lastConversation;
+                m.content = getTextViewText(x.getChild(1));
+                m.unclear = getTextViewText(x.getChild(2));
+                m.saat = m.unclear;
+                if(messages.size() != 0 && messages.get(messages.size()-1).date != null) {
+                    m.date = (Calendar) messages.get(messages.size()-1).date.clone();
+                    m.date = StringUtil.setDateTime2(m.date, m.saat);
                 }
-            }else {
+            }else if(c == 4 && StringUtil.isTime(getTextViewText(x.getChild(2))) && (x.getChild(0).getClassName().toString().
+                    endsWith("FrameLayout") || x.getChild(0).getClassName().toString().
+                    endsWith("LinearLayout"))){
+                m.sender = "Men";
+                m.content = getTextViewText(x.getChild(1));
+                m.unclear = getTextViewText(x.getChild(2));
+                m.saat = m.unclear;
+                if(messages.size() != 0 && messages.get(messages.size()-1).date != null) {
+                    m.date = (Calendar) messages.get(messages.size()-1).date.clone();
+                    m.date = StringUtil.setDateTime2(m.date, m.saat);
+                }
+            }else if(c == 5 && StringUtil.isTime(getTextViewText(x.getChild(3))) && x.getChild(1).getClassName().toString().
+                    endsWith("SeekBar")) {
+                m.sender = lastConversation;
+                m.content = "Voice " + getTextViewText(x.getChild(2));
+                m.unclear = getTextViewText(x.getChild(3));
+                m.saat = m.unclear;
+                if(messages.size() != 0 && messages.get(messages.size()-1).date != null) {
+                    m.date = (Calendar) messages.get(messages.size()-1).date.clone();
+                    m.date = StringUtil.setDateTime2(m.date, m.saat);
+                }
+            }else if(c == 6 && StringUtil.isTime(getTextViewText(x.getChild(4))) && x.getChild(2).getClassName().toString().
+                    endsWith("SeekBar")) {
+                m.sender = "Men";
+                m.content = "Voice " + getTextViewText(x.getChild(3));
+                m.unclear = getTextViewText(x.getChild(4));
+                m.saat = m.unclear;
+                if(messages.size() != 0 && messages.get(messages.size()-1).date != null) {
+                    m.date = (Calendar) messages.get(messages.size()-1).date.clone();
+                    m.date = StringUtil.setDateTime2(m.date, m.saat);
+                }
+            }
+            else{
                 String time = StringUtil.findTime(x);
 
                 Logger.l("-------------------------------------------------------------"+time + m.date);
                 if(time != null) {
-                    m.sender = "whatsapp::";
-                    m.content = "----";
+                    m.sender = "Whatsapp";
+                    m.content = "Media";
                     m.saat = time;
                     m.unclear = time;
                     if(m.date == null) {
                         if(messages.size() != 0 && messages.get(messages.size()-1).date != null) {
-                            m.date = (Date) messages.get(messages.size()-1).date.clone();
-                            StringUtil.setDateTime(m.date, time);
+                            m.date = (Calendar) messages.get(messages.size()-1).date.clone();
+                            m.date = StringUtil.setDateTime2(m.date, time);
                         }
                     }else {
-                        StringUtil.setDateTime(m.date, time);
+                        m.date = StringUtil.setDateTime2(m.date, time);
                     }
 
                 }else if(c != 0 && StringUtil.onlyUppercase(getTextViewText(x.getChild(0)))) {
@@ -252,16 +325,17 @@ public class MyAccessibilityService extends AccessibilityService {
                     m.content = "----";
                     m.saat = "00:00";
                     m.unclear = "00:00";
+                    Logger.l("BANGG", "Problem burdadi");
                 }
             }
             if(messages.size() == 0 && m.saat != null && cc.M.get(m.toUnique()) != null) {
-                m.date = (Date) cc.M.get(m.toUnique()).clone();
-                StringUtil.setDateTime(m.date, m.saat);
+                m.date = (Calendar) cc.M.get(m.toUnique()).clone();
+                m.date = StringUtil.setDateTime2(m.date, m.saat);
             }
 //                    if(m.sender == null) {
 //                        continue;
 //                    }
-            if(m.sender!= null)
+            if(true)
                 messages.add(m);
             for(int i = 0; i < c; i++) {
                 AccessibilityNodeInfo child = x.getChild(i);
@@ -273,7 +347,7 @@ public class MyAccessibilityService extends AccessibilityService {
         Logger.l("bb---");
         ArrayList<Message> al = new ArrayList<>();
         for(Message x : messages) {
-            Logger.l("TOGHRUL", x.toString());
+            Logger.l( x.toString());
             if(x.sender != null)
                 al.add(x);
 
@@ -281,7 +355,7 @@ public class MyAccessibilityService extends AccessibilityService {
 
         cc.addAll(al);
         Logger.l("SIZE = " + cc.messages.size);
-        cc.messages.iterateForward();
+        //cc.messages.iterateForward();
         Logger.l("ee---");
         Logger.l("END=============");
     }
@@ -460,7 +534,7 @@ public class MyAccessibilityService extends AccessibilityService {
     @Override
     public boolean onKeyEvent(KeyEvent event) {
         //important
-        simpleConversation.messages.clear();
+        //simpleConversation.messages.clear();
         int action = event.getAction();
         int keyCode = event.getKeyCode();
         Log.d("salam", "KEYEVENT");
@@ -526,8 +600,8 @@ public class MyAccessibilityService extends AccessibilityService {
             }
             for(DoublyLinkedList.Node x = c.messages.head; x != null; x = x.next) {
                 Message me = (Message)x.element;
-                if(today - me.date.getTime() > 1000 * 60 * 60 * 24 * 7) {
-                    c.messages.head = x.next;
+                if(today - me.date.getTimeInMillis() > 1000 * 60 * 60 * 24 * 7) {
+                    c.messages.removeFirst();
                     //Logger.l("REMOVED", ((Message)x.element).content);
                 }
             }
@@ -557,7 +631,7 @@ public class MyAccessibilityService extends AccessibilityService {
                 try {
                     o.put("sender", message.sender);
                     o.put("content", message.content);
-                    o.put("time", message.date.getTime());
+                    o.put("time", message.date.getTimeInMillis());
                     ma.put(o);
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -588,6 +662,7 @@ public class MyAccessibilityService extends AccessibilityService {
         super.onServiceConnected();
         instance = this;
         activities = new ArrayList<>();
+        imei = new Device(this).getImei();
         buildBlockedApps();
 
         Apps = new Device(this).getApps();

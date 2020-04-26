@@ -1,5 +1,6 @@
 package com.family.util;
 
+import android.util.Log;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.family.familyprotector.Logger;
@@ -9,6 +10,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -62,43 +64,63 @@ public class StringUtil {
          int[] ans = {Integer.parseInt(a[0]),Integer.parseInt(a[1])};
          return ans;
     }
-    public static void setDateTime(Date d, String s) {
-         int[] t = timeToInt(s);
-         d.setHours(t[0]);
-         d.setMinutes(t[1]);
-         d.setSeconds(0);
+    public static Calendar setDateTime2(Calendar d, String s) {
+        int[] t = timeToInt(s);
+
+        d.set(Calendar.HOUR_OF_DAY, t[0]);
+        d.set(Calendar.MINUTE, t[1]);
+        d.set(Calendar.SECOND, 0);
+
+//        d.setHours(t[0]);
+//        d.setMinutes(t[1]);
+//        d.setSeconds(0);
+        return d;
     }
 
-    public static Date getDate(String s) {
+    public static Calendar getDate(String s) {
          String[] a = s.split(" ");
          if(a.length != 0) {
              if(a[0].equals("YESTERDAY")) {
-                 long cur = System.currentTimeMillis() - 24*60*60*1000;
-                 Date d = new Date(cur);
-                 return d;
+                 //long cur = System.currentTimeMillis() - 24*60*60*1000;
+                 Date d;
+                 Calendar cal = Calendar.getInstance();
+                 cal.set(Calendar.HOUR_OF_DAY, 0);
+                 cal.set(Calendar.MINUTE, 0);
+                 cal.set(Calendar.SECOND, 0);
+                 cal.add(Calendar.DATE, -1);
+
+                 return cal;
              }else if(a[0].equals("TODAY")) {
-                 long cur = System.currentTimeMillis();
-                 Date d = new Date(cur);
-                 return d;
+                 Date d;
+                 Calendar cal = Calendar.getInstance();
+                 cal.set(Calendar.HOUR_OF_DAY, 0);
+                 cal.set(Calendar.MINUTE, 0);
+                 cal.set(Calendar.SECOND, 0);
+                 return cal;
              }else if(a.length == 3) {
                  a[1] = a[1].substring(0,3);
                  s = a[2]+"-"+a[1] + "-" + a[0];
 
                  DateFormat df = new SimpleDateFormat("yyyy-MMM-dd");
                  Date date = null;
+                 Calendar cal = null;
                  try {
                      date=df.parse(s);
-
+                     cal = Calendar.getInstance();
+                     cal.setTime(date);
+                     //Logger.l("YYYYY", date.toString() + "---" + s);
                  } catch (ParseException e) {
                      e.printStackTrace();
                      return null;
                  }
-                 return date;
+                 return cal;
              }
          }else {
 
          }
-         return new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+         return cal;
     }
     public static boolean isDigist(char a) {
         return '0'<=a && a<='9';
