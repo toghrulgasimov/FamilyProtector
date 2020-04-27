@@ -160,5 +160,16 @@ public class StringUtil {
          }
          return null;
     }
+    public static boolean isNowWithoutDay(String s) {
+         if(s == null || s.indexOf(":") == -1) {
+             return false;
+         }
+         Calendar now = Calendar.getInstance();
+         Date nowd = now.getTime();
+         String []a = s.split(":");
+         int h = Integer.parseInt(a[0]);
+         int m = Integer.parseInt(a[1]);
+         return now.get(Calendar.HOUR_OF_DAY) == h && now.get(Calendar.MINUTE) == m;
+    }
 
 }

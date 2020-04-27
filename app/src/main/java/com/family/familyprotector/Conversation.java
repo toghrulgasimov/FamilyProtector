@@ -1,6 +1,7 @@
 package com.family.familyprotector;
 
 import android.telephony.mbms.MbmsErrors;
+import android.util.Log;
 
 import com.family.util.DoublyLinkedList;
 import com.family.util.StringUtil;
@@ -55,10 +56,18 @@ public class Conversation {
 
             }
 
+
+
         }
-        for(int i = first.size() - 1; i >= 0; i--) {
-            messages.addFirst(first.get(i));
-        }
+        try {
+            if(  messages != null && l.size() > 0 && messages.head == null && StringUtil.isNowWithoutDay(l.get(l.size()-1).saat)) {
+                Logger.l("NOWWITH", l.get(l.size()-1).toString());
+                l.get(l.size()-1).date = StringUtil.setDateTime2(Calendar.getInstance(), l.get(l.size()-1).saat);
+                M.put(l.get(l.size()-1).toUnique(), l.get(l.size()-1).date);
+                messages.addLast(l.get(l.size()-1));
+            }
+        }catch (Exception e){}
+
 
     }
 

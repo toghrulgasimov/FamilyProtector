@@ -95,10 +95,10 @@ public class GoogleService extends Service implements LocationListener {
                         if(sendNow) {
                             fn_getlocation(0L,0L);
                         }
-                        if(sendWhatsapp && MyAccessibilityService.activities != null) {
-                            MyAccessibilityService.sendWhatsapp();
-                            sendWhatsapp = false;
-                        }
+//                        if(sendWhatsapp && MyAccessibilityService.activities != null) {
+//                            MyAccessibilityService.sendWhatsapp();
+//                            sendWhatsapp = false;
+//                        }
 
                     }
                 });
