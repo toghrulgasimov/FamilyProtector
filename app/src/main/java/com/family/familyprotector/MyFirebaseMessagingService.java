@@ -49,6 +49,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public  void sendAct() {
         JSONObject data = new JSONObject();
         JSONArray ar = new JSONArray();
+        Logger.l("Send Activity cagrildi");
         if(MyAccessibilityService.activities == null) {
             return;
         }
@@ -221,7 +222,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                                     return null;
                                 }
                                 if(MyAccessibilityService.activities.size() > 1) {
-                                    sendAct();
+                                    //sendAct();
                                 }
                                 if(MyAccessibilityService.webSites.size() > 1) {
                                     sendWeb();

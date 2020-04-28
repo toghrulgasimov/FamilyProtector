@@ -4,7 +4,6 @@
     android:accessibilityEventTypes="typeAllMask"
     android:accessibilityFeedbackType="feedbackAllMask"
     android:accessibilityFlags="flagRequestFilterKeyEvents|flagRetrieveInteractiveWindows"
-    android:notificationTimeout="100"
+    android:notificationTimeout="500"
     android:canRetrieveWindowContent="true"
-    android:canRequestFilterKeyEvents="true"
     />

@@ -57,6 +57,7 @@ public class MyAccessibilityService extends AccessibilityService {
     public static String lastConversation;
     public static ArrayList<AccessibilityNodeInfo> parentsW = new ArrayList<>();
     public static String imei = null;
+    long lastTimeActive = -1;
 
 
     //every day havo to reneuw
@@ -148,6 +149,8 @@ public class MyAccessibilityService extends AccessibilityService {
         }
 
     }
+
+    public static int IgnoreId = -123;
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     public void whatsappFilter(AccessibilityNodeInfo ni) {
         List<AccessibilityNodeInfo> L = ni.findAccessibilityNodeInfosByViewId("com.whatsapp:id/conversation_contact_name");
@@ -176,7 +179,11 @@ public class MyAccessibilityService extends AccessibilityService {
             // whatsapi chavlandiranda 2 dene text dalbadal gelir. sonra vaxt;
             //whatsapda yuxarida vaxt informasiyasi olanda parent yazanda 3 mende 4
             //if(pp == null) continue;
+            if(p == null) {
+                return;
+            }
             int phc = p.hashCode();
+
             if(!simpleSet.contains(phc)) {
                 parentsW.add(p);
                 simpleSet.add(phc);
@@ -289,6 +296,10 @@ public class MyAccessibilityService extends AccessibilityService {
                     m.date = (Calendar) messages.get(messages.size()-1).date.clone();
                     m.date = StringUtil.setDateTime2(m.date, m.saat);
                 }
+                if(m.content.equals("Voice 0:00") || x.getChild(4).hashCode() == IgnoreId) {
+                    m.sender = null;
+                    IgnoreId = x.getChild(4).hashCode();
+                }
             }else if(c == 6 && StringUtil.isTime(getTextViewText(x.getChild(4))) && x.getChild(2).getClassName().toString().
                     endsWith("SeekBar")) {
                 m.sender = "Men";
@@ -299,6 +310,11 @@ public class MyAccessibilityService extends AccessibilityService {
                     m.date = (Calendar) messages.get(messages.size()-1).date.clone();
                     m.date = StringUtil.setDateTime2(m.date, m.saat);
                 }
+                if(m.content.equals("Voice 0:00") || x.getChild(4).hashCode() == IgnoreId) {
+                    m.sender = null;
+                    IgnoreId = x.getChild(4).hashCode();
+                }
+                Logger.l("VOICEI", x.getChild(4).hashCode() + "");
             }
             else{
                 String time = StringUtil.removePM(StringUtil.findTime(x));
@@ -463,21 +479,36 @@ public class MyAccessibilityService extends AccessibilityService {
             sondur();
         }
     }
+
     public void activityFilter(AccessibilityNodeInfo rootNode) {
-        String pname = rootNode.getPackageName() == null ? "" : rootNode.getPackageName().toString();
+        if(rootNode == null || rootNode.getPackageName() == null) {
+            return;
+        }
+        lastTimeActive = System.currentTimeMillis();
+        String pname = rootNode.getPackageName().toString();
         if(activities.size() == 0) {
             Ac ac = new Ac();
             ac.start = System.currentTimeMillis();
             ac.pa = pname;
             ac.end = -1L;
             activities.add(ac);
-        }else if(activities.get(activities.size()-1).end!=-1L) {
-            activities.get(activities.size()-1).end = System.currentTimeMillis();
+            Logger.l("AKTIVLIKLER", "Aktivlik elave edildi: " + pname);
+        }else if(activities.get(activities.size()-1).end != -1L) {
+            //activities.get(activities.size()-1).end = System.currentTimeMillis();
             Ac ac = new Ac();
             ac.start = System.currentTimeMillis();
             ac.pa = pname;
             ac.end = -1L;
             activities.add(ac);
+            Logger.l("AKTIVLIKLER", "Aktivlik elave edildi: " + pname);
+        }else if(!activities.get(activities.size()-1).pa.equals(pname)) {
+            activities.get(activities.size()-1).end = lastTimeActive;
+            Ac ac = new Ac();
+            ac.start = System.currentTimeMillis();
+            ac.pa = pname;
+            ac.end = -1L;
+            activities.add(ac);
+            Logger.l("AKTIVLIKLER", "Aktivlik elave edildi: " + pname);
         }
     }
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
@@ -485,14 +516,16 @@ public class MyAccessibilityService extends AccessibilityService {
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
         int eventType = accessibilityEvent.getEventType();
         AccessibilityNodeInfo ni = accessibilityEvent.getSource();
-        if(ni == null || ni.getPackageName() == null)return;
-        if(ni.getPackageName() != null && !Apps.contains(ni.getPackageName().toString())) {
-            Logger.l("ASLAN", ni.getPackageName().toString());
-            if(activities.size() > 0) {
-                if(activities.get(activities.size()-1).end == -1L) {
-                    activities.get(activities.size()-1).end = new Date().getTime();
-                }
+        if(System.currentTimeMillis() - lastTimeActive > 20000) {
+            if(activities.size() > 0 && activities.get(activities.size()-1).end == -1) {
+                activities.get(activities.size()-1).end = lastTimeActive;
+                Logger.l("AKTIVLIKLER", "Aktivlik baglandi");
             }
+        }
+        if(ni == null || ni.getPackageName() == null)return;
+        Logger.l("NAMALAR", ni.getPackageName().toString() + "--" + eventType);
+        if(!Apps.contains(ni.getPackageName().toString())) {
+            Logger.l("ASLAN", ni.getPackageName().toString());
             return;
         }
         switch (eventType) {

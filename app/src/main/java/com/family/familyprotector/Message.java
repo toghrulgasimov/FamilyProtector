@@ -10,6 +10,7 @@ public class Message {
     public String content = null;
     public Calendar date = null;
     public String saat = null;
+    public String viewId = null;
     public String type = "simple";
     public Message() {
 

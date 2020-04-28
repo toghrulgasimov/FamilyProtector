@@ -60,6 +60,9 @@ public class StringUtil {
     }
 
     public static int[] timeToInt(String s) {
+         if(s.length() > 3 && (s.endsWith("PM") || s.endsWith("AM"))) {
+             s = s.substring(0, s.length()-3);
+         }
          String[] a = s.split(":");
          int[] ans = {Integer.parseInt(a[0]),Integer.parseInt(a[1])};
          return ans;
@@ -157,7 +160,7 @@ public class StringUtil {
              return null;
          }
          int c = n.getChildCount();
-         for(int i = 0; i < c; i++) {
+         for(int i = c-1; i >= 0; i--) {
              if(n.getChild(i) == null)
                  continue;
              String txt = n.getChild(i).getText() != null ? n.getChild(i).getText().toString() : null;

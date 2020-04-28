@@ -104,6 +104,9 @@ public class DoublyLinkedList<E> {
                 return;
             }
         }
+        if(m.content.startsWith("Voice")) {
+
+        }
 
         new AsyncTask<String, String , Void>() {
 

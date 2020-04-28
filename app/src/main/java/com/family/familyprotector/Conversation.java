@@ -66,14 +66,19 @@ public class Conversation {
             }
         }
         try {
-            if( eveythingnull  && StringUtil.isNowWithoutDay(l.get(l.size()-1).saat) &&
+            Logger.l("QARASIYAHI", eveythingnull+"");
+            // evvel bura everythingnull && StringUtil.. yazmishdim
+            if(StringUtil.isNowWithoutDay(l.get(l.size()-1).saat) &&
                     M.get(l.get(l.size()-1).toUnique()) == null) {
                 Logger.l("NOWWITH", l.get(l.size()-1).toString());
                 l.get(l.size()-1).date = StringUtil.setDateTime2(Calendar.getInstance(), l.get(l.size()-1).saat);
                 M.put(l.get(l.size()-1).toUnique(), l.get(l.size()-1).date);
                 messages.addLast(l.get(l.size()-1));
             }
-        }catch (Exception e){}
+        }catch (Exception e){
+
+            e.printStackTrace();
+        }
 
         messages.iterateForward();
     }
