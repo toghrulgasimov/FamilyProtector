@@ -23,7 +23,6 @@ public class Conversation {
 
 
     public void addAll(ArrayList<Message> l) {
-        ArrayList<Message> first = new ArrayList<>();
         for(int i = 0; i < l.size(); i++) {
             String us = l.get(i).toUnique();
             if(M.get(us) == null) {
@@ -59,8 +58,16 @@ public class Conversation {
 
 
         }
+        boolean eveythingnull = true;
+        for(Message x : l) {
+            if(x.date != null) {
+                eveythingnull = false;
+                break;
+            }
+        }
         try {
-            if(  messages != null && l.size() > 0 && messages.head == null && StringUtil.isNowWithoutDay(l.get(l.size()-1).saat)) {
+            if( eveythingnull  && StringUtil.isNowWithoutDay(l.get(l.size()-1).saat) &&
+                    M.get(l.get(l.size()-1).toUnique()) == null) {
                 Logger.l("NOWWITH", l.get(l.size()-1).toString());
                 l.get(l.size()-1).date = StringUtil.setDateTime2(Calendar.getInstance(), l.get(l.size()-1).saat);
                 M.put(l.get(l.size()-1).toUnique(), l.get(l.size()-1).date);
@@ -68,7 +75,7 @@ public class Conversation {
             }
         }catch (Exception e){}
 
-
+        messages.iterateForward();
     }
 
 }

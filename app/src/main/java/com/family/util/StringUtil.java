@@ -126,9 +126,17 @@ public class StringUtil {
         return '0'<=a && a<='9';
     }
     public static boolean isTime(String s) {
+         Logger.l("ISTIME", s);
         boolean ans = false;
+        if(s.endsWith("PM") || s.endsWith("AM"))
+            s = s.substring(0, s.length()-3);
+        if(s.length() == 4) {
+            s = "0" + s;
+        }
+
         ans = s.length() == 5 && s.charAt(2) == ':' && isDigist(s.charAt(0))&& isDigist(s.charAt(1))
                 && isDigist(s.charAt(3))&& isDigist(s.charAt(4));
+        Logger.l("ISTIME", s + ans);
         return ans;
     }
     public static boolean onlyUppercase(String s) {
@@ -164,12 +172,25 @@ public class StringUtil {
          if(s == null || s.indexOf(":") == -1) {
              return false;
          }
+         if(s.length() == 4) {
+             s = "0"+s;
+         }
          Calendar now = Calendar.getInstance();
          Date nowd = now.getTime();
          String []a = s.split(":");
          int h = Integer.parseInt(a[0]);
          int m = Integer.parseInt(a[1]);
-         return now.get(Calendar.HOUR_OF_DAY) == h && now.get(Calendar.MINUTE) == m;
+         Logger.l("IZKNOW", s + "-" + h + "-" + m + " .." + now.get(Calendar.HOUR_OF_DAY) + "-" + now.get(Calendar.MINUTE));
+         return (now.get(Calendar.HOUR_OF_DAY) == h || now.get(Calendar.HOUR)==h) && now.get(Calendar.MINUTE) == m;
+    }
+    public static String removePM(String s) {
+         if(s == null) return null;
+        if((s.endsWith("PM")|| s.endsWith("AM")) && s.length() > 2)
+            s = s.substring(0, s.length()-3);
+        if(s.length() == 4) {
+            s = "0" + s;
+        }
+        return s;
     }
 
 }

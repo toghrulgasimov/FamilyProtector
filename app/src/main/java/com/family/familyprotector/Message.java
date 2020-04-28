@@ -24,6 +24,6 @@ public class Message {
     }
     @Override
     public String toString() {
-        return sender + ": " + content + " - " + (date == null ? "NULL" : date.getTime());
+        return sender + ": " + content + " - " + (date == null ? "NULL" : date.getTime()) + "--" + saat;
     }
 }

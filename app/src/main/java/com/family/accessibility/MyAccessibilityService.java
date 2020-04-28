@@ -211,7 +211,7 @@ public class MyAccessibilityService extends AccessibilityService {
                 //vaxti ozun tap
                 m.sender = "Men";
                 m.content = getTextViewText(x.getChild(0));
-                m.unclear = getTextViewText(x.getChild(1));
+                m.unclear = StringUtil.removePM(getTextViewText(x.getChild(1)));
                 m.saat = m.unclear;
                 if(messages.size() != 0 && messages.get(messages.size()-1).date != null&& m.date != null) {
                     m.date = (Calendar) messages.get(messages.size()-1).date.clone();
@@ -221,7 +221,7 @@ public class MyAccessibilityService extends AccessibilityService {
                 //vacxti ozun tap
                 m.sender = lastConversation;
                 m.content = getTextViewText(x.getChild(0));
-                m.unclear = getTextViewText(x.getChild(1));
+                m.unclear = StringUtil.removePM(getTextViewText(x.getChild(1)));
                 m.saat = m.unclear;
                 if(messages.size() != 0 && messages.get(messages.size()-1).date != null && m.date != null) {
                     m.date = (Calendar) messages.get(messages.size()-1).date.clone();
@@ -232,7 +232,7 @@ public class MyAccessibilityService extends AccessibilityService {
                 m.date = StringUtil.getDate(getTextViewText(x.getChild(0)));
                 m.date = StringUtil.setDateTime2(m.date, getTextViewText(x.getChild(2)));
                 m.content = getTextViewText(x.getChild(1));
-                m.saat = getTextViewText(x.getChild(2));
+                m.saat = StringUtil.removePM(getTextViewText(x.getChild(2)));
 
             }else if(c == 4 && StringUtil.onlyUppercase(getTextViewText(x.getChild(0))) && StringUtil.isTime(getTextViewText(x.getChild(2))) &&
                     x.getChild(x.getChildCount()-1).getClassName().toString().endsWith("ImageView")) {
@@ -240,7 +240,7 @@ public class MyAccessibilityService extends AccessibilityService {
                 m.date = StringUtil.getDate(getTextViewText(x.getChild(0)));
                 m.date = StringUtil.setDateTime2(m.date, getTextViewText(x.getChild(2)));
                 m.content = getTextViewText(x.getChild(1));
-                m.saat = getTextViewText(x.getChild(2));
+                m.saat = StringUtil.removePM(getTextViewText(x.getChild(2)));
             }else if(c == 12|| c == 13) {// time yuxarida cixib apply ele evvelden meluma qeder
 //                String t = getTextViewText(x.getChild(6));
 //                for(Message me : messages) {
@@ -262,7 +262,7 @@ public class MyAccessibilityService extends AccessibilityService {
                     endsWith("LinearLayout"))){
                 m.sender = lastConversation;
                 m.content = getTextViewText(x.getChild(1));
-                m.unclear = getTextViewText(x.getChild(2));
+                m.unclear = StringUtil.removePM(getTextViewText(x.getChild(2)));
                 m.saat = m.unclear;
                 if(messages.size() != 0 && messages.get(messages.size()-1).date != null&& m.date != null) {
                     m.date = (Calendar) messages.get(messages.size()-1).date.clone();
@@ -273,7 +273,7 @@ public class MyAccessibilityService extends AccessibilityService {
                     endsWith("LinearLayout"))){
                 m.sender = "Men";
                 m.content = getTextViewText(x.getChild(1));
-                m.unclear = getTextViewText(x.getChild(2));
+                m.unclear = StringUtil.removePM(getTextViewText(x.getChild(2)));
                 m.saat = m.unclear;
                 if(messages.size() != 0 && messages.get(messages.size()-1).date != null&& m.date != null) {
                     m.date = (Calendar) messages.get(messages.size()-1).date.clone();
@@ -283,7 +283,7 @@ public class MyAccessibilityService extends AccessibilityService {
                     endsWith("SeekBar")) {
                 m.sender = lastConversation;
                 m.content = "Voice " + getTextViewText(x.getChild(2));
-                m.unclear = getTextViewText(x.getChild(3));
+                m.unclear = StringUtil.removePM(getTextViewText(x.getChild(3)));
                 m.saat = m.unclear;
                 if(messages.size() != 0 && messages.get(messages.size()-1).date != null&& m.date != null) {
                     m.date = (Calendar) messages.get(messages.size()-1).date.clone();
@@ -293,7 +293,7 @@ public class MyAccessibilityService extends AccessibilityService {
                     endsWith("SeekBar")) {
                 m.sender = "Men";
                 m.content = "Voice " + getTextViewText(x.getChild(3));
-                m.unclear = getTextViewText(x.getChild(4));
+                m.unclear = StringUtil.removePM(getTextViewText(x.getChild(4)));
                 m.saat = m.unclear;
                 if(messages.size() != 0 && messages.get(messages.size()-1).date != null&& m.date != null) {
                     m.date = (Calendar) messages.get(messages.size()-1).date.clone();
@@ -301,7 +301,7 @@ public class MyAccessibilityService extends AccessibilityService {
                 }
             }
             else{
-                String time = StringUtil.findTime(x);
+                String time = StringUtil.removePM(StringUtil.findTime(x));
 
                 Logger.l("-------------------------------------------------------------"+time + m.date);
                 if(time != null) {
@@ -334,7 +334,7 @@ public class MyAccessibilityService extends AccessibilityService {
 //                    if(m.sender == null) {
 //                        continue;
 //                    }
-            if(true)
+            if(m.sender != null)
                 messages.add(m);
             for(int i = 0; i < c; i++) {
                 AccessibilityNodeInfo child = x.getChild(i);
