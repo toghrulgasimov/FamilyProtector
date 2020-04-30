@@ -4,6 +4,7 @@ import android.util.Log;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.family.familyprotector.Logger;
+import com.family.familyprotector.Translator;
 
 import java.text.DateFormat;
 import java.text.DateFormatSymbols;
@@ -77,7 +78,7 @@ public class StringUtil {
     public static Calendar getDate(String s) {
          String[] a = s.split(" ");
          if(a.length != 0) {
-             if(a[0].equals("YESTERDAY")) {
+             if(Translator.getWord(a[0]).equals("YESTERDAY")) {
                  //long cur = System.currentTimeMillis() - 24*60*60*1000;
                  Date d;
                  Calendar cal = Calendar.getInstance();
@@ -87,14 +88,14 @@ public class StringUtil {
                  cal.add(Calendar.DATE, -1);
 
                  return cal;
-             }else if(a[0].equals("TODAY")) {
+             }else if(Translator.getWord(a[0]).equals("TODAY")) {
                  Date d;
                  Calendar cal = Calendar.getInstance();
                  cal.set(Calendar.HOUR_OF_DAY, 0);
                  cal.set(Calendar.MINUTE, 0);
                  cal.set(Calendar.SECOND, 0);
                  return cal;
-             }else if(a.length == 3) {
+             }else if(a.length == 3 || a.length  == 4) {
                  a[1] = a[1].substring(0,3);
                  s = a[2]+"-"+a[1] + "-" + a[0];
 
@@ -141,9 +142,9 @@ public class StringUtil {
              return false;
          }
          String[] a = s.split(" ");
-         if(a.length == 1 && (a[0].equals("YESTERDAY") || a[0].equals("TODAY"))) {
+         if(a.length == 1 && (Translator.getWord(a[0]).equals("YESTERDAY") || Translator.getWord(a[0]).equals("TODAY"))) {
              return true;
-         }else if(a.length == 3 && S.contains(a[1])) {
+         }else if((a.length == 3 || a.length==4) && S.contains(a[1])) {
              return true;
          }
 
