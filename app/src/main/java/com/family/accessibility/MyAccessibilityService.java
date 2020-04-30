@@ -514,19 +514,30 @@ public class MyAccessibilityService extends AccessibilityService {
             Logger.l("AKTIVLIKLER", "Aktivlik elave edildi: " + pname);
         }
     }
+    public static String lastPackage = "";
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
 
         int eventType = accessibilityEvent.getEventType();
         AccessibilityNodeInfo ni = accessibilityEvent.getSource();
-        if(System.currentTimeMillis() - lastTimeActive > 20000) {
-            if(activities.size() > 0 && activities.get(activities.size()-1).end == -1) {
-                activities.get(activities.size()-1).end = lastTimeActive;
+        if((System.currentTimeMillis() - lastTimeActive > 15000)) {
+            if(activities.size() > 0 && activities.get(activities.size()-1).end == -1 && !activities.get(activities.size()-1).pa.equals(lastPackage)
+            && !lastPackage.equals("")) {
+                if(activities.get(activities.size()-1).pa.equals("com.whatsapp") || activities.get(activities.size()-1).pa.equals("com.google.android.youtube")
+                        || activities.get(activities.size()-1).pa.equals("com.android.chrome")) {
+                    activities.get(activities.size()-1).end = lastTimeActive;
+                }
+                else{
+                        activities.get(activities.size()-1).end = System.currentTimeMillis();
+                }
                 Logger.l("AKTIVLIKLER", "Aktivlik baglandi");
             }
         }
         if(ni == null || ni.getPackageName() == null)return;
+        lastPackage = ni.getPackageName().toString();
+        //lastTimeActive = System.currentTimeMillis();
+
         Logger.l("NAMALAR", ni.getPackageName().toString() + "--" + eventType);
         if(!Apps.contains(ni.getPackageName().toString())) {
             Logger.l("ASLAN", ni.getPackageName().toString());
