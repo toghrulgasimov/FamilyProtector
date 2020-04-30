@@ -47,7 +47,6 @@ public class PermissionManager {
                 p,
                 SIMPLE);
     }
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void activityResult(int requestCode) {
         if(requestCode == DRAW) {
             setUssage();

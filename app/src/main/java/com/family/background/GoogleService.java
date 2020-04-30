@@ -21,6 +21,7 @@ import com.family.accessibility.MyAccessibilityService;
 import com.family.familyprotector.Device;
 import com.family.familyprotector.LocationOnce;
 import com.family.familyprotector.Logger;
+import com.family.familyprotector.MyFirebaseMessagingService;
 import com.family.familyprotector.Not;
 import com.family.internet.InternetHelper;
 import com.family.internet.ServerHelper;
@@ -143,6 +144,7 @@ public class GoogleService extends Service implements LocationListener {
                         locations.add(l);
                     }
                 }
+
                 return null;
             }
         }.execute();

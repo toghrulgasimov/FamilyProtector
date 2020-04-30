@@ -5,9 +5,12 @@ import com.family.util.StringUtil;
 
 import org.junit.Test;
 
+import java.text.DateFormatSymbols;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 import static com.family.util.StringUtil.*;
 import static org.junit.Assert.assertEquals;
@@ -57,5 +60,9 @@ public class StringUtilTest {
         b.setHours(12);
         System.out.println(d);
         System.out.println(b);
+
+
+
+
     }
 }

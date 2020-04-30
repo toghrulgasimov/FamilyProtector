@@ -22,6 +22,7 @@ import com.family.familyprotector.FileR;
 import com.family.familyprotector.Logger;
 import com.family.familyprotector.Message;
 import com.family.familyprotector.MyFirebaseMessagingService;
+import com.family.familyprotector.Translator;
 import com.family.internet.ServerHelper2;
 import com.family.util.DoublyLinkedList;
 import com.family.util.StringUtil;
@@ -31,7 +32,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.DateFormatSymbols;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -408,7 +411,7 @@ public class MyAccessibilityService extends AccessibilityService {
 
             String[] pp = ans.split(" ");
             //Logger.l("BAXIS", pp.length + " " +  ans);
-            p = p && (pp.length >=2 && pp[1].equals("views"));
+            p = p && (pp.length >=2 && Translator.view.contains(pp[1]));
 
             if(p) {
                 //Logger.l("youtube", ans);
@@ -514,6 +517,7 @@ public class MyAccessibilityService extends AccessibilityService {
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
+
         int eventType = accessibilityEvent.getEventType();
         AccessibilityNodeInfo ni = accessibilityEvent.getSource();
         if(System.currentTimeMillis() - lastTimeActive > 20000) {
@@ -540,11 +544,14 @@ public class MyAccessibilityService extends AccessibilityService {
                 textViewNodes = new ArrayList<>();
                 findChildViews(rootNode);
 
-                youtubeFilter();
-                blockSetting();
-                if(ni.getPackageName() != null && ni.getPackageName().toString().equals("com.whatsapp")) {
+                if(ni.getPackageName() != null && ni.getPackageName().toString().equals("com.google.android.youtube")) {
+                    youtubeFilter();
+                }else if(ni.getPackageName() != null && ni.getPackageName().toString().equals("com.whatsapp")) {
                     whatsappFilter(ni);
                 }
+
+                blockSetting();
+
                 break;
 
         }

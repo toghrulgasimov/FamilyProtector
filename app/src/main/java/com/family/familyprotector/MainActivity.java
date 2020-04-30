@@ -47,7 +47,6 @@ public class MainActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //new ServerHelper(this).execute("https://lookin24.com/sendActivity", "sadasdasdasdasd");
 
 
         final Context t = this;
@@ -197,7 +196,7 @@ public class MainActivity extends FragmentActivity {
             }
         }.execute();
         startActivity(new Intent(MainActivity.this, ParentActivity.class));
-        this.finish();
+        //this.finish();
     }
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override

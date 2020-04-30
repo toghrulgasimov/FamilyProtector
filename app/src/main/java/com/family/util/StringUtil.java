@@ -6,6 +6,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import com.family.familyprotector.Logger;
 
 import java.text.DateFormat;
+import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -36,27 +37,20 @@ public class StringUtil {
 
         return ans;
     }
-
-    public static String[] aylar = {
-            "JANUARY",
-            "FEBRUARY",
-            "MARCH",
-            "APRIL",
-            "MAY",
-            "JUNE",
-            "JULY",
-            "AUGUST",
-            "SEPTEMBER",
-            "OCTOBER",
-            "NOVEMBER",
-            "DECEMBER"
-    };
-    public static Set<String> S = new HashSet<>(Arrays.asList(aylar));
+    public static Set<String> S;
     public static Map<String, Integer> M = new HashMap<>();
      static {
-        for(int i = 0; i < aylar.length; i++) {
-            M.put(aylar[i], i+1);
+         calculateMonth();
+    }
+    public static void calculateMonth() {
+        DateFormatSymbols dfs = new DateFormatSymbols();
+        M.clear();
+        String[] months = dfs.getMonths();
+        for(int i = 0; i < months.length; i++) {
+            months[i] = months[i].toUpperCase();
+            M.put(months[i], i+1);
         }
+        S = new HashSet<>(Arrays.asList(months));
     }
 
     public static int[] timeToInt(String s) {
