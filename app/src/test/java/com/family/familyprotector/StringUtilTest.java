@@ -10,7 +10,9 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 
 import static com.family.util.StringUtil.*;
 import static org.junit.Assert.assertEquals;
@@ -61,6 +63,9 @@ public class StringUtilTest {
         System.out.println(d);
         System.out.println(b);
 
+        Set<String> S = new HashSet<>();
+
+        S.remove("salam");
 
 
 
