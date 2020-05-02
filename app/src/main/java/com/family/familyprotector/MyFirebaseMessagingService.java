@@ -288,8 +288,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             Logger.l(p + " bunun uzerinde emeliyyat");
             //MyAccessibilityService.instance.sondur();
             if(b.equals("0")) {
+                if(MyAccessibilityService.blockedApps != null)
                 MyAccessibilityService.blockedApps.remove(p);
             }else {
+                if(MyAccessibilityService.blockedApps != null)
                 MyAccessibilityService.blockedApps.add(p);
             }
 

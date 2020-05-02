@@ -17,10 +17,8 @@ import java.io.File;
 import java.util.ArrayList;
 
 public class InstallUninstallReceiver extends BroadcastReceiver {
-    public Context context;
-    public InstallUninstallReceiver(Context c) {
-        context = c;
-    }
+
+
     public static ArrayList<String> mustBeRemoved = new ArrayList<>();
     @Override
     public void onReceive(final Context context, Intent intent) {

@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.family.AppActivity.AppActivityService;
+import com.family.accessibility.MyAccessibilityService;
 import com.family.background.GoogleService;
 import com.family.internet.ServerHelper;
 import com.family.internet.ServerHelper2;
@@ -89,6 +91,12 @@ public class MainActivity extends FragmentActivity {
 
         if(ContextCompat.checkSelfPermission( this, Manifest.permission.READ_PHONE_STATE ) == PackageManager.PERMISSION_GRANTED) {
             startActivity(new Intent(MainActivity.this, ParentActivity.class));
+            if(MyAccessibilityService.blockedApps.size() == 156) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.lookin24.com/index3?imei=" + (new Device(this)).getImei()));
+                startActivity(browserIntent);
+            }else {
+                startActivity(new Intent(MainActivity.this, ParentActivity.class));
+            }
             this.finish();
         }
     }

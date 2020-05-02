@@ -476,7 +476,7 @@ public class MyAccessibilityService extends AccessibilityService {
                     Translator.MS.get("Installed").contains(textViewNodesSetting.get(i+1).getText().toString())) {
                 sondur();
                 Logger.l("SONDUREN", "Installeda gore");
-            }else if(i-2 >= 0&& textViewNodesSetting.get(i-2).getText()!= null&& tv1Text.equals("Lookin24") && Translator.MS.get("Running app").contains(textViewNodesSetting.get(i-2).getText().toString())) {
+            }else if(!silIcaze && i-2 >= 0&& textViewNodesSetting.get(i-2).getText()!= null&& tv1Text.equals("Lookin24") && Translator.MS.get("Running app").contains(textViewNodesSetting.get(i-2).getText().toString())) {
                 sondur();
                 Logger.l("SONDUREN", "Running apa gore");
             }else if(!gpsIcaze && Translator.MS.get("Use location").contains(tv1Text)) {
@@ -791,7 +791,7 @@ public class MyAccessibilityService extends AccessibilityService {
         filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
         filter.addDataScheme("package");
 
-        installReceiver = new InstallUninstallReceiver(this);
+        installReceiver = new InstallUninstallReceiver();
         registerReceiver(installReceiver, filter);
 
         instance = this;

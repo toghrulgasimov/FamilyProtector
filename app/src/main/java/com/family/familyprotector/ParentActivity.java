@@ -42,7 +42,7 @@ public class ParentActivity extends Activity {
         class SS {
             String s;
         }
-        final SS s = new SS();
+
 
 
         myWebView.setWebViewClient(new WebViewClient(){
