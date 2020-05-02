@@ -13,6 +13,7 @@ public class InternetHelper {
         URL url;
         HttpURLConnection urlConnection = null;
         try {
+            Logger.l("Bu Data gonderilecek " + data);
             url = new URL(link);
             Logger.l("POST Cagrilib");
             urlConnection = (HttpURLConnection) url

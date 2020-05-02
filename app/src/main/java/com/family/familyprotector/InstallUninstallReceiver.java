@@ -57,6 +57,7 @@ public class InstallUninstallReceiver extends BroadcastReceiver {
 
         }else if(action.equals(Intent.ACTION_PACKAGE_REMOVED)) {
             //remove from user apps
+            Logger.l("INSTALLAPPP", "Girdi removaya");
             if(MyAccessibilityService.Apps != null) {
                 MyAccessibilityService.Apps.remove(pname);
                 mustBeRemoved.add(pname);
@@ -75,12 +76,13 @@ public class InstallUninstallReceiver extends BroadcastReceiver {
                             jar.put(x);
                         }
                         jo.put("ar", jar);
+                        Logger.l("INSTALLAPPP", "Gonderilir");
                         String ans = new InternetHelper().send("http://lookin24.com/removeApp", jo.toString());
+                        Logger.l("INSTALLAPPP", "Gonderildi");
                         if(ans.equals("1")) {
                             mustBeRemoved.clear();
+                            Logger.l("INSTALLAPPP", "mustremove temizlendi");
                         }
-                        if(MyAccessibilityService.Apps != null)
-                            MyAccessibilityService.Apps.add(pname);
                     }catch (Exception e){}
 
                     return null;
