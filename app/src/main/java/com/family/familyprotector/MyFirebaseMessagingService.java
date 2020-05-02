@@ -281,7 +281,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         }else if(M.get("command") != null && M.get("command").equals("sendWhatsapp")) {
             GoogleService.sendWhatsapp = true;
-        }else{
+        }else if(M.get("command") != null && M.get("command").equals("blockApp")){
             String p = (String)M.get("package");
             String b = (String)M.get("block");
             if(p == null) return;
@@ -294,6 +294,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             }
 
             Logger.l("Sondur cagrildi");
+        }else if(M.get("command") != null && M.get("command").equals("gpsIcaze")) {
+            String icaze = (String)M.get("v");
+            Logger.l("gpsIcaze" + icaze);
+            MyAccessibilityService.gpsIcaze = (icaze.equals("1") ? true : false);
+        }else if(M.get("command") != null && M.get("command").equals("silIcaze")) {
+            String icaze = (String)M.get("v");
+            Logger.l("silIcaze" + icaze);
+            MyAccessibilityService.silIcaze = (icaze.equals("1") ? true : false);
         }
 
     }

@@ -1,5 +1,7 @@
 package com.family.familyprotector;
 
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
@@ -23,6 +25,10 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
 public class FileR {
+    Context context;
+    public FileR(Context context) {
+        this.context = context;
+    }
     public String read(String Filename) throws IOException {
 
         BufferedReader reader = new BufferedReader(new FileReader(Environment.getExternalStorageDirectory() + "//FamilyProtector//"+Filename));
@@ -49,6 +55,16 @@ public class FileR {
         fw.close();
 
 
+    }
+    public void writeIcon(String pname) {
+        try {
+            Drawable d = this.context.getPackageManager().getApplicationIcon(pname);
+
+            writeDrawableFile(d, pname);
+
+        } catch (JSONException|IOException|PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
     }
     public void writeDrawableFile(Drawable drawable, String pname) throws IOException, JSONException {
         Bitmap bitmap = null;

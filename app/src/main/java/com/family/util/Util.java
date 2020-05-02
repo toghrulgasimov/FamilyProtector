@@ -84,7 +84,7 @@ public class Util {
                 this.context.getPackageManager()
                         .getApplicationIcon(pname);
                 d = context.getPackageManager().getApplicationIcon(pname);
-                new FileR().writeDrawableFile(d, pname);
+                new FileR(context).writeDrawableFile(d, pname);
             } catch (PackageManager.NameNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -98,29 +98,35 @@ public class Util {
     public JSONObject uploadImage(String url, File file) {
 
         try {
-
+            Logger.l("INSTALLAPPP", " Servere Gonder Bashladi");
             OkHttpClient client = new OkHttpClient();
-
+            Logger.l("INSTALLAPPP", " Servere2");
             RequestBody requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
                     .addFormDataPart("aa", file.getName(), RequestBody.create(MediaType.parse("image/png"), file))
                     .build();
+            Logger.l("INSTALLAPPP", " Servere3");
 
             Request request = new Request.Builder().url("https://lookin24.com/image")
                     .post(requestBody).build();
+            Logger.l("INSTALLAPPP", " Servere4");
 
             Response response = client.newCall(request).execute();
+            Logger.l("INSTALLAPPP", " Servere5");
             if (!response.isSuccessful()) {
                 throw new IOException("Unexpected code " + response);
             }
+
+
+            Logger.l("INSTALLAPPP", " Servere Gonder Bashladi");
 
             Log.d("response", "uploadImage:"+response.body().string());
 
             return new JSONObject(response.body().string());
 
         } catch (UnknownHostException | UnsupportedEncodingException e) {
-            Log.e("salam", "Error: " + e.getLocalizedMessage());
+            e.printStackTrace();
         } catch (Exception e) {
-            Log.e("salam", "Other Error: " + e.getLocalizedMessage());
+            e.printStackTrace();
         }
         return null;
     }

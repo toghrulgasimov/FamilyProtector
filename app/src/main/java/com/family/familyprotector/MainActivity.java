@@ -170,7 +170,7 @@ public class MainActivity extends FragmentActivity {
                     e.printStackTrace();
                 }
                 try {
-                    new FileR().write("locations.txt", "123.1231:123.3213", true);
+                    new FileR(c).write("locations.txt", "123.1231:123.3213", true);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

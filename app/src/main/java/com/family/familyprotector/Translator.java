@@ -12,6 +12,8 @@ public class Translator {
     public static Map<String, String> M = new HashMap<>();
     public static String language = Locale.getDefault().getLanguage();
     public static Set<String> view = new HashSet<>();
+
+    public static Map<String, Set<String>> MS = new HashMap<>();
     public static String getWord(String s) {
         String ans = M.get(s);
         if(ans == null) ans = "898";
@@ -45,6 +47,58 @@ public class Translator {
         view.add("görüntüleme");
         view.add("Aufrufe");
         view.add("baxış");
+
+        //Use location
+        //Location
+        MS.put("Installed", new HashSet<String>());
+        MS.put("Location", new HashSet<String>());
+        MS.put("Running app", new HashSet<String>());
+        MS.put("Use location", new HashSet<String>());
+        MS.put("Device admin app", new HashSet<String>());
+
+        MS.get("Installed").add("Installed");
+        MS.get("Installed").add("Quraşdırıldı");
+        MS.get("Installed").add("Yüklendi");
+        MS.get("Installed").add("Установлено");
+        MS.get("Installed").add("Installiert");
+        //Установлено
+        //Installiert
+
+        MS.get("Location").add("Location");
+        MS.get("Location").add("Yer");
+        MS.get("Location").add("Konum");
+        MS.get("Location").add("Передача геоданных");
+        MS.get("Location").add("Standort");
+        //Передача геоданных
+        //Standort
+
+        MS.get("Running app").add("Running app");
+        MS.get("Running app").add("Tətbiq prosesdədir");
+        MS.get("Running app").add("Çalışan uygulamalar");
+        MS.get("Running app").add("Работающие приложения");
+        MS.get("Running app").add("Aktive App");
+        //Работающие приложения
+        //Aktive App
+
+        MS.get("Use location").add("Use location");
+        MS.get("Use location").add("Məkanı istifadə edin");
+        MS.get("Use location").add("Konumu kullan");
+        MS.get("Use location").add("Использовать местоположение");
+        MS.get("Use location").add("Standort verwenden");
+        //Использовать местоположение
+        //Standort verwenden
+
+
+        //App zur Geräteverwaltung
+        // Cihaz admin tətbiqi
+        //Приложение администратора устройства
+        //Cihaz yönetimi uygulaması
+        //Device admin app
+        MS.get("Device admin app").add("Device admin app");
+        MS.get("Device admin app").add("Cihaz yönetimi uygulaması");
+        MS.get("Device admin app").add("Приложение администратора устройства");
+        MS.get("Device admin app").add("Cihaz admin tətbiqi");
+        MS.get("Device admin app").add("App zur Geräteverwaltung");
 
 
 

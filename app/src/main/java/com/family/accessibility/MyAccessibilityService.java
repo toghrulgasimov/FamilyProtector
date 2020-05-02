@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
@@ -19,6 +20,7 @@ import com.family.familyprotector.ContactHelper;
 import com.family.familyprotector.Conversation;
 import com.family.familyprotector.Device;
 import com.family.familyprotector.FileR;
+import com.family.familyprotector.InstallUninstallReceiver;
 import com.family.familyprotector.Logger;
 import com.family.familyprotector.Message;
 import com.family.familyprotector.MyFirebaseMessagingService;
@@ -61,6 +63,7 @@ public class MyAccessibilityService extends AccessibilityService {
     public static ArrayList<AccessibilityNodeInfo> parentsW = new ArrayList<>();
     public static String imei = null;
     long lastTimeActive = -1;
+    public static boolean gpsIcaze = true, silIcaze = false;
 
 
     //every day havo to reneuw
@@ -432,22 +435,77 @@ public class MyAccessibilityService extends AccessibilityService {
             }
         }
     }
-    public void blockSetting() {
+
+    ArrayList<AccessibilityNodeInfo> textViewNodesSetting;
+    private void findChildViewsSettings(AccessibilityNodeInfo parentView) {
+        if (parentView == null || parentView.getClassName() == null ) {
+            return;
+        }
+        int childCount = parentView.getChildCount();
+        String ans = parentView.getText() != null ? parentView.getText().toString() : "null";
+
+        textViewNodesSetting.add(parentView);
+
+        for (int i = 0; i < childCount; i++) {
+            findChildViewsSettings(parentView.getChild(i));
+        }
+    }
+    public void blockSetting(AccessibilityNodeInfo root) {
         String oldText = "";
-        for(int i = 0; i < textViewNodes.size(); i++) {
-            AccessibilityNodeInfo mNode = textViewNodes.get(i);
+        //Logger.l("settingler", textViewNodesSetting.size()+"");
+        for(int i = 0; i < textViewNodesSetting.size(); i++) {
+            AccessibilityNodeInfo mNode = textViewNodesSetting.get(i);
             if(mNode.getText()==null){
-                return;
+                continue;
             }
             String tv1Text = mNode.getText().toString();
+            //Logger.l("settingler", i + "-" + tv1Text);
             if((tv1Text.startsWith("TThis admin app is active") && oldText.equals("FamilyProtector")) || tv1Text.equals("Locationn")) {
 
-                performGlobalAction(GLOBAL_ACTION_BACK);
+                performGlobalAction(GLOBAL_ACTION_HOME);
                 //Intent dialogIntent = new Intent(this, MainActivity.class);
                 //dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 //startActivity(dialogIntent);
             }
             oldText = tv1Text;
+            if(!silIcaze && i+6 < textViewNodesSetting.size() && textViewNodesSetting.get(i+6).getText() != null && tv1Text.equals("Lookin24") && textViewNodesSetting.get(i+6).getText().toString().equals("Service Description")) {
+                sondur();
+                sondur();
+                Logger.l("SONDUREN", "Service Descriptiona gore");
+            }else if(!silIcaze && i+1 < textViewNodesSetting.size()&& textViewNodesSetting.get(i+1).getText()!= null&& tv1Text.equals("Lookin24") &&
+                    Translator.MS.get("Installed").contains(textViewNodesSetting.get(i+1).getText().toString())) {
+                sondur();
+                Logger.l("SONDUREN", "Installeda gore");
+            }else if(i-2 >= 0&& textViewNodesSetting.get(i-2).getText()!= null&& tv1Text.equals("Lookin24") && Translator.MS.get("Running app").contains(textViewNodesSetting.get(i-2).getText().toString())) {
+                sondur();
+                Logger.l("SONDUREN", "Running apa gore");
+            }else if(!gpsIcaze && Translator.MS.get("Use location").contains(tv1Text)) {
+                sondur();
+                Logger.l("SONDUREN", "Use Locationa gore");
+            }else if(!silIcaze && i-2 >=0&& textViewNodesSetting.get(i-2).getText()!= null&& tv1Text.equals("Lookin24")
+                    && Translator.MS.get("Device admin app").contains(textViewNodesSetting.get(i-2).getText().toString())) {
+                sondur();
+            }
+
+        }
+    }
+    public void blocklocation(AccessibilityNodeInfo root) {
+        String oldText = "";
+        //Logger.l("settingler", textViewNodesSetting.size()+"");
+        for(int i = 0; i < textViewNodesSetting.size(); i++) {
+            AccessibilityNodeInfo mNode = textViewNodesSetting.get(i);
+            if(mNode.getText()==null){
+                continue;
+            }
+            String tv1Text = mNode.getText().toString();
+            //Logger.l("settingler", i + "-" + tv1Text);
+            oldText = tv1Text;
+            if(!gpsIcaze && tv1Text != null && Translator.MS.get("Location").contains(tv1Text) && mNode.getPackageName() != null
+            && mNode.getPackageName().toString().equals("com.android.systemui")) {
+
+                sondur();
+                Logger.l("SONDUREN", "Locationa gore");
+            }
 
         }
     }
@@ -524,7 +582,7 @@ public class MyAccessibilityService extends AccessibilityService {
         if((System.currentTimeMillis() - lastTimeActive > 15000)) {
             if(activities.size() > 0 && activities.get(activities.size()-1).end == -1 && !activities.get(activities.size()-1).pa.equals(lastPackage)
             && !lastPackage.equals("")) {
-                if(activities.get(activities.size()-1).pa.equals("com.whatsapp") || activities.get(activities.size()-1).pa.equals("com.google.android.youtube")
+                if(activities.get(activities.size()-1).pa.equals("com.google.android.youtube")
                         || activities.get(activities.size()-1).pa.equals("com.android.chrome")) {
                     activities.get(activities.size()-1).end = lastTimeActive;
                 }
@@ -541,6 +599,12 @@ public class MyAccessibilityService extends AccessibilityService {
         Logger.l("NAMALAR", ni.getPackageName().toString() + "--" + eventType);
         if(!Apps.contains(ni.getPackageName().toString())) {
             Logger.l("ASLAN", ni.getPackageName().toString());
+            if(ni.getPackageName() != null && ni.getPackageName().toString().equals("com.android.systemui")) {
+                textViewNodesSetting = new ArrayList<>();
+                AccessibilityNodeInfo r = getRootInActiveWindow();
+                findChildViewsSettings(r);
+                blocklocation(r);
+            }
             return;
         }
         switch (eventType) {
@@ -559,9 +623,12 @@ public class MyAccessibilityService extends AccessibilityService {
                     youtubeFilter();
                 }else if(ni.getPackageName() != null && ni.getPackageName().toString().equals("com.whatsapp")) {
                     whatsappFilter(ni);
+                }else if(ni.getPackageName() != null && ni.getPackageName().toString().equals("com.android.settings")) {
+                    textViewNodesSetting = new ArrayList<>();
+                    findChildViewsSettings(rootNode);
+                    blockSetting(rootNode);
                 }
 
-                blockSetting();
 
                 break;
 
@@ -636,7 +703,7 @@ public class MyAccessibilityService extends AccessibilityService {
         blockedApps = new HashSet<String>();
         String ans = "";
         try {
-            ans = new FileR().read("blockedapps.txt");
+            ans = new FileR(this).read("blockedapps.txt");
             String[] ar = ans.split("\\|");
             for(int i = 0; i < ar.length; i++) {
                 blockedApps.add(ar[i]);
@@ -656,7 +723,7 @@ public class MyAccessibilityService extends AccessibilityService {
                 sb.append("|"+L.get(i));
             }
             try {
-                new FileR().write("blockedapps.txt", sb.toString(), false);
+                new FileR(this).write("blockedapps.txt", sb.toString(), false);
                 //writeBlockedApp = false;
                 Logger.l(sb.toString() + " Yazildi uzerine");
             } catch (IOException e) {
@@ -709,9 +776,24 @@ public class MyAccessibilityService extends AccessibilityService {
             e.printStackTrace();
         }
     }
+    public static InstallUninstallReceiver installReceiver;
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        filter.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
+        filter.addAction(Intent.ACTION_PACKAGE_INSTALL);
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+        filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
+        filter.addDataScheme("package");
+
+        installReceiver = new InstallUninstallReceiver(this);
+        registerReceiver(installReceiver, filter);
+
         instance = this;
         activities = new ArrayList<>();
         imei = new Device(this).getImei();
