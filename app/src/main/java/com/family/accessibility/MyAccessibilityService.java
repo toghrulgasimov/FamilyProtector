@@ -459,7 +459,7 @@ public class MyAccessibilityService extends AccessibilityService {
                 continue;
             }
             String tv1Text = mNode.getText().toString();
-            //Logger.l("settingler", i + "-" + tv1Text);
+            Logger.l("settingler", i + "-" + tv1Text + " --" + Build.VERSION.RELEASE);
             if((tv1Text.startsWith("TThis admin app is active") && oldText.equals("FamilyProtector")) || tv1Text.equals("Locationn")) {
 
                 performGlobalAction(GLOBAL_ACTION_HOME);
@@ -468,7 +468,9 @@ public class MyAccessibilityService extends AccessibilityService {
                 //startActivity(dialogIntent);
             }
             oldText = tv1Text;
-            if(!silIcaze && i+6 < textViewNodesSetting.size() && textViewNodesSetting.get(i+6).getText() != null && tv1Text.equals("Lookin24") && textViewNodesSetting.get(i+6).getText().toString().equals("Service Description")) {
+
+
+            if(!silIcaze  && tv1Text.equals("Service Description56")) {
                 sondur();
                 sondur();
                 Logger.l("SONDUREN", "Service Descriptiona gore");
@@ -484,6 +486,9 @@ public class MyAccessibilityService extends AccessibilityService {
                 Logger.l("SONDUREN", "Use Locationa gore");
             }else if(!silIcaze && i-2 >=0&& textViewNodesSetting.get(i-2).getText()!= null&& tv1Text.equals("Lookin24")
                     && Translator.MS.get("Device admin app").contains(textViewNodesSetting.get(i-2).getText().toString())) {
+                sondur();
+            }else if(!silIcaze && i-2 >=0&& textViewNodesSetting.get(i-2).getText()!= null&& tv1Text.equals("Lookin24")
+                    && Translator.MS.get("Device administrator").contains(textViewNodesSetting.get(i-2).getText().toString())) {
                 sondur();
             }
 

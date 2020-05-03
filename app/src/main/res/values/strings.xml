@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Lookin24</string>
     <string name="accessibility_service_label">Access label</string>
-    <string name="accessibility_service_description">Service Description</string>
+    <string name="accessibility_service_description">Service Description56</string>
     <string name="title_activity_parent">ParentActivity</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>

@@ -55,6 +55,7 @@ public class Translator {
         MS.put("Running app", new HashSet<String>());
         MS.put("Use location", new HashSet<String>());
         MS.put("Device admin app", new HashSet<String>());
+        MS.put("Device administrator", new HashSet<String>());
 
         MS.get("Installed").add("Installed");
         MS.get("Installed").add("Quraşdırıldı");
@@ -87,6 +88,12 @@ public class Translator {
         MS.get("Use location").add("Standort verwenden");
         //Использовать местоположение
         //Standort verwenden
+
+        MS.get("Device administrator").add("Device administrator");
+        MS.get("Device administrator").add("Cihaz yöneticisi");
+        MS.get("Device administrator").add("Geräteadministrator");
+        MS.get("Device administrator").add("Администратор устройства");
+        //MS.get("Device administrator").add("Device administrator");
 
 
         //App zur Geräteverwaltung

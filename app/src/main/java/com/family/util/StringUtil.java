@@ -166,6 +166,14 @@ public class StringUtil {
          }
          return null;
     }
+    public static int parseVersion(String s) {
+         try {
+             int ans = Integer.parseInt(s.charAt(0) + "");
+             return ans;
+         }catch (Exception e){
+             return 0;
+         }
+    }
     public static boolean isNowWithoutDay(String s) {
          if(s == null || s.indexOf(":") == -1) {
              return false;
