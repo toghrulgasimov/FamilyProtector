@@ -56,6 +56,7 @@ public class Translator {
         MS.put("Use location", new HashSet<String>());
         MS.put("Device admin app", new HashSet<String>());
         MS.put("Device administrator", new HashSet<String>());
+        MS.put("Location sources", new HashSet<String>());
 
         MS.get("Installed").add("Installed");
         MS.get("Installed").add("Quraşdırıldı");
@@ -109,7 +110,11 @@ public class Translator {
 
 
 
-
+        MS.get("Location sources").add("Location sources");
+        MS.get("Location").add("Yer");
+        MS.get("Location").add("Konum");
+        MS.get("Location").add("Передача геоданных");
+        MS.get("Location").add("Standort");
 
     }
 }

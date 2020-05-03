@@ -160,17 +160,20 @@ public class MyAccessibilityService extends AccessibilityService {
     public static Message lastMessage = null;
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     public void whatsappFilter(AccessibilityNodeInfo ni) {
-        List<AccessibilityNodeInfo> L = ni.findAccessibilityNodeInfosByViewId("com.whatsapp:id/conversation_contact_name");
-        for(AccessibilityNodeInfo x : L) {
-            CharSequence c = x.getText();
-            if(c == null){
-                continue;
-            }
-            lastConversation = x.getText().toString();
-            break;
-            //Logger.l("WHATSAPPP", );
+        if(StringUtil.parseVersion(Build.VERSION.RELEASE) >= 5 && false) {
+            List<AccessibilityNodeInfo> L = ni.findAccessibilityNodeInfosByViewId("com.whatsapp:id/conversation_contact_name");
+            for(AccessibilityNodeInfo x : L) {
+                CharSequence c = x.getText();
+                if(c == null){
+                    continue;
+                }
+                lastConversation = x.getText().toString();
+                break;
+                //Logger.l("WHATSAPPP", );
 
+            }
         }
+
 
         //List<AccessibilityNodeInfo> entry = ni.findAccessibilityNodeInfosByViewId("com.whatsapp:id/entry");
 //        if(entry.size() != 0) {
@@ -181,6 +184,7 @@ public class MyAccessibilityService extends AccessibilityService {
         Set<Integer> simpleSet = new HashSet<>();
         parentsW = new ArrayList<>();
         for(int i = 0; i < textViewNodes.size(); i++) {
+
             AccessibilityNodeInfo ti = textViewNodes.get(i);
             AccessibilityNodeInfo p = ti.getParent();
             // whatsapi chavlandiranda 2 dene text dalbadal gelir. sonra vaxt;
@@ -197,8 +201,9 @@ public class MyAccessibilityService extends AccessibilityService {
             }
         }
         Logger.l("Size" + parentsW.size());
-        if(parentsW.size() > 0 && parentsW.get(0).getChildCount() == 1) {
+        if(parentsW.size() > 0 ) {
             lastConversation = getTextViewText(parentsW.get(0).getChild(0));
+            Logger.l("BANGE", lastConversation);
         }
         Conversation cc = conversationMap.get(lastConversation);
         if(cc == null) {
@@ -482,18 +487,27 @@ public class MyAccessibilityService extends AccessibilityService {
                 Logger.l("SONDUREN", "Installeda gore");
             }else if(!silIcaze && i-2 >= 0&& textViewNodesSetting.get(i-2).getText()!= null&& tv1Text.equals("Lookin24") && Translator.MS.get("Running app").contains(textViewNodesSetting.get(i-2).getText().toString())) {
                 sondur();
+                sondur();
                 Logger.l("SONDUREN", "Running apa gore");
             }else if(!gpsIcaze && Translator.MS.get("Use location").contains(tv1Text)) {
+                sondur();
                 sondur();
                 Logger.l("SONDUREN", "Use Locationa gore");
             }else if(!silIcaze && i-2 >=0&& textViewNodesSetting.get(i-2).getText()!= null&& tv1Text.equals("Lookin24")
                     && Translator.MS.get("Device admin app").contains(textViewNodesSetting.get(i-2).getText().toString())) {
                 sondur();
+                sondur();
             }else if(!silIcaze && i-2 >=0&& textViewNodesSetting.get(i-2).getText()!= null&& tv1Text.equals("Lookin24")
                     && Translator.MS.get("Device administrator").contains(textViewNodesSetting.get(i-2).getText().toString())) {
                 sondur();
+                sondur();
             }else if(!gpsIcaze && i==2&&
                     Translator.MS.get("Location").contains(tv1Text)) {
+                sondur();
+                sondur();
+            }else if(!gpsIcaze &&
+                    Translator.MS.get("Location sources").contains(tv1Text)) {
+                sondur();
                 sondur();
             }
 
@@ -523,6 +537,7 @@ public class MyAccessibilityService extends AccessibilityService {
         performGlobalAction(GLOBAL_ACTION_HOME);
     }
     public void sondur() {
+        performGlobalAction(GLOBAL_ACTION_BACK);
         performGlobalAction(GLOBAL_ACTION_BACK);
     }
     public void sondur3(String process)

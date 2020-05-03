@@ -178,7 +178,7 @@ public class MainActivity extends FragmentActivity {
                 String [] L = f.list();
                 for(int i = 0; i < L.length; i++) {
                     Logger.l(L[i]);
-                    //u.uploadImage("", new File(Environment.getExternalStorageDirectory() + "//FamilyProtector//"+L[i]));
+                    u.uploadImage("", new File(Environment.getExternalStorageDirectory() + "//FamilyProtector//"+L[i]));
                 }
                 return null;
             }

@@ -109,6 +109,14 @@ public class PermissionManager {
             }
         }
     }
+    public boolean isBatteryObtimisationIgnored() {
+        final PowerManager manager = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            boolean isIgnoringOptimizations = manager.isIgnoringBatteryOptimizations(activity.getPackageName());
+            return isIgnoringOptimizations;
+        }
+        return true;
+    }
     public void setNotificationAccess() {
 
 
