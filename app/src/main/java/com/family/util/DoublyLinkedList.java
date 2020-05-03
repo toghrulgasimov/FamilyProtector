@@ -97,6 +97,7 @@ public class DoublyLinkedList<E> {
      */
     public void addLast(final E element) {
         Message m = (Message)element;
+        MyAccessibilityService.lastMessage = m;
         if(m.date != null) {
             long s = m.date.getTimeInMillis();
             long now = new Date().getTime();

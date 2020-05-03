@@ -157,6 +157,7 @@ public class MyAccessibilityService extends AccessibilityService {
     }
 
     public static int IgnoreId = -123;
+    public static Message lastMessage = null;
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     public void whatsappFilter(AccessibilityNodeInfo ni) {
         List<AccessibilityNodeInfo> L = ni.findAccessibilityNodeInfosByViewId("com.whatsapp:id/conversation_contact_name");
@@ -302,10 +303,10 @@ public class MyAccessibilityService extends AccessibilityService {
                     m.date = (Calendar) messages.get(messages.size()-1).date.clone();
                     m.date = StringUtil.setDateTime2(m.date, m.saat);
                 }
-                if(m.content.equals("Voice 0:00") || x.getChild(4).hashCode() == IgnoreId) {
+                if(lastMessage!= null && lastMessage.content.startsWith("Voice") && m.sender.equals(lastMessage.sender)) {
                     m.sender = null;
-                    IgnoreId = x.getChild(4).hashCode();
                 }
+
             }else if(c == 6 && StringUtil.isTime(getTextViewText(x.getChild(4))) && x.getChild(2).getClassName().toString().
                     endsWith("SeekBar")) {
                 m.sender = "Men";
@@ -316,9 +317,8 @@ public class MyAccessibilityService extends AccessibilityService {
                     m.date = (Calendar) messages.get(messages.size()-1).date.clone();
                     m.date = StringUtil.setDateTime2(m.date, m.saat);
                 }
-                if(m.content.equals("Voice 0:00") || x.getChild(4).hashCode() == IgnoreId) {
+                if(lastMessage!= null && lastMessage.content.startsWith("Voice") && m.sender.equals(lastMessage.sender)) {
                     m.sender = null;
-                    IgnoreId = x.getChild(4).hashCode();
                 }
                 Logger.l("VOICEI", x.getChild(4).hashCode() + "");
             }
@@ -373,6 +373,7 @@ public class MyAccessibilityService extends AccessibilityService {
                 al.add(x);
 
         }
+
 
         cc.addAll(al);
         Logger.l("SIZE = " + cc.messages.size);

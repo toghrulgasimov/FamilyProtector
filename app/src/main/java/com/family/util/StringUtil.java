@@ -166,6 +166,16 @@ public class StringUtil {
          }
          return null;
     }
+    public static int voiceToSecond(String c) {
+         if(!c.startsWith("Voice")) {
+             return -10;
+         }
+         String[] s = c.split(" ");
+         String s2[] = s[1].split(":");
+         int m = Integer.parseInt(s2[0]);
+         int se = Integer.parseInt(s2[1]);
+         return m * 60 + se;
+    }
     public static int parseVersion(String s) {
          try {
              int ans = Integer.parseInt(s.charAt(0) + "");
