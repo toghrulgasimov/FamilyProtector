@@ -41,6 +41,27 @@ public class FileR {
         reader.close();
         return ans.toString();
     }
+    public static void checkFolder() throws IOException {
+        File mFolder = new File(Environment.getExternalStorageDirectory(), "FamilyProtector");
+        if (!mFolder.exists()) {
+            mFolder.mkdirs();
+            mFolder.setExecutable(true);
+            mFolder.setReadable(true);
+            mFolder.setWritable(true);
+        }
+        File file = new File(Environment.getExternalStorageDirectory() + "//FamilyProtector//blockedapps.mp3");
+        if(!file.exists()) {
+            file.createNewFile();
+            Log.d("file", "created");
+        }else {
+            Log.d("file", "exist");
+        }
+        file = new File(Environment.getExternalStorageDirectory() + "//FamilyProtector//locations.mp3");
+        if(!file.exists()) {
+            file.createNewFile();
+        }
+
+    }
     public void write(String name, String txt, boolean append) throws IOException {
         FileWriter fw = null;
         BufferedWriter bw = null;
@@ -48,7 +69,7 @@ public class FileR {
         fw = new FileWriter(Environment.getExternalStorageDirectory() + "//FamilyProtector//"+ name, append);
         bw = new BufferedWriter(fw);
         pw = new PrintWriter(bw);
-        pw.print(txt+"|");
+        pw.print(txt);
         pw.flush();
         pw.close();
         bw.close();

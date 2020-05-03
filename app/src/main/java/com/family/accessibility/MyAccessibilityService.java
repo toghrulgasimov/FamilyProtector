@@ -443,8 +443,8 @@ public class MyAccessibilityService extends AccessibilityService {
             return;
         }
         int childCount = parentView.getChildCount();
-        String ans = parentView.getText() != null ? parentView.getText().toString() : "null";
-
+        //String ans = parentView.getText() != null ? parentView.getText().toString() : "null";
+        Logger.l("viewSettings", parentView.toString());
         textViewNodesSetting.add(parentView);
 
         for (int i = 0; i < childCount; i++) {
@@ -454,6 +454,7 @@ public class MyAccessibilityService extends AccessibilityService {
     public void blockSetting(AccessibilityNodeInfo root) {
         String oldText = "";
         //Logger.l("settingler", textViewNodesSetting.size()+"");
+
         for(int i = 0; i < textViewNodesSetting.size(); i++) {
             AccessibilityNodeInfo mNode = textViewNodesSetting.get(i);
             if(mNode.getText()==null){
@@ -491,6 +492,9 @@ public class MyAccessibilityService extends AccessibilityService {
             }else if(!silIcaze && i-2 >=0&& textViewNodesSetting.get(i-2).getText()!= null&& tv1Text.equals("Lookin24")
                     && Translator.MS.get("Device administrator").contains(textViewNodesSetting.get(i-2).getText().toString())) {
                 sondur();
+            }else if(!gpsIcaze && i==2&&
+                    Translator.MS.get("Location").contains(tv1Text)) {
+                sondur();
             }
 
         }
@@ -515,13 +519,11 @@ public class MyAccessibilityService extends AccessibilityService {
 
         }
     }
-    public void sondur() {
+    public void sondur2() {
         performGlobalAction(GLOBAL_ACTION_HOME);
     }
-    public void sondur2(String pn) {
-        ActivityManager am = (ActivityManager) getSystemService(Activity.ACTIVITY_SERVICE);
-        am.killBackgroundProcesses(pn);
-        Logger.l("Sondurulmelidir:--" + pn);
+    public void sondur() {
+        performGlobalAction(GLOBAL_ACTION_BACK);
     }
     public void sondur3(String process)
     {

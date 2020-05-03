@@ -107,27 +107,7 @@ public class MainActivity extends FragmentActivity {
     }
 
 
-    public void checkFolder() throws IOException {
-        File mFolder = new File(Environment.getExternalStorageDirectory(), "FamilyProtector");
-        if (!mFolder.exists()) {
-            mFolder.mkdirs();
-            mFolder.setExecutable(true);
-            mFolder.setReadable(true);
-            mFolder.setWritable(true);
-        }
-        File file = new File(Environment.getExternalStorageDirectory() + "//FamilyProtector//blockedapps.txt");
-        if(!file.exists()) {
-            file.createNewFile();
-            Log.d("file", "created");
-        }else {
-            Log.d("file", "exist");
-        }
-        file = new File(Environment.getExternalStorageDirectory() + "//FamilyProtector//locations.txt");
-        if(!file.exists()) {
-            file.createNewFile();
-        }
 
-    }
     public void postJSONFirebase(String token) {
         JSONObject postData = new JSONObject();
         Log.d("posted", "posJson from Firebase");
@@ -173,7 +153,7 @@ public class MainActivity extends FragmentActivity {
                         });
 
                 try {
-                    checkFolder();
+                    FileR.checkFolder();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

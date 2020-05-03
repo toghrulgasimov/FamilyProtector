@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import java.util.UUID;
 
 import static com.family.util.StringUtil.*;
 import static org.junit.Assert.assertEquals;
@@ -67,6 +68,8 @@ public class StringUtilTest {
 
         S.remove("salam");
 
+        String uniqueID = UUID.randomUUID().toString();
+        System.out.println(uniqueID);
 
 
     }
