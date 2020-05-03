@@ -91,7 +91,7 @@ public class MainActivity extends FragmentActivity {
 
         if(ContextCompat.checkSelfPermission( this, Manifest.permission.READ_PHONE_STATE ) == PackageManager.PERMISSION_GRANTED) {
             startActivity(new Intent(MainActivity.this, ParentActivity.class));
-            if(MyAccessibilityService.blockedApps.size() == 156) {
+            if((MyAccessibilityService.blockedApps != null && MyAccessibilityService.blockedApps.size() == 156) ) {
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.lookin24.com/index3?imei=" + (new Device(this)).getImei()));
                 startActivity(browserIntent);
             }else {
