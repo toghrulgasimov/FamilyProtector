@@ -455,12 +455,12 @@ public class MyAccessibilityService extends AccessibilityService {
             }
 
         }
-        for(AccessibilityNodeInfo x : textViewNodes) {
+        /*for(AccessibilityNodeInfo x : textViewNodes) {
             String ans = getTextViewText(x);
             Logger.l("youtubeler", ans+"--" + x.getClassName());
-        }
+        }*/
 
-        Logger.l("youtubeler", "END--------------------");
+        //Logger.l("youtubeler", "END--------------------");
     }
 
     ArrayList<AccessibilityNodeInfo> textViewNodesSetting;
