@@ -67,9 +67,13 @@ public class StringUtilTest {
         Set<String> S = new HashSet<>();
 
         S.remove("salam");
+        S.add("asdads");
+        S.add("Asdads");
 
         String uniqueID = UUID.randomUUID().toString();
         System.out.println(uniqueID);
+
+        System.out.println(S.toString());
 
 
     }

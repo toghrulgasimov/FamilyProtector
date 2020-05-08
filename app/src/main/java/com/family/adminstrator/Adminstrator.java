@@ -8,6 +8,7 @@ import android.util.Log;
 public class Adminstrator extends DeviceAdminReceiver {
     //https://github.com/mitre/device-admin-sample/blob/master/app/src/main/AndroidManifest.xml
     // i searched there is no need to declare in Manifest
+    //https://stackoverflow.com/questions/17943300/how-to-know-if-my-application-admin-or-not/17943666
 
 
     @Override

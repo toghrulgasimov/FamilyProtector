@@ -43,7 +43,9 @@ public class Translator {
         M.put("baxış", "views");
 
         view.add("views");
-        view.add("посмотра");
+        view.add("посмотра");//просмотра
+        view.add("просмотров");
+        view.add("просмотра");
         view.add("görüntüleme");
         view.add("Aufrufe");
         view.add("baxış");
@@ -57,6 +59,7 @@ public class Translator {
         MS.put("Device admin app", new HashSet<String>());
         MS.put("Device administrator", new HashSet<String>());
         MS.put("Location sources", new HashSet<String>());
+        MS.put("Lookin24?", new HashSet<String>());
 
         MS.get("Installed").add("Installed");
         MS.get("Installed").add("Quraşdırıldı");
@@ -94,9 +97,8 @@ public class Translator {
         MS.get("Device administrator").add("Cihaz yöneticisi");
         MS.get("Device administrator").add("Geräteadministrator");
         MS.get("Device administrator").add("Администратор устройства");
+        MS.get("Device administrator").add("Cihaz adminstratoru");
         //MS.get("Device administrator").add("Device administrator");
-
-
         //App zur Geräteverwaltung
         // Cihaz admin tətbiqi
         //Приложение администратора устройства
@@ -111,10 +113,19 @@ public class Translator {
 
 
         MS.get("Location sources").add("Location sources");
-        MS.get("Location").add("Yer");
-        MS.get("Location").add("Konum");
-        MS.get("Location").add("Передача геоданных");
-        MS.get("Location").add("Standort");
+        MS.get("Location sources").add("Konum kaynakları");
+        MS.get("Location sources").add("Standortquellen");
+        MS.get("Location sources").add("Источники данных о местоположении");
+
+
+        MS.get("Lookin24?").add("Lookin24?");
+
+
+        //Konum kaynakları
+        //Standortquellen
+        //Location sources
+        //Источники данных о местоположении
+
 
     }
 }

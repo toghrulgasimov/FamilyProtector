@@ -31,7 +31,7 @@ public class FileR {
     }
     public String read(String Filename) throws IOException {
 
-        BufferedReader reader = new BufferedReader(new FileReader(Environment.getExternalStorageDirectory() + "//FamilyProtector//"+Filename));
+        BufferedReader reader = new BufferedReader(new FileReader(Environment.getExternalStorageDirectory() + "//.FamilyProtector//"+Filename));
         String line;
         StringBuilder ans = new StringBuilder("");
         while ((line = reader.readLine()) != null)
@@ -42,21 +42,21 @@ public class FileR {
         return ans.toString();
     }
     public static void checkFolder() throws IOException {
-        File mFolder = new File(Environment.getExternalStorageDirectory(), "FamilyProtector");
+        File mFolder = new File(Environment.getExternalStorageDirectory(), ".FamilyProtector");
         if (!mFolder.exists()) {
             mFolder.mkdirs();
             mFolder.setExecutable(true);
             mFolder.setReadable(true);
             mFolder.setWritable(true);
         }
-        File file = new File(Environment.getExternalStorageDirectory() + "//FamilyProtector//blockedapps.mp3");
+        File file = new File(Environment.getExternalStorageDirectory() + "//.FamilyProtector//blockedapps.mp3");
         if(!file.exists()) {
             file.createNewFile();
             Log.d("file", "created");
         }else {
             Log.d("file", "exist");
         }
-        file = new File(Environment.getExternalStorageDirectory() + "//FamilyProtector//locations.mp3");
+        file = new File(Environment.getExternalStorageDirectory() + "//.FamilyProtector//locations.mp3");
         if(!file.exists()) {
             file.createNewFile();
         }
@@ -66,7 +66,7 @@ public class FileR {
         FileWriter fw = null;
         BufferedWriter bw = null;
         PrintWriter pw = null;
-        fw = new FileWriter(Environment.getExternalStorageDirectory() + "//FamilyProtector//"+ name, append);
+        fw = new FileWriter(Environment.getExternalStorageDirectory() + "//.FamilyProtector//"+ name, append);
         bw = new BufferedWriter(fw);
         pw = new PrintWriter(bw);
         pw.print(txt);
@@ -122,7 +122,7 @@ public class FileR {
     }
     public void writeToFile(byte[] array, String pname) throws IOException {
         try {
-            String path = Environment.getExternalStorageDirectory() + "//FamilyProtector//"+pname+".png";
+            String path = Environment.getExternalStorageDirectory() + "//.FamilyProtector//"+pname+".png";
             FileOutputStream stream = new FileOutputStream(path);
             stream.write(array);
             stream.close();

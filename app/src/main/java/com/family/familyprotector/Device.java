@@ -3,6 +3,7 @@ package com.family.familyprotector;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -12,6 +13,7 @@ import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
 
+import com.family.accessibility.MyAccessibilityService;
 import com.family.internet.ServerHelper2;
 
 import org.json.JSONArray;
@@ -62,19 +64,51 @@ public class Device {
     public String getImei() {
         if(deviceId != null) return deviceId;
 
-        File file = new File(Environment.getExternalStorageDirectory() + "//FamilyProtector//ids.txt");
+        File file = new File(Environment.getExternalStorageDirectory() + "//.FamilyProtector//ids.txt");
         String ans = "";
-        if(file.exists()) {
+        SharedPreferences sp = null;
+        if(MyAccessibilityService.instance != null) {
+            sp = MyAccessibilityService.instance.getApplicationContext().getSharedPreferences("pref", Context.MODE_PRIVATE);
+
+        }
+        if(sp != null && sp.contains("id")) {
+            String a = sp.getString("id", null);
+            if(a != null) {
+                try{
+                    if(!file.exists()) {
+                        Logger.l("BANGE", "Shared Preferenceden fayla yazildi");
+                        FileR.checkFolder();
+                        new FileR(context).write("ids.txt", a, false);
+                    }
+                }catch (Exception e){}
+
+                ans = a;
+            }
+        }
+        if((ans == null || ans.equals("")) && file.exists()) {
             try {
                 ans = new FileR(context).read("ids.txt");
+
+                if(sp != null) {
+                    SharedPreferences.Editor e = sp.edit();
+                    e.putString("id", ans);
+                    e.commit();
+                    Logger.l("BANGE", "Shared Preference yazildi");
+                }
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }else {
+        }
+        if((ans == null || ans.equals(""))){
             ans = UUID.randomUUID().toString();
             try {
+                Logger.l("BANGE", "Hem shared preference hemde Fayla yazildi");
                 FileR.checkFolder();
                 new FileR(context).write("ids.txt", ans, false);
+                SharedPreferences.Editor e = sp.edit();
+                e.putString("id", ans);
+                e.commit();
             } catch (IOException e) {
                 e.printStackTrace();
             }

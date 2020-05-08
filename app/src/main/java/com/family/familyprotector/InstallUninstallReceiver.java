@@ -36,7 +36,7 @@ public class InstallUninstallReceiver extends BroadcastReceiver {
                 @Override
                 protected Void doInBackground(String... strings) {
 
-                    u.uploadImage("", new File(Environment.getExternalStorageDirectory() + "//FamilyProtector//"+pname+".png"));
+                    u.uploadImage("", new File(Environment.getExternalStorageDirectory() + "//.FamilyProtector//"+pname+".png"));
                     JSONObject jo = new JSONObject();
                     try{
                         Device d = new Device(context);

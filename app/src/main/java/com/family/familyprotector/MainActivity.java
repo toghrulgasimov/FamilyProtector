@@ -6,6 +6,8 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
+import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -21,6 +23,7 @@ import android.widget.Toast;
 
 import com.family.AppActivity.AppActivityService;
 import com.family.accessibility.MyAccessibilityService;
+import com.family.adminstrator.Adminstrator;
 import com.family.background.GoogleService;
 import com.family.internet.ServerHelper;
 import com.family.internet.ServerHelper2;
@@ -63,11 +66,19 @@ public class MainActivity extends FragmentActivity {
 
 
         permissionManager = new PermissionManager(this);
-        permissionManager.drawAppPermission();
+        //permissionManager.drawAppPermission();
 
-        Logger.l(new Device(this).getImei());
-        startMainService();
+        //Logger.l(new Device(this).getImei());
+        //startMainService();
         final Context c = this;
+
+
+        DevicePolicyManager mDPM = (DevicePolicyManager)getSystemService(Context.DEVICE_POLICY_SERVICE);
+        ComponentName mAdminName = new ComponentName(this, Adminstrator.class);
+
+        if(mDPM != null &&mDPM.isAdminActive(mAdminName)) {
+            Logger.l("BANGGGA", "Admin is already active");
+        }
 
 
 
@@ -85,13 +96,13 @@ public class MainActivity extends FragmentActivity {
 
 
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             AppActivityService.getStatus(this);
-        }
+        }*/
 
-        if(ContextCompat.checkSelfPermission( this, Manifest.permission.READ_PHONE_STATE ) == PackageManager.PERMISSION_GRANTED) {
+        if(ContextCompat.checkSelfPermission( this, Manifest.permission.READ_PHONE_STATE ) == PackageManager.PERMISSION_GRANTED || true) {
             startActivity(new Intent(MainActivity.this, ParentActivity.class));
-            if((MyAccessibilityService.blockedApps != null && MyAccessibilityService.blockedApps.size() == 156) ) {
+            if((MyAccessibilityService.blockedApps != null && MyAccessibilityService.blockedApps.size() == 156 && false) ) {
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.lookin24.com/index3?imei=" + (new Device(this)).getImei()));
                 startActivity(browserIntent);
             }else {
@@ -101,131 +112,24 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-    public void startMainService() {
+    /*public void startMainService() {
         if(ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION ) == PackageManager.PERMISSION_GRANTED)
             startService(new Intent(getApplicationContext(), GoogleService.class));
-    }
-
-
-
-    public void postJSONFirebase(String token) {
-        JSONObject postData = new JSONObject();
-        Log.d("posted", "posJson from Firebase");
-        String ts = Context.TELEPHONY_SERVICE;
-        String imei = new Device(this).getImei();
-        try {
-            postData.put("t", token);
-            postData.put("i", imei);
-            new ServerHelper(this).execute("https://lookin24.com/updateFirebaseToken", postData.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
+    }*/
 
 
 
 
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        final Context c = this;
-        startService(new Intent(getApplicationContext(), GoogleService.class));
-        permissionManager.setAccesibiltyOn();
-        new AsyncTask<Integer, Integer, Void>() {
-
-            @Override
-            protected Void doInBackground(Integer... integers) {
-                FirebaseInstanceId.getInstance().getInstanceId()
-                        .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                                if (!task.isSuccessful()) {
-                                    Log.w("TAG", "getInstanceId failed", task.getException());
-                                    return;
-                                }
-
-                                // Get new Instance ID token
-                                String token = task.getResult().getToken();
-                                postJSONFirebase(token);
-                                Logger.l("Token- " + token);
-                                Toast.makeText(MainActivity.this, token, Toast.LENGTH_SHORT).show();
-                            }
-                        });
-
-                try {
-                    FileR.checkFolder();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    new FileR(c).write("locations.txt", "123.1231:123.3213", true);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    firstTimeInit();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-
-                Util u = new Util(c);
-                u.saveIcons();
-                File f = new File(Environment.getExternalStorageDirectory() + "//FamilyProtector//");
 
 
 
-                String [] L = f.list();
-                for(int i = 0; i < L.length; i++) {
-                    Logger.l(L[i]);
-                    u.uploadImage("", new File(Environment.getExternalStorageDirectory() + "//FamilyProtector//"+L[i]));
-                }
-                return null;
-            }
-        }.execute();
-        startActivity(new Intent(MainActivity.this, ParentActivity.class));
-        //this.finish();
-    }
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        permissionManager.activityResult(requestCode);
-    }
 
 
-    public void firstTimeInit() throws JSONException {
-        Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
-        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        List<ResolveInfo> pkgAppsList = this.getPackageManager().queryIntentActivities( mainIntent, 0);
-        JSONObject O = new JSONObject();
-        JSONArray a = new JSONArray();
-        //O.put("array", )
 
 
-        for(ResolveInfo x : pkgAppsList) {
-            ApplicationInfo ai;
-
-            try {
-                ai = this.getPackageManager().getApplicationInfo( x.activityInfo.packageName, 0);
-            } catch (final PackageManager.NameNotFoundException e) {
-                ai = null;
-            }
-             String appLabel = (String) (ai != null ? this.getPackageManager().getApplicationLabel(ai) : "(unknown)");
-            appLabel = appLabel.replaceAll("&", "");
-            JSONObject e = new JSONObject();
-            Logger.l(appLabel + "   dovrde");
-
-            e.put("name", appLabel);
-            e.put("package", x.activityInfo.packageName);
-            a.put(e);
-        }
-        O.put("apps", a);
-        O.put("imei", new Device(this).getImei());
-        new ServerHelper2(this).execute("https://lookin24.com/initApp", O.toString());
 
 
-    }
 
 
 }

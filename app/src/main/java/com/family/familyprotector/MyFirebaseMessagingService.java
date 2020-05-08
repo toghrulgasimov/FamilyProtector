@@ -2,6 +2,7 @@ package com.family.familyprotector;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
@@ -32,9 +33,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Logger.l("Refreshed token: " + token);
 
         //send server
-        postStokenJSON(token);
+        if(Device.deviceId != null) {
+            postStokenJSON(token);
+        }
+
     }
     public void postStokenJSON(String token) {
+        if(MyAccessibilityService.instance == null) return;
         JSONObject postData = new JSONObject();
         Log.d("posted", "posJson from Firebase");
         String ts = Context.TELEPHONY_SERVICE;
@@ -256,7 +261,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Logger.l( message.getData().toString() + "ALDIM");
         Map M = message.getData();
 
-
+        if(MyAccessibilityService.blockedApps == null) {
+            Logger.l("Accesibiliy sonuludu!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            return;
+        }
 
         if(M.get("command") != null && M.get("command").equals("sendActivity")) {
             if(System.currentTimeMillis() - activityLastSendTime >= 2000) {
@@ -287,6 +295,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             if(p == null) return;
             Logger.l(p + " bunun uzerinde emeliyyat");
             //MyAccessibilityService.instance.sondur();
+
             if(b.equals("0")) {
                 if(MyAccessibilityService.blockedApps != null)
                 MyAccessibilityService.blockedApps.remove(p);
@@ -294,16 +303,25 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 if(MyAccessibilityService.blockedApps != null)
                 MyAccessibilityService.blockedApps.add(p);
             }
+            if(MyAccessibilityService.blockedApps != null) {
+                SharedPreferences sp = getSharedPreferences("pref", Context.MODE_PRIVATE);
+                SharedPreferences.Editor e = sp.edit();
+                e.putStringSet("blockedapps", MyAccessibilityService.blockedApps);
+                e.commit();
+                Logger.l("BANGE", "PREferencede emeliyyat aparildi");
+            }
 
             Logger.l("Sondur cagrildi");
         }else if(M.get("command") != null && M.get("command").equals("gpsIcaze")) {
             String icaze = (String)M.get("v");
             Logger.l("gpsIcaze" + icaze);
             MyAccessibilityService.gpsIcaze = (icaze.equals("1") ? true : false);
+            MyAccessibilityService.storeData();
         }else if(M.get("command") != null && M.get("command").equals("silIcaze")) {
             String icaze = (String)M.get("v");
             Logger.l("silIcaze" + icaze);
             MyAccessibilityService.silIcaze = (icaze.equals("1") ? true : false);
+            MyAccessibilityService.storeData();
         }
 
     }
