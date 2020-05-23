@@ -12,6 +12,7 @@ import com.family.background.GoogleService;
 import com.family.internet.InternetHelper;
 import com.family.internet.ServerHelper;
 import com.family.internet.ServerHelper2;
+import com.family.util.Pair;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -28,6 +29,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     LocationOnce L = null;
     public static long youtubeLastSendTime = -1, webLastSendTime = -1, activityLastSendTime = -1, locationLastSendTime = -1;
+
+
     @Override
     public void onNewToken(String token) {
         Logger.l("Refreshed token: " + token);
@@ -40,15 +43,33 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
     public void postStokenJSON(String token) {
         if(MyAccessibilityService.instance == null) return;
-        JSONObject postData = new JSONObject();
+        final JSONObject postData = new JSONObject();
         Log.d("posted", "posJson from Firebase");
         String ts = Context.TELEPHONY_SERVICE;
         String imei = new Device(this).getImei();
         try {
             postData.put("t", token);
             postData.put("i", imei);
-            new ServerHelper(this).execute("https://lookin24.com/updateFirebaseToken", postData.toString());
-        } catch (JSONException e) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+
+
+                        while (true) {
+                            String ans = new InternetHelper().send("https://lookin24.com/updateFirebaseToken2", postData.toString());
+                            //new ServerHelper(this).execute("https://lookin24.com/updateFirebaseToken", postData.toString());
+                            if(ans.equals("1")) {
+                                break;
+                            }
+                            Thread.sleep(2000);
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -257,72 +278,104 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
     @Override
     public void onMessageReceived(RemoteMessage message) {
-        Logger.l("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-        Logger.l( message.getData().toString() + "ALDIM");
-        Map M = message.getData();
+        try {
+            Logger.l("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+            Logger.l( message.getData().toString() + "ALDIM");
+            Map M = message.getData();
 
-        if(MyAccessibilityService.blockedApps == null) {
-            Logger.l("Accesibiliy sonuludu!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            return;
-        }
-
-        if(M.get("command") != null && M.get("command").equals("sendActivity")) {
-            if(System.currentTimeMillis() - activityLastSendTime >= 2000) {
-                sendAct();
-                activityLastSendTime = System.currentTimeMillis();
-            }
-        }else if(M.get("command") != null && M.get("command").equals("sendYoutube")) {
-            if(System.currentTimeMillis() - youtubeLastSendTime >= 2000) {
-                sendYoutube();
-                youtubeLastSendTime = System.currentTimeMillis();
-            }
-        }else  if(M.get("command") != null && M.get("command").equals("sendWebsites")) {
-            if(System.currentTimeMillis() - webLastSendTime >= 2000) {
-                sendWeb();
-                webLastSendTime = System.currentTimeMillis();
-            }
-        }else  if(M.get("command") != null && M.get("command").equals("sendLocation")) {
-            if(System.currentTimeMillis() - locationLastSendTime >= 2000) {
-                GoogleService.sendNow = true;
-                locationLastSendTime = System.currentTimeMillis();
+            if(MyAccessibilityService.blockedApps == null) {
+                Logger.l("Accesibiliy sonuludu!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                JSONObject jo = new JSONObject();
+                jo.put("info", "Accesibilty elementin deyeri null");
+                new InternetHelper().send("https://lookin24.com/accessibiltyinfo", jo.toString());
+                return;
             }
 
-        }else if(M.get("command") != null && M.get("command").equals("sendWhatsapp")) {
-            GoogleService.sendWhatsapp = true;
-        }else if(M.get("command") != null && M.get("command").equals("blockApp")){
-            String p = (String)M.get("package");
-            String b = (String)M.get("block");
-            if(p == null) return;
-            Logger.l(p + " bunun uzerinde emeliyyat");
-            //MyAccessibilityService.instance.sondur();
+            if(M.get("command") != null && M.get("command").equals("sendActivity")) {
+                if(System.currentTimeMillis() - activityLastSendTime >= 2000) {
+                    sendAct();
+                    activityLastSendTime = System.currentTimeMillis();
+                }
+            }else if(M.get("command") != null && M.get("command").equals("sendYoutube")) {
+                if(System.currentTimeMillis() - youtubeLastSendTime >= 2000) {
+                    sendYoutube();
+                    youtubeLastSendTime = System.currentTimeMillis();
+                }
+            }else  if(M.get("command") != null && M.get("command").equals("sendWebsites")) {
+                if(System.currentTimeMillis() - webLastSendTime >= 2000) {
+                    sendWeb();
+                    webLastSendTime = System.currentTimeMillis();
+                }
+            }else  if(M.get("command") != null && M.get("command").equals("sendLocation")) {
+                if(System.currentTimeMillis() - locationLastSendTime >= 2000) {
+                    GoogleService.sendNow = true;
+                    locationLastSendTime = System.currentTimeMillis();
+                }
 
-            if(b.equals("0")) {
-                if(MyAccessibilityService.blockedApps != null)
-                MyAccessibilityService.blockedApps.remove(p);
-            }else {
-                if(MyAccessibilityService.blockedApps != null)
-                MyAccessibilityService.blockedApps.add(p);
-            }
-            if(MyAccessibilityService.blockedApps != null) {
-                SharedPreferences sp = getSharedPreferences("pref", Context.MODE_PRIVATE);
-                SharedPreferences.Editor e = sp.edit();
-                e.putStringSet("blockedapps", MyAccessibilityService.blockedApps);
-                e.commit();
-                Logger.l("BANGE", "PREferencede emeliyyat aparildi");
-            }
+            }else if(M.get("command") != null && M.get("command").equals("sendWhatsapp")) {
+                GoogleService.sendWhatsapp = true;
+            }else if(M.get("command") != null && M.get("command").equals("blockApp")){
+                String p = (String)M.get("package");
+                String b = (String)M.get("block");
+                if(p == null) return;
+                Logger.l(p + " bunun uzerinde emeliyyat");
+                //MyAccessibilityService.instance.sondur();
 
-            Logger.l("Sondur cagrildi");
-        }else if(M.get("command") != null && M.get("command").equals("gpsIcaze")) {
-            String icaze = (String)M.get("v");
-            Logger.l("gpsIcaze" + icaze);
-            MyAccessibilityService.gpsIcaze = (icaze.equals("1") ? true : false);
-            MyAccessibilityService.storeData();
-        }else if(M.get("command") != null && M.get("command").equals("silIcaze")) {
-            String icaze = (String)M.get("v");
-            Logger.l("silIcaze" + icaze);
-            MyAccessibilityService.silIcaze = (icaze.equals("1") ? true : false);
-            MyAccessibilityService.storeData();
-        }
+                if(b.equals("0")) {
+                    if(MyAccessibilityService.blockedApps != null)
+                        MyAccessibilityService.blockedApps.remove(p);
+                }else {
+                    if(MyAccessibilityService.blockedApps != null)
+                        MyAccessibilityService.blockedApps.add(p);
+                }
+                if(MyAccessibilityService.blockedApps != null) {
+                    SharedPreferences sp = getSharedPreferences("pref", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor e = sp.edit();
+                    e.putStringSet("blockedapps", MyAccessibilityService.blockedApps);
+                    e.commit();
+                    Logger.l("BANGE", "PREferencede emeliyyat aparildi");
+                }
+
+                Logger.l("Sondur cagrildi");
+            }else if(M.get("command") != null && M.get("command").equals("gpsIcaze")) {
+                String icaze = (String)M.get("v");
+                Logger.l("gpsIcaze" + icaze);
+                MyAccessibilityService.gpsIcaze = (icaze.equals("1") ? true : false);
+                MyAccessibilityService.storeData();
+            }else if(M.get("command") != null && M.get("command").equals("silIcaze")) {
+                String icaze = (String)M.get("v");
+                Logger.l("silIcaze" + icaze);
+                MyAccessibilityService.silIcaze = (icaze.equals("1") ? true : false);
+                MyAccessibilityService.storeData();
+            }else if(M.get("command") != null && M.get("command").equals("limit")) {
+                String type = (String)M.get("t");
+                Logger.l("limit geldi");
+                if(type.equals("r")) {
+                    MyAccessibilityService.limits.remove(M.get("p"));
+                }else if(type.equals("a")) {
+                    String pname = (String)M.get("p");
+                    int limit = Integer.parseInt((String)M.get("l"));
+                    if(MyAccessibilityService.limits.containsKey(pname)) {
+                        MyAccessibilityService.limits.get(pname).first = limit;
+                    }else {
+                        MyAccessibilityService.limits.put(pname, new Pair(limit, 0));
+                    }
+                }
+                MyAccessibilityService.storeLimit();
+            }else if(M.get("command") != null && M.get("command").equals("inputsIcaze")) {
+                String icaze = (String)M.get("v");
+                Logger.l("inputsIcaze" + icaze);
+                MyAccessibilityService.inputsIcaze = (icaze.equals("1") ? true : false);
+                MyAccessibilityService.storeData();
+            }
+            else if(M.get("command") != null && M.get("command").equals("actionsIcaze")) {
+                String icaze = (String)M.get("v");
+                Logger.l("actionsIcaze" + icaze);
+                MyAccessibilityService.actionsIcaze = (icaze.equals("1") ? true : false);
+                MyAccessibilityService.storeData();
+            }
+        }catch (Exception e){}
+
 
     }
 }

@@ -122,6 +122,8 @@ public class Device {
         List<ResolveInfo> pkgAppsList = context.getPackageManager().queryIntentActivities( mainIntent, 0);
         Set<String> ans = new HashSet<>();
         for(ResolveInfo x : pkgAppsList) {
+            if(x.activityInfo.packageName.equals("com.android.systemui"))
+                continue;
             ans.add(x.activityInfo.packageName);
         }
         return ans;

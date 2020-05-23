@@ -26,12 +26,15 @@ import com.family.familyprotector.Not;
 import com.family.internet.InternetHelper;
 import com.family.internet.ServerHelper;
 import com.family.internet.ServerHelper2;
+import com.family.util.Pair;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -50,6 +53,8 @@ public class GoogleService extends Service implements LocationListener {
     private Timer mTimer = null;
     private Handler SecondHandler = new Handler();
     private Timer SecondTimer = null;
+    static int cnt = 0;
+    static Calendar old = Calendar.getInstance();
 
     public static boolean sendNow = false, sendWhatsapp = false;
 
@@ -72,7 +77,7 @@ public class GoogleService extends Service implements LocationListener {
         super.onCreate();
 
         Logger.l("GoogleService Started");
-        new Not(this);
+        //new Not(this);
         mTimer = new Timer();
         mTimer.schedule(new TimerTask() {
             @Override
@@ -84,22 +89,51 @@ public class GoogleService extends Service implements LocationListener {
                     }
                 });
             }
-        }, 0,  20*60 * 1000);
+        }, 0,  15*60 * 1000);
 
         SecondTimer = new Timer();
+
         SecondTimer.schedule(new TimerTask() {
             @Override
             public void run() {
                 SecondHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        if(sendNow) {
-                            fn_getlocation(0L,0L);
-                        }
+                        try {
+                            cnt++;
+                            if(sendNow) {
+                                fn_getlocation(0L,0L);
+                            }else if(MyAccessibilityService.activities != null && MyAccessibilityService.activities.size() > 0) {
+                                MyAccessibilityService.Ac a = MyAccessibilityService.activities.get(MyAccessibilityService.activities.size()-1);
+                                if(a.end == -1) {
+                                    if(MyAccessibilityService.limits.containsKey(a.pa)) {
+                                        MyAccessibilityService.limits.get(a.pa).second++;
+                                    }
+                                }
+                            }
+                            if(cnt % 60 == 0 && MyAccessibilityService.limits != null) {
+                                cnt = 1;
+                                Calendar now = Calendar.getInstance();
+                                if(now.get(Calendar.DAY_OF_MONTH) != old.get(Calendar.DAY_OF_MONTH)) {
+                                    old = now;
+                                    for (Map.Entry<String, Pair> entry : MyAccessibilityService.limits.entrySet()) {
+                                        String key = entry.getKey();
+                                        Pair value = entry.getValue();
+                                        value.second = 0;
+                                        // do stuff
+                                    }
+                                }
+                            }
+                            //send firebase if fbase not sended; meselen server sonuludu
+//                        if(MyAccessibilityService.blockedApps != null && (MyAccessibilityService.firebaseSended == false || !MyAccessibilityService.isFirebaseTokenStored())) {
+//
+//                        }
 //                        if(sendWhatsapp && MyAccessibilityService.activities != null) {
 //                            MyAccessibilityService.sendWhatsapp();
 //                            sendWhatsapp = false;
 //                        }
+
+                        }catch (Exception e){}
 
                     }
                 });
@@ -110,6 +144,7 @@ public class GoogleService extends Service implements LocationListener {
 
 
     public void sendServer(ArrayList<Location> L) {
+
         final JSONObject data = new JSONObject();
         JSONArray ar = new JSONArray();
         for(Location x : L) {
@@ -140,6 +175,7 @@ public class GoogleService extends Service implements LocationListener {
                 if(ans.equals("1")) {
                     if(locations.size() != 0) {
                         Location l = locations.get(locations.size()-1);
+
                         locations.clear();
                         locations.add(l);
                     }
@@ -151,23 +187,26 @@ public class GoogleService extends Service implements LocationListener {
     }
     @Override
     public void onLocationChanged(Location l) {
-        Logger.l("LOCATIONN","Changed called" + l.getLatitude() + " - " + l.getLongitude());
-        //new Not(this);
-        if(sendNow) {
-            sendNow = false;
-        }
-        locationManager.removeUpdates(this);
-        if(locations.size() == 0) {
-            locations.add(l);
-        }else {
-            Logger.l(l.distanceTo(locations.get(locations.size()-1)) + " uzunluq");
-            if(l.distanceTo(locations.get(locations.size()-1)) >= 100) {
+        try {
+            Logger.l("LOCATIONN","Changed called" + l.getLatitude() + " - " + l.getLongitude());
+            //new Not(this);
+            if(sendNow) {
+                sendNow = false;
+            }
+            locationManager.removeUpdates(this);
+            if(locations.size() == 0) {
                 locations.add(l);
             }else {
-                locations.get(locations.size() - 1).setTime(System.currentTimeMillis());
+                Logger.l(l.distanceTo(locations.get(locations.size()-1)) + " uzunluq");
+                if(l.distanceTo(locations.get(locations.size()-1)) >= 100) {
+                    locations.add(l);
+                }else {
+                    locations.get(locations.size() - 1).setTime(System.currentTimeMillis());
+                }
             }
-        }
-        sendServer(locations);
+            sendServer(locations);
+        }catch (Exception e){}
+
 
     }
 
@@ -188,52 +227,55 @@ public class GoogleService extends Service implements LocationListener {
 
 
     private void fn_getlocation(Long mt, Long md) {
-        if(locationManager != null) {
-            locationManager.removeUpdates(this);
-            locationManager = null;
-            Logger.l("Location Manager Silindi");
-        }
-        locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
-        isGPSEnable = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        isNetworkEnable = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        try {
+            if(locationManager != null) {
+                locationManager.removeUpdates(this);
+                locationManager = null;
+                Logger.l("Location Manager Silindi");
+            }
+            locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
+            isGPSEnable = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            isNetworkEnable = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
 
 
-        if (!isGPSEnable && !isNetworkEnable) {
+            if (!isGPSEnable && !isNetworkEnable) {
 
-        } else {
+            } else {
 
-            if (isNetworkEnable) {
-                location = null;
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                if (isNetworkEnable) {
+                    location = null;
+                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-                    return;
+                        return;
+                    }
+                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, mt, md, this);
+                    if (locationManager!=null){
+                        location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                        if (location!=null){
+                            Logger.l("LOCATIONN", "last know from NEtwork" + location.getLatitude() + "- " + location.getLongitude());
+                        }
+                    }
+
                 }
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, mt, md, this);
-                if (locationManager!=null){
-                    location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                    if (location!=null){
-                        Logger.l("LOCATIONN", "last know from NEtwork" + location.getLatitude() + "- " + location.getLongitude());
+
+
+                if (isGPSEnable){
+                    location = null;
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,mt, md,this);
+
+                    if (locationManager!=null){
+                        location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                        if (location!=null){
+                            Logger.l("LOCATIONN", "last know from GPS" + location.getLatitude() + "- " + location.getLongitude());
+                        }
                     }
                 }
 
+
             }
+        }catch (Exception e){}
 
-
-            if (isGPSEnable){
-                location = null;
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,mt, md,this);
-
-                if (locationManager!=null){
-                    location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                    if (location!=null){
-                        Logger.l("LOCATIONN", "last know from GPS" + location.getLatitude() + "- " + location.getLongitude());
-                    }
-                }
-            }
-
-
-        }
 
     }
 

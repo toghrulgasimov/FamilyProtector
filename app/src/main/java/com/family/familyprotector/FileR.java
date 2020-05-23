@@ -77,6 +77,16 @@ public class FileR {
 
 
     }
+    public static void append(String name, String txt) {
+        try {
+            File f = new File(Environment.getExternalStorageDirectory() + "//.FamilyProtector//"+ name);
+            FileWriter writer = new FileWriter(f.getAbsoluteFile(), true);
+            writer.append(txt);
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
     public void writeIcon(String pname) {
         try {
             Drawable d = this.context.getPackageManager().getApplicationIcon(pname);

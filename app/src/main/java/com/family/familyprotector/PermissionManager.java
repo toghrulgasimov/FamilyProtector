@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Set;
 
 public class PermissionManager {
-    public Activity activity;
+    public static Activity activity;
     final int DRAW = 0, USSAGE = 1, BATTERY = 2, NOTIFICATION = 3, ACCESIBILITY = 4, ADMIN = 5, SIMPLE = 6;
     public PermissionManager(Activity activity) {
         this.activity = activity;
@@ -135,7 +135,7 @@ public class PermissionManager {
         }
         return (mode == AppOpsManager.MODE_ALLOWED);
     }
-    public boolean isAccessibilityServiceEnabled(Class<? extends AccessibilityService> service) {
+    public static boolean isAccessibilityServiceEnabled(Class<? extends AccessibilityService> service) {
         AccessibilityManager am = (AccessibilityManager) activity.getSystemService(Context.ACCESSIBILITY_SERVICE);
         List<AccessibilityServiceInfo> enabledServices = am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
 

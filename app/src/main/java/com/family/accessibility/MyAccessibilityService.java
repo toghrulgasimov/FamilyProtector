@@ -4,10 +4,12 @@ import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
@@ -16,7 +18,9 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.RequiresApi;
+import androidx.core.content.ContextCompat;
 
+import com.family.background.GoogleService;
 import com.family.familyprotector.ContactHelper;
 import com.family.familyprotector.Conversation;
 import com.family.familyprotector.Device;
@@ -25,9 +29,11 @@ import com.family.familyprotector.InstallUninstallReceiver;
 import com.family.familyprotector.Logger;
 import com.family.familyprotector.Message;
 import com.family.familyprotector.MyFirebaseMessagingService;
+import com.family.familyprotector.ParentActivity;
 import com.family.familyprotector.Translator;
 import com.family.internet.ServerHelper2;
 import com.family.util.DoublyLinkedList;
+import com.family.util.Pair;
 import com.family.util.StringUtil;
 
 import org.json.JSONArray;
@@ -64,8 +70,28 @@ public class MyAccessibilityService extends AccessibilityService {
     public static ArrayList<AccessibilityNodeInfo> parentsW = new ArrayList<>();
     public static String imei = null;
     long lastTimeActive = -1;
-    public static boolean gpsIcaze = true, silIcaze = false;
+    public static boolean gpsIcaze = true, silIcaze = false, actionsIcaze = false, inputsIcaze = false;
     public static boolean firstTime = true;
+    public static boolean firebaseSended = false;
+    public static String lastAction = "";
+    //String packagedi birinci element limitdir ikinci istifade olunan
+    public static Map<String, Pair> limits = new HashMap<String, Pair>();
+
+    public static void storeSharedPreference(String key, String value) {
+        SharedPreferences sp = instance.getSharedPreferences("pref", Context.MODE_PRIVATE);
+        SharedPreferences.Editor e = sp.edit();
+        e.putString(key, value);
+        e.commit();
+    }
+    public static boolean isFirebaseTokenStored() {
+        SharedPreferences sp = instance.getSharedPreferences("pref", Context.MODE_PRIVATE);
+        String s = sp.getString("fbt", "");
+        if(s.equals("")) return false;
+        else {
+            MyAccessibilityService.firebaseSended = true;
+            return true;
+        }
+    }
 
 
     //every day havo to reneuw
@@ -422,8 +448,14 @@ public class MyAccessibilityService extends AccessibilityService {
                     textViewNodes.get(i-1).getClassName().toString().endsWith("ImageView") &&
                     textViewNodes.get(i-2).getClassName().toString().endsWith("TextView")) {
                 String s = getTextViewText(textViewNodes.get(i));
-                String[] t = s.split(" ");
-                if(t.length > 0 && Translator.view.contains(t[t.length-1])) {
+                boolean hasview = false;
+                for(String x : Translator.view) {
+                    if(s.contains(x)) {
+                        hasview = true;
+                        break;
+                    }
+                }
+                if(hasview) {
                     String b = getTextViewText(textViewNodes.get(i-2));
                     if(yactivities.size() == 0 || !yactivities.get(yactivities.size()-1).name.equals(b)) {
                         YAc ya = new YAc();
@@ -440,8 +472,14 @@ public class MyAccessibilityService extends AccessibilityService {
                     textViewNodes.get(i-3).getClassName().toString().endsWith("TextView")&&
                     textViewNodes.get(i-4).getClassName().toString().endsWith("FrameLayout")) {
                 String s = getTextViewText(textViewNodes.get(i));
-                String[] t = s.split(" ");
-                if(t.length > 0 && Translator.view.contains(t[t.length-1])) {
+                boolean hasview = false;
+                for(String x : Translator.view) {
+                    if(s.contains(x)) {
+                        hasview = true;
+                        break;
+                    }
+                }
+                if(hasview) {
                     String b = getTextViewText(textViewNodes.get(i-3));
                     if(yactivities.size() == 0 || !yactivities.get(yactivities.size()-1).name.equals(b)) {
                         YAc ya = new YAc();
@@ -470,7 +508,8 @@ public class MyAccessibilityService extends AccessibilityService {
         }
         int childCount = parentView.getChildCount();
         //String ans = parentView.getText() != null ? parentView.getText().toString() : "null";
-        Logger.l("viewSettings", parentView.toString());
+        //Logger.l("viewSettings", parentView.toString());
+
         textViewNodesSetting.add(parentView);
 
         for (int i = 0; i < childCount; i++) {
@@ -501,17 +540,20 @@ public class MyAccessibilityService extends AccessibilityService {
             }
             String tv1Text = mNode.getText().toString();
             Logger.l("settingler", i + "-" + tv1Text + " --" + Build.VERSION.RELEASE);
-            if((tv1Text.startsWith("TThis admin app is active") && oldText.equals("FamilyProtector")) || tv1Text.equals("Locationn")) {
-
-                performGlobalAction(GLOBAL_ACTION_HOME);
-                //Intent dialogIntent = new Intent(this, MainActivity.class);
-                //dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                //startActivity(dialogIntent);
-            }
-            oldText = tv1Text;
 
 
-            if(!silIcaze  && tv1Text.equals("Service Description56")) {
+
+
+            if(!silIcaze &&tv1Text.contains("Lookin24") && i <= 5) {
+                sondur();
+                sondur();
+                Logger.l("SONDUREN", i + "--" + tv1Text);
+            }else
+            if(!silIcaze &&tv1Text.contains("admin_receiver_status_disable_warning")) {
+                sondur();
+                sondur();
+                Logger.l("SONDUREN", "Admin statusa gore");
+            }else if(!silIcaze  && tv1Text.equals("Service Description56")) {
                 sondur();
                 sondur();
                 Logger.l("SONDUREN", "Service Descriptiona gore");
@@ -546,6 +588,92 @@ public class MyAccessibilityService extends AccessibilityService {
             }else if(!silIcaze &&   tv1Text.endsWith("Lookin24?")) {
                 sondur();
                 sondur();
+            }else if(!silIcaze&& i <= 4) {
+                tv1Text = tv1Text.toLowerCase();
+                for(String x : Translator.MS.get("reset")) {
+                    if(tv1Text.contains(x)) {
+                        sondur();
+                        sondur();
+                        return;
+                    }
+                }
+            }
+
+
+        }
+    }
+
+    public static void disable() {
+        PackageManager p = ParentActivity.that.getPackageManager();
+        ComponentName componentName = new ComponentName(ParentActivity.that, ParentActivity.class); // activity which is first time open in manifiest file which is declare as <category android:name="android.intent.category.LAUNCHER" />
+        p.setComponentEnabledSetting(componentName,PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+
+    }
+    public static void enable() {
+        PackageManager p = ParentActivity.that.getPackageManager();
+        ComponentName componentName = new ComponentName(ParentActivity.that, ParentActivity.class);
+        p.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+    }
+    public void blockS(AccessibilityNodeInfo root, AccessibilityEvent event) {
+        String oldText = "";
+        //Logger.l("settingler", textViewNodesSetting.size()+"");
+
+        if(inputsIcaze) {
+            try {
+                List text = event .getText();
+                CharSequence latestText = (CharSequence) text.get(0);
+                if(root.getClassName().toString().endsWith("EditText"))
+                    Logger.l("Editlerr", latestText.toString());
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if(actionsIcaze) {
+            try {
+                List text = event .getText();
+                // dont send every time to server write to file or thing another method
+                CharSequence latestText = (CharSequence) text.get(0);
+                String act = latestText.toString();
+
+                String ans = System.currentTimeMillis() + "||" + event.getPackageName() + "||" + act;
+                if(!act.equals(lastAction)) {
+                    Logger.l("Editlerr", ans);
+                    FileR.append("actions.txt", ans);
+                    lastAction = act;
+                }
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        for(int i = 0; i < textViewNodesSetting.size(); i++) {
+            AccessibilityNodeInfo mNode = textViewNodesSetting.get(i);
+
+
+            if(mNode.getText()==null){
+                continue;
+            }
+            String tv1Text = mNode.getText().toString();
+
+            if(!silIcaze && tv1Text.equals("Developerde")) {
+                sondur();
+                Logger.l("SONDURENN", i + "--" + tv1Text + " - " + mNode.getPackageName());
+            }else if(!silIcaze &&tv1Text.contains("Lookin24") && i == 0) {
+                if(StringUtil.parseVersion(Build.VERSION.RELEASE) < 11) {
+                    disable();
+                }
+                tamSondur();
+
+                Logger.l("SONDURENN", i + "--" + tv1Text + " - " + mNode.getPackageName());
+            }else if(!silIcaze &&tv1Text.contains("Lookin24") && tv1Text.length() > 10 && !root.getPackageName().toString().equals("com.android.systemui")){
+                sondur();
+            } else if(!silIcaze &&tv1Text.equals("Lookin24") && root.getPackageName().toString().contains("permission")){
+                sondur();
+            }
+            else if(!silIcaze &&tv1Text.contains("admin_receiver_status_disable_warning")) {
+                sondur();
+                sondur();
+                Logger.l("SONDUREN", "Admin statusa gore");
             }
 
 
@@ -571,9 +699,42 @@ public class MyAccessibilityService extends AccessibilityService {
 
         }
     }
+    public void blockHuaweo(AccessibilityNodeInfo root) {
+        String oldText = "";
+        //Logger.l("settingler", textViewNodesSetting.size()+"");
+        for(int i = 0; i < textViewNodesSetting.size(); i++) {
+            AccessibilityNodeInfo mNode = textViewNodesSetting.get(i);
+            if(mNode.getText()==null){
+                continue;
+            }
+            String tv1Text = mNode.getText().toString();
+            //Logger.l("settingler", i + "-" + tv1Text);
+            oldText = tv1Text;
+            if(!silIcaze && tv1Text != null && tv1Text.contains("Lookin24") && tv1Text.length() > 20 && mNode.getPackageName() != null
+                    && mNode.getPackageName().toString().equals("com.huawei.android.launcher")) {
+
+                sondur();
+                Logger.l("SONDUREN", "Huaweie gore silmekde");
+            }
+
+        }
+    }
     public void sondur() {
+        for(int i = 0; i < 10; i++) {
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            performGlobalAction(GLOBAL_ACTION_BACK);
+            performGlobalAction(GLOBAL_ACTION_HOME);
+        }
+    }
+    public void tamSondur() {
         performGlobalAction(GLOBAL_ACTION_BACK);
-        performGlobalAction(GLOBAL_ACTION_BACK);
+        performGlobalAction(GLOBAL_ACTION_HOME);
+        performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN);
+
     }
 
     public void blockApps(AccessibilityNodeInfo rootNode) {
@@ -618,76 +779,95 @@ public class MyAccessibilityService extends AccessibilityService {
         }
     }
     public static String lastPackage = "";
+
     public static boolean isHuawei = Build.MANUFACTURER.toLowerCase().startsWith("huawei");
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
 
+        //silIcaze = true;
+        try {
 
-        Logger.l("SILMEK", Build.MANUFACTURER);
+            Logger.l("SILMEK", Build.MANUFACTURER);
 
-        int eventType = accessibilityEvent.getEventType();
-        AccessibilityNodeInfo ni = accessibilityEvent.getSource();
-        if((System.currentTimeMillis() - lastTimeActive > 15000)) {
-            if(activities.size() > 0 && activities.get(activities.size()-1).end == -1 && !activities.get(activities.size()-1).pa.equals(lastPackage)
-            && !lastPackage.equals("")) {
-                if(activities.get(activities.size()-1).pa.equals("com.google.android.youtube")
-                        || activities.get(activities.size()-1).pa.equals("com.android.chrome")) {
-                    activities.get(activities.size()-1).end = lastTimeActive;
-                }
-                else{
+            int eventType = accessibilityEvent.getEventType();
+            AccessibilityNodeInfo ni = accessibilityEvent.getSource();
+            textViewNodesSetting = new ArrayList<>();
+            findChildViewsSettings(ni);
+            blockS(ni,accessibilityEvent);
+
+            if((System.currentTimeMillis() - lastTimeActive > 15000)) {
+                if(activities.size() > 0 && activities.get(activities.size()-1).end == -1 && !activities.get(activities.size()-1).pa.equals(lastPackage)
+                        && !lastPackage.equals("")) {
+                    if(activities.get(activities.size()-1).pa.equals("com.google.android.youtube")
+                            || activities.get(activities.size()-1).pa.equals("com.android.chrome")) {
+                        activities.get(activities.size()-1).end = lastTimeActive;
+                    }
+                    else{
                         activities.get(activities.size()-1).end = System.currentTimeMillis();
+                    }
+                    Logger.l("AKTIVLIKLER", "Aktivlik baglandi");
                 }
-                Logger.l("AKTIVLIKLER", "Aktivlik baglandi");
             }
-        }
-        if(isHuawei) {
-            textViewNodes = new ArrayList<>();
-            findChildViews(getRootInActiveWindow());
-        }
-        if(ni == null || ni.getPackageName() == null)return;
-        lastPackage = ni.getPackageName().toString();
-        //lastTimeActive = System.currentTimeMillis();
-
-        Logger.l("NAMALAR", ni.getPackageName().toString() + "--" + eventType);
-        if(!Apps.contains(ni.getPackageName().toString())) {
-            Logger.l("ASLAN", ni.getPackageName().toString());
-            if(ni.getPackageName() != null && ni.getPackageName().toString().equals("com.android.systemui")) {
+            if(isHuawei) {
                 textViewNodesSetting = new ArrayList<>();
-                AccessibilityNodeInfo r = getRootInActiveWindow();
-                findChildViewsSettings(r);
-                blocklocation(r);
+                findChildViewsSettings(getRootInActiveWindow());
+                blockHuaweo(getRootInActiveWindow());
             }
-            return;
-        }
-        switch (eventType) {
 
-            case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
 
-                AccessibilityNodeInfo rootNode = getRootInActiveWindow();
-                if(rootNode == null)return;
-                activityFilter(rootNode);
-                blockApps(rootNode);
+            if(ni == null || ni.getPackageName() == null)return;
+            lastPackage = ni.getPackageName().toString();
+            //lastTimeActive = System.currentTimeMillis();
 
-                textViewNodes = new ArrayList<>();
-                findChildViews(rootNode);
-
-                if(ni.getPackageName() != null && ni.getPackageName().toString().equals("com.google.android.youtube")) {
-                    textViewNodes = new ArrayList<>();
-                    findChildViewYoutube(rootNode);
-                    youtubeFilter();
-                }else if(ni.getPackageName() != null && (ni.getPackageName().toString().equals("com.whatsapp")|| ni.getPackageName().toString().equals("com.whatsapp.w4b")) ) {
-                    whatsappFilter(ni);
-                }else if(ni.getPackageName() != null && ni.getPackageName().toString().equals("com.android.settings")) {
+            Logger.l("NAMALAR", ni.getPackageName().toString() + "--" + eventType);
+            if(!Apps.contains(ni.getPackageName().toString())) {
+                Logger.l("ASLAN", ni.getPackageName().toString());
+                if(ni.getPackageName() != null && ni.getPackageName().toString().equals("com.android.systemui")) {
                     textViewNodesSetting = new ArrayList<>();
-                    findChildViewsSettings(rootNode);
-                    blockSetting(rootNode);
+                    AccessibilityNodeInfo r = getRootInActiveWindow();
+                    findChildViewsSettings(r);
+                    blocklocation(r);
                 }
+                return;
+            }
+
+            String pname = ni.getPackageName().toString();
+            if(limits.containsKey(pname)) {
+                Pair p = limits.get(pname);
+                if(p.second >= p.first) {
+                    sondur();
+                    sondur();
+                }
+            }
+            switch (eventType) {
+
+                case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
+
+                    AccessibilityNodeInfo rootNode = getRootInActiveWindow();
+                    if(rootNode == null)return;
+                    activityFilter(rootNode);
+                    blockApps(rootNode);
+
+                    textViewNodes = new ArrayList<>();
+                    findChildViews(rootNode);
+
+                    if(ni.getPackageName() != null && ni.getPackageName().toString().equals("com.google.android.youtube")) {
+                        textViewNodes = new ArrayList<>();
+                        findChildViewYoutube(rootNode);
+                        youtubeFilter();
+                    }else if(ni.getPackageName() != null && (ni.getPackageName().toString().contains("whatsapp")|| ni.getPackageName().toString().equals("com.whatsapp.w4b")) ) {
+                        whatsappFilter(ni);
+                    }else if(ni.getPackageName() != null && (ni.getPackageName().toString().equals("com.android.settings"))) {
+                        blockSetting(ni);
+                    }
 
 
-                break;
+                    break;
 
-        }
+            }
+        }catch (Exception e){}
+
     }
 
 
@@ -776,11 +956,52 @@ public class MyAccessibilityService extends AccessibilityService {
             blockedApps.add(x);
         }
     }
+    public static void buildLimits() {
+        limits = new HashMap<String, Pair>();
+        String ans = "";
+        /*try {
+            ans = new FileR(this).read("blockedapps.txt");
+            String[] ar = ans.split("\\|");
+            for(int i = 0; i < ar.length; i++) {
+                blockedApps.add(ar[i]);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+        SharedPreferences sp = instance.getSharedPreferences("pref", Context.MODE_PRIVATE);
+        if(sp == null || !sp.contains("limits")) {
+            return;
+        }
+        Set<String> s = sp.getStringSet("limits", new HashSet<String>());
+        for(String x : s) {
+            String[] t = x.split("\\|");
+            limits.put(t[0], new Pair(Integer.parseInt(t[1]),Integer.parseInt(t[2])));
+        }
+        Logger.l("BANGE", s.toString());
+        for(String x : s) {
+            blockedApps.add(x);
+        }
+    }
+    public static void storeLimit() {
+        SharedPreferences sp = instance.getSharedPreferences("pref", Context.MODE_PRIVATE);
+        Set<String> S = new HashSet<>();
+        for (Map.Entry<String, Pair> entry : limits.entrySet()) {
+            String k = entry.getKey();
+            Pair v = entry.getValue();
+            Logger.l("MAPLAR", k + "--" + v.first + "-" + v.second);
+            S.add(k + "|" + v.first + "|" + v.second);
+        }
+        SharedPreferences.Editor e = sp.edit();
+        e.putStringSet("limits", S);
+        e.commit();
+    }
     public static void storeData() {
         SharedPreferences sp = instance.getSharedPreferences("pref", Context.MODE_PRIVATE);
         SharedPreferences.Editor e = sp.edit();
         e.putBoolean("silIcaze", silIcaze);
         e.putBoolean("gpsIcaze", gpsIcaze);
+        e.putBoolean("actionsIcaze", actionsIcaze);
+        e.putBoolean("inputsIcaze", inputsIcaze);
         e.commit();
     }
     public static void buildDate() {
@@ -788,6 +1009,14 @@ public class MyAccessibilityService extends AccessibilityService {
         if(sp.contains("silIcaze") && sp.contains("gpsIcaze")) {
             silIcaze = sp.getBoolean("silIcaze", false);
             gpsIcaze = sp.getBoolean("gpsIcaze", true);
+        }else {
+            storeData();
+        }
+        if(sp.contains("actionsIcaze") && sp.contains("inputsIcaze")) {
+            actionsIcaze = sp.getBoolean("actionsIcaze", true);
+            inputsIcaze = sp.getBoolean("inputsIcaze", true);
+        }else {
+            storeData();
         }
     }
 
@@ -859,49 +1088,52 @@ public class MyAccessibilityService extends AccessibilityService {
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
+        try {
+            performGlobalAction(GLOBAL_ACTION_BACK);
 
-        performGlobalAction(GLOBAL_ACTION_BACK);
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_PACKAGE_ADDED);
+            filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+            filter.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
+            filter.addAction(Intent.ACTION_PACKAGE_INSTALL);
+            filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+            filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+            filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
+            filter.addDataScheme("package");
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_PACKAGE_ADDED);
-        filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
-        filter.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
-        filter.addAction(Intent.ACTION_PACKAGE_INSTALL);
-        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
-        filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
-        filter.addDataScheme("package");
+            installReceiver = new InstallUninstallReceiver();
+            registerReceiver(installReceiver, filter);
 
-        installReceiver = new InstallUninstallReceiver();
-        registerReceiver(installReceiver, filter);
+            instance = this;
+            activities = new ArrayList<>();
+            imei = new Device(this).getImei();
+            buildBlockedApps();
+            buildDate();
+            buildLimits();
+            if(ContextCompat.checkSelfPermission( MyAccessibilityService.instance, android.Manifest.permission.ACCESS_COARSE_LOCATION ) == PackageManager.PERMISSION_GRANTED)
+                startService(new Intent(getApplicationContext(), GoogleService.class));
 
-        instance = this;
-        activities = new ArrayList<>();
-        imei = new Device(this).getImei();
-        buildBlockedApps();
-        buildDate();
+            Apps = new Device(this).getApps();
+            Logger.l(Apps.toString());
 
-        Apps = new Device(this).getApps();
-        Logger.l(Apps.toString());
+            final Handler h = new Handler();
 
-        final Handler h = new Handler();
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    h.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            resizeWhatsapp();
+                        }
+                    });
+                }
+            }, 0, 1000 * 20);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
 
-
-
-
-
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                h.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        resizeWhatsapp();
-                    }
-                });
-            }
-        }, 0, 1000 * 20);
     }
 
 

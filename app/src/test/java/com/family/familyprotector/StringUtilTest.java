@@ -1,6 +1,7 @@
 package com.family.familyprotector;
 
 import com.family.util.DoublyLinkedList;
+import com.family.util.Pair;
 import com.family.util.StringUtil;
 
 import org.junit.Test;
@@ -10,8 +11,10 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -20,6 +23,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class StringUtilTest {
+    public static Map<String, Pair> limits = new HashMap<>();
 
     @Test
     public void simpleTest() {
@@ -74,6 +78,18 @@ public class StringUtilTest {
         System.out.println(uniqueID);
 
         System.out.println(S.toString());
+
+        System.out.println(Locale.getDefault().getLanguage());
+
+        Pair pa = new Pair(10,3);
+        limits.put("a", pa);
+        Pair r = limits.get("a");
+        r.first = 25;
+
+        for(int i = 0; i < 1000; i++) {
+
+            System.out.println(StringUtil.dist("analar","aa"));
+        }
 
 
     }

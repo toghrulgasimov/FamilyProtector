@@ -60,6 +60,7 @@ public class Translator {
         MS.put("Device administrator", new HashSet<String>());
         MS.put("Location sources", new HashSet<String>());
         MS.put("Lookin24?", new HashSet<String>());
+        MS.put("reset", new HashSet<String>());
 
         MS.get("Installed").add("Installed");
         MS.get("Installed").add("Quraşdırıldı");
@@ -119,6 +120,11 @@ public class Translator {
 
 
         MS.get("Lookin24?").add("Lookin24?");
+
+        MS.get("reset").add("sıfır");
+        MS.get("reset").add("zurücksetz");
+        MS.get("reset").add("reset?");
+        MS.get("reset").add("Сброс".toLowerCase());
 
 
         //Konum kaynakları
