@@ -706,9 +706,8 @@ public class MyAccessibilityService extends AccessibilityService {
             String tv1Text = mNode.getText().toString();
             //Logger.l("settingler", i + "-" + tv1Text);
             oldText = tv1Text;
-            if(!gpsIcaze && tv1Text != null && Translator.MS.get("Location").contains(tv1Text) && mNode.getPackageName() != null
+            if(!gpsIcaze && tv1Text != null && (Translator.MS.get("Location").contains(tv1Text) || tv1Text.equals("GPS")) && mNode.getPackageName() != null
             && mNode.getPackageName().toString().equals("com.android.systemui")) {
-
                 sondur();
                 Logger.l("SONDUREN", "Locationa gore");
             }
