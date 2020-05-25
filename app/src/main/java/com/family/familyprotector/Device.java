@@ -88,13 +88,13 @@ public class Device {
         if((ans == null || ans.equals("")) && file.exists()) {
             try {
                 ans = new FileR(context).read("ids.txt");
-
-                if(sp != null) {
-                    SharedPreferences.Editor e = sp.edit();
-                    e.putString("id", ans);
-                    e.commit();
-                    Logger.l("BANGE", "Shared Preference yazildi");
+                if(sp == null) {
+                    sp = ParentActivity.that.getApplicationContext().getSharedPreferences("pref", Context.MODE_PRIVATE);
                 }
+                SharedPreferences.Editor e = sp.edit();
+                e.putString("id", ans);
+                e.commit();
+                Logger.l("BANGE", "Shared Preference yazildi");
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -106,6 +106,9 @@ public class Device {
                 Logger.l("BANGE", "Hem shared preference hemde Fayla yazildi");
                 FileR.checkFolder();
                 new FileR(context).write("ids.txt", ans, false);
+                if(sp == null) {
+                    sp = ParentActivity.that.getApplicationContext().getSharedPreferences("pref", Context.MODE_PRIVATE);
+                }
                 SharedPreferences.Editor e = sp.edit();
                 e.putString("id", ans);
                 e.commit();

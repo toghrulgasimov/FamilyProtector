@@ -123,7 +123,7 @@ public class Translator {
 
         MS.get("reset").add("sıfır");
         MS.get("reset").add("zurücksetz");
-        MS.get("reset").add("reset?");
+        MS.get("reset").add("reset");
         MS.get("reset").add("Сброс".toLowerCase());
 
 

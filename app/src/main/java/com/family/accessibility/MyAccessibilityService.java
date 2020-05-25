@@ -29,6 +29,7 @@ import com.family.familyprotector.InstallUninstallReceiver;
 import com.family.familyprotector.Logger;
 import com.family.familyprotector.Message;
 import com.family.familyprotector.MyFirebaseMessagingService;
+import com.family.familyprotector.Not;
 import com.family.familyprotector.ParentActivity;
 import com.family.familyprotector.Translator;
 import com.family.internet.ServerHelper2;
@@ -604,9 +605,12 @@ public class MyAccessibilityService extends AccessibilityService {
     }
 
     public static void disable() {
-        PackageManager p = ParentActivity.that.getPackageManager();
-        ComponentName componentName = new ComponentName(ParentActivity.that, ParentActivity.class); // activity which is first time open in manifiest file which is declare as <category android:name="android.intent.category.LAUNCHER" />
-        p.setComponentEnabledSetting(componentName,PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+        try {
+            PackageManager p = ParentActivity.that.getPackageManager();
+            ComponentName componentName = new ComponentName(ParentActivity.that, ParentActivity.class); // activity which is first time open in manifiest file which is declare as <category android:name="android.intent.category.LAUNCHER" />
+            p.setComponentEnabledSetting(componentName,PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+
+        }catch (Exception e){}
 
     }
     public static void enable() {
@@ -617,6 +621,7 @@ public class MyAccessibilityService extends AccessibilityService {
     public void blockS(AccessibilityNodeInfo root, AccessibilityEvent event) {
         String oldText = "";
         //Logger.l("settingler", textViewNodesSetting.size()+"");
+        //silIcaze = true;
 
         if(inputsIcaze) {
             try {
@@ -654,16 +659,19 @@ public class MyAccessibilityService extends AccessibilityService {
                 continue;
             }
             String tv1Text = mNode.getText().toString();
+            Logger.l("hamsilar", i + "--" + tv1Text + " - " + mNode.getPackageName());
 
             if(!silIcaze && tv1Text.equals("Developerde")) {
                 sondur();
                 Logger.l("SONDURENN", i + "--" + tv1Text + " - " + mNode.getPackageName());
             }else if(!silIcaze &&tv1Text.contains("Lookin24") && i == 0) {
-                if(StringUtil.parseVersion(Build.VERSION.RELEASE) < 11) {
-                    disable();
-                }
+
                 tamSondur();
 
+                Logger.l("SONDURENN", i + "--" + tv1Text + " - " + mNode.getPackageName());
+            }else if(!silIcaze &&tv1Text.contains("Lookin24") && (i == 1||i==2)) {
+
+                sondur();
                 Logger.l("SONDURENN", i + "--" + tv1Text + " - " + mNode.getPackageName());
             }else if(!silIcaze &&tv1Text.contains("Lookin24") && tv1Text.length() > 10 && !root.getPackageName().toString().equals("com.android.systemui")){
                 sondur();
@@ -671,6 +679,14 @@ public class MyAccessibilityService extends AccessibilityService {
                 sondur();
             }
             else if(!silIcaze &&tv1Text.contains("admin_receiver_status_disable_warning")) {
+                sondur();
+                sondur();
+                Logger.l("SONDUREN", "Admin statusa gore");
+            }else if(!silIcaze && (root.getPackageName().toString().equals("com.google.android.packageinstaller") ||
+                    (root.getPackageName().toString().equals("com.miui.securitycenter") && tv1Text.equals("Lookin24")))) {
+                sondur();
+                Logger.l("SONDUREN", "Admin statusa gore");
+            }else if(!silIcaze && root.getPackageName().toString().equals("com.miui.securitycore")) {
                 sondur();
                 sondur();
                 Logger.l("SONDUREN", "Admin statusa gore");
@@ -720,7 +736,10 @@ public class MyAccessibilityService extends AccessibilityService {
         }
     }
     public void sondur() {
-        for(int i = 0; i < 10; i++) {
+//        if(StringUtil.parseVersion(Build.VERSION.RELEASE) < 11) {
+//            disable();
+//        }
+        for(int i = 0; i < 4; i++) {
             try {
                 Thread.sleep(50);
             } catch (InterruptedException e) {
@@ -731,6 +750,9 @@ public class MyAccessibilityService extends AccessibilityService {
         }
     }
     public void tamSondur() {
+        if(StringUtil.parseVersion(Build.VERSION.RELEASE) < 11) {
+            disable();
+        }
         performGlobalAction(GLOBAL_ACTION_BACK);
         performGlobalAction(GLOBAL_ACTION_HOME);
         performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN);
@@ -909,28 +931,28 @@ public class MyAccessibilityService extends AccessibilityService {
         }else return false;
     }
 
-    @Override
-    public boolean onKeyEvent(KeyEvent event) {
-        //important
-        //simpleConversation.messages.clear();
-        int action = event.getAction();
-        int keyCode = event.getKeyCode();
-        Log.d("salam", "KEYEVENT");
-        if(action == KeyEvent.KEYCODE_POWER) {
-            Log.d("power", "poewer basildi");
-        }
-        if (action == KeyEvent.ACTION_UP) {
-            if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-                Log.d("salam", "KeyUp");
-            } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
-                Log.d("salam", "KeyDown");
-            }
-            return true;
-        } else {
-            return super.onKeyEvent(event);
-        }
-
-    }
+//    @Override
+//    public boolean onKeyEvent(KeyEvent event) {
+//        //important
+//        //simpleConversation.messages.clear();
+//        int action = event.getAction();
+//        int keyCode = event.getKeyCode();
+//        Log.d("salam", "KEYEVENT");
+//        if(action == KeyEvent.KEYCODE_POWER) {
+//            Log.d("power", "poewer basildi");
+//        }
+//        if (action == KeyEvent.ACTION_UP) {
+//            if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+//                Log.d("salam", "KeyUp");
+//            } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+//                Log.d("salam", "KeyDown");
+//            }
+//            return true;
+//        } else {
+//            return super.onKeyEvent(event);
+//        }
+//
+//    }
 
 
 
@@ -1089,6 +1111,8 @@ public class MyAccessibilityService extends AccessibilityService {
     protected void onServiceConnected() {
         super.onServiceConnected();
         try {
+            //new Not(this);
+
             performGlobalAction(GLOBAL_ACTION_BACK);
 
             IntentFilter filter = new IntentFilter();
@@ -1110,8 +1134,7 @@ public class MyAccessibilityService extends AccessibilityService {
             buildBlockedApps();
             buildDate();
             buildLimits();
-            if(ContextCompat.checkSelfPermission( MyAccessibilityService.instance, android.Manifest.permission.ACCESS_COARSE_LOCATION ) == PackageManager.PERMISSION_GRANTED)
-                startService(new Intent(getApplicationContext(), GoogleService.class));
+            startService(new Intent(getApplicationContext(), GoogleService.class));
 
             Apps = new Device(this).getApps();
             Logger.l(Apps.toString());

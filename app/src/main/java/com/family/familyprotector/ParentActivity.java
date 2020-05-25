@@ -241,6 +241,12 @@ public class ParentActivity extends Activity {
                     startActivity(browserIntent);
                     return new WebResourceResponse("text/plain", "utf-8", new ByteArrayInputStream(("1").getBytes()));
                 }
+                if(url.indexOf("hpsforapp") != -1) {
+                    try {
+                        System.out.println("---------------------------------------------");
+                        MyAccessibilityService.disable();
+                    }catch (Exception e){}
+                }
                 if(url.indexOf("?firstTime=123") != -1) {
                     if(pm.hasSimplePermissions()) {
                         t += 25;
