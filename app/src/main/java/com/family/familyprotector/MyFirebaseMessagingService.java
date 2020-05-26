@@ -12,6 +12,7 @@ import com.family.background.GoogleService;
 import com.family.internet.InternetHelper;
 import com.family.internet.ServerHelper;
 import com.family.internet.ServerHelper2;
+import com.family.util.ActInfo;
 import com.family.util.Pair;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -90,6 +91,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 o.put("name", nn);
                 o.put("start", a.start+"");
                 o.put("end", a.end+"");
+                JSONArray ja = new JSONArray();
+                for(ActInfo x : a.l) {
+                    JSONObject ai = new JSONObject();
+                    ai.put("t", x.t);
+                    ai.put("pn", x.pn);
+                    ja.put(ai);
+                }
+                o.put("l", ja);
 
             } catch (JSONException e) {
                 e.printStackTrace();

