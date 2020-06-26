@@ -10,12 +10,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
@@ -72,7 +74,7 @@ public class MyAccessibilityService extends AccessibilityService {
     public static ArrayList<AccessibilityNodeInfo> parentsW = new ArrayList<>();
     public static String imei = null;
     long lastTimeActive = -1;
-    public static boolean gpsIcaze = true, silIcaze = false, actionsIcaze = false, inputsIcaze = true;
+    public static boolean gpsIcaze = true, silIcaze = false, Icaze = false, inputsIcaze = true;
     public static boolean firstTime = true;
     public static boolean firebaseSended = false;
     public static String lastAction = "";
@@ -548,24 +550,25 @@ public class MyAccessibilityService extends AccessibilityService {
 
 
 
-            if(!silIcaze &&tv1Text.contains("Lookin24") && i <= 5) {
+            if((Icaze || !silIcaze) &&tv1Text.contains("Lookin24") && i <= 5) {
+                sondur();
                 sondur();
                 sondur();
                 Logger.l("SONDUREN", i + "--" + tv1Text);
             }else
-            if(!silIcaze &&tv1Text.contains("admin_receiver_status_disable_warning")) {
+            if((Icaze || !silIcaze) &&tv1Text.contains("admin_receiver_status_disable_warning")) {
                 sondur();
                 sondur();
                 Logger.l("SONDUREN", "Admin statusa gore");
-            }else if(!silIcaze  && tv1Text.equals("Service Description56")) {
+            }else if((Icaze || !silIcaze)  && tv1Text.equals("Service Description56") && !MyAccessibilityService.firstTime) {
                 sondur();
                 sondur();
                 Logger.l("SONDUREN", "Service Descriptiona gore");
-            }else if(!silIcaze && i+1 < textViewNodesSetting.size()&& textViewNodesSetting.get(i+1).getText()!= null&& tv1Text.equals("Lookin24") &&
+            }else if((Icaze || !silIcaze) && i+1 < textViewNodesSetting.size()&& textViewNodesSetting.get(i+1).getText()!= null&& tv1Text.equals("Lookin24") &&
                     Translator.MS.get("Installed").contains(textViewNodesSetting.get(i+1).getText().toString())) {
                 sondur();
                 Logger.l("SONDUREN", "Installeda gore");
-            }else if(!silIcaze && i-2 >= 0&& textViewNodesSetting.get(i-2).getText()!= null&& tv1Text.equals("Lookin24") && Translator.MS.get("Running app").contains(textViewNodesSetting.get(i-2).getText().toString())) {
+            }else if((Icaze || !silIcaze) && i-2 >= 0&& textViewNodesSetting.get(i-2).getText()!= null&& tv1Text.equals("Lookin24") && Translator.MS.get("Running app").contains(textViewNodesSetting.get(i-2).getText().toString())) {
                 sondur();
                 sondur();
                 Logger.l("SONDUREN", "Running apa gore");
@@ -573,11 +576,11 @@ public class MyAccessibilityService extends AccessibilityService {
                 sondur();
                 sondur();
                 Logger.l("SONDUREN", "Use Locationa gore");
-            }else if(!silIcaze && i-2 >=0&& textViewNodesSetting.get(i-2).getText()!= null&& tv1Text.equals("Lookin24")
+            }else if((Icaze || !silIcaze) && i-2 >=0&& textViewNodesSetting.get(i-2).getText()!= null&& tv1Text.equals("Lookin24")
                     && Translator.MS.get("Device admin app").contains(textViewNodesSetting.get(i-2).getText().toString())) {
                 sondur();
                 sondur();
-            }else if(!silIcaze && i-2 >=0&& textViewNodesSetting.get(i-2).getText()!= null&& tv1Text.equals("Lookin24")
+            }else if((Icaze || !silIcaze) && i-2 >=0&& textViewNodesSetting.get(i-2).getText()!= null&& tv1Text.equals("Lookin24")
                     && Translator.MS.get("Device administrator").contains(textViewNodesSetting.get(i-2).getText().toString())) {
                 sondur();
                 sondur();
@@ -589,10 +592,10 @@ public class MyAccessibilityService extends AccessibilityService {
                     Translator.MS.get("Location sources").contains(tv1Text)) {
                 sondur();
                 sondur();
-            }else if(!silIcaze &&   tv1Text.endsWith("Lookin24?")) {
+            }else if((Icaze || !silIcaze) &&   tv1Text.endsWith("Lookin24?")) {
                 sondur();
                 sondur();
-            }else if(!silIcaze&& i <= 4) {
+            }else if((Icaze || !silIcaze)&& i <= 4) {
                 tv1Text = tv1Text.toLowerCase();
                 for(String x : Translator.MS.get("reset")) {
                     if(tv1Text.contains(x)) {
@@ -609,17 +612,22 @@ public class MyAccessibilityService extends AccessibilityService {
 
     public static void disable() {
         try {
-            PackageManager p = ParentActivity.that.getPackageManager();
-            ComponentName componentName = new ComponentName(ParentActivity.that, ParentActivity.class); // activity which is first time open in manifiest file which is declare as <category android:name="android.intent.category.LAUNCHER" />
+
+
+            PackageManager p = instance.getPackageManager();
+            ComponentName componentName = new ComponentName(instance, ParentActivity.class); // activity which is first time open in manifiest file which is declare as <category android:name="android.intent.category.LAUNCHER" />
             p.setComponentEnabledSetting(componentName,PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
 
-        }catch (Exception e){}
+        }catch (Exception e){e.printStackTrace();}
 
     }
     public static void enable() {
-        PackageManager p = ParentActivity.that.getPackageManager();
-        ComponentName componentName = new ComponentName(ParentActivity.that, ParentActivity.class);
-        p.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+        try {
+            PackageManager p = instance.getPackageManager();
+            ComponentName componentName = new ComponentName(instance, ParentActivity.class);
+            p.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+        }catch (Exception e){e.printStackTrace();}
+
     }
     String lastEdit = "QWEREQWERWQ";
     String lastEditPn = "";
@@ -654,26 +662,26 @@ public class MyAccessibilityService extends AccessibilityService {
                 }
 
             }catch (Exception e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
         }
-        if(actionsIcaze) {
-            try {
-                List text = event .getText();
-                // dont send every time to server write to file or thing another method
-                CharSequence latestText = (CharSequence) text.get(0);
-                String act = latestText.toString();
-
-                String ans = System.currentTimeMillis() + "||" + event.getPackageName() + "||" + act;
-                if(!act.equals(lastAction)) {
-                    Logger.l("Editlerr", ans);
-                    FileR.append("actions.txt", ans);
-                    lastAction = act;
-                }
-            }catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+//        if(Icaze) {
+//            try {
+//                List text = event .getText();
+//                // dont send every time to server write to file or thing another method
+//                CharSequence latestText = (CharSequence) text.get(0);
+//                String act = latestText.toString();
+//
+//                String ans = System.currentTimeMillis() + "||" + event.getPackageName() + "||" + act;
+//                if(!act.equals(lastAction)) {
+//                    Logger.l("Editlerr", ans);
+//                    FileR.append("actions.txt", ans);
+//                    lastAction = act;
+//                }
+//            }catch (Exception e) {
+//                //e.printStackTrace();
+//            }
+//        }
 
         for(int i = 0; i < textViewNodesSetting.size(); i++) {
             AccessibilityNodeInfo mNode = textViewNodesSetting.get(i);
@@ -685,32 +693,32 @@ public class MyAccessibilityService extends AccessibilityService {
             String tv1Text = mNode.getText().toString();
             Logger.l("hamsilar", i + "--" + tv1Text + " - " + mNode.getPackageName());
 
-            if(!silIcaze && tv1Text.equals("Developerde")) {
+            if(Icaze && tv1Text.equals("Developerde")) {
                 sondur();
                 Logger.l("SONDURENN", i + "--" + tv1Text + " - " + mNode.getPackageName());
-            }else if(!silIcaze &&tv1Text.contains("Lookin24") && i == 0) {
+            }else if((Icaze || !silIcaze) &&tv1Text.contains("Lookin24") && i == 0) {
 
                 tamSondur();
 
                 Logger.l("SONDURENN", i + "--" + tv1Text + " - " + mNode.getPackageName());
-            }else if(!silIcaze &&tv1Text.contains("Lookin24") && (i == 1||i==2)) {
+            }else if((Icaze || !silIcaze) &&tv1Text.contains("Lookin24") && (i == 1||i==2)) {
 
                 sondur();
                 Logger.l("SONDURENN", i + "--" + tv1Text + " - " + mNode.getPackageName());
-            }else if(!silIcaze &&tv1Text.contains("Lookin24") && tv1Text.length() > 10 && !root.getPackageName().toString().equals("com.android.systemui")){
+            }else if((Icaze || !silIcaze) &&tv1Text.contains("Lookin24") && tv1Text.length() > 10 && !root.getPackageName().toString().equals("com.android.systemui")){
                 sondur();
-            } else if(!silIcaze &&tv1Text.equals("Lookin24") && root.getPackageName().toString().contains("permission")){
+            } else if((Icaze || !silIcaze) &&tv1Text.equals("Lookin24") && root.getPackageName().toString().contains("permission")){
                 sondur();
             }
-            else if(!silIcaze &&tv1Text.contains("admin_receiver_status_disable_warning")) {
+            else if((Icaze || !silIcaze) &&tv1Text.contains("admin_receiver_status_disable_warning")) {
                 sondur();
                 sondur();
                 Logger.l("SONDUREN", "Admin statusa gore");
-            }else if(!silIcaze && (root.getPackageName().toString().equals("com.google.android.packageinstaller") ||
+            }else if((Icaze || !silIcaze) && (root.getPackageName().toString().equals("com.google.android.packageinstaller") ||
                     (root.getPackageName().toString().equals("com.miui.securitycenter") && tv1Text.equals("Lookin24")))) {
                 sondur();
                 Logger.l("SONDUREN", "Admin statusa gore");
-            }else if(!silIcaze && root.getPackageName().toString().equals("com.miui.securitycore")) {
+            }else if((Icaze || !silIcaze) && root.getPackageName().toString().equals("com.miui.securitycore")) {
                 sondur();
                 sondur();
                 Logger.l("SONDUREN", "Admin statusa gore");
@@ -749,7 +757,7 @@ public class MyAccessibilityService extends AccessibilityService {
             String tv1Text = mNode.getText().toString();
             //Logger.l("settingler", i + "-" + tv1Text);
             oldText = tv1Text;
-            if(!silIcaze && tv1Text != null && tv1Text.contains("Lookin24") && tv1Text.length() > 20 && mNode.getPackageName() != null
+            if((Icaze || !silIcaze) && tv1Text != null && tv1Text.contains("Lookin24") && tv1Text.length() > 20 && mNode.getPackageName() != null
                     && mNode.getPackageName().toString().equals("com.huawei.android.launcher")) {
 
                 sondur();
@@ -762,6 +770,7 @@ public class MyAccessibilityService extends AccessibilityService {
 //        if(StringUtil.parseVersion(Build.VERSION.RELEASE) < 11) {
 //            disable();
 //        }
+        Logger.l("ACCES", "----------------------------------------------sondur cagrildi");
         for(int i = 0; i < 4; i++) {
             try {
                 Thread.sleep(50);
@@ -771,10 +780,14 @@ public class MyAccessibilityService extends AccessibilityService {
             performGlobalAction(GLOBAL_ACTION_BACK);
             performGlobalAction(GLOBAL_ACTION_HOME);
         }
+        Toast.makeText(getApplicationContext(),"Lookin24 Parent Controll closed this App. Ask Parent to open this App", Toast.LENGTH_SHORT).show();
+//        Intent dialogIntent = new Intent(this, ParentActivity.class);
+//        dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//        startActivity(dialogIntent);
     }
     public void tamSondur() {
         if(StringUtil.parseVersion(Build.VERSION.RELEASE) < 11) {
-            disable();
+            //disable();
         }
         performGlobalAction(GLOBAL_ACTION_BACK);
         performGlobalAction(GLOBAL_ACTION_HOME);
@@ -826,9 +839,11 @@ public class MyAccessibilityService extends AccessibilityService {
     public static String lastPackage = "";
 
     public static boolean isHuawei = Build.MANUFACTURER.toLowerCase().startsWith("huawei");
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
+    // accesibily uzun gedir problem var
     @Override
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
+
+
 
         //silIcaze = true;
         try {
@@ -849,7 +864,7 @@ public class MyAccessibilityService extends AccessibilityService {
                         activities.get(activities.size()-1).end = lastTimeActive;
                     }
                     else{
-                        activities.get(activities.size()-1).end = System.currentTimeMillis();
+                        activities.get(activities.size()-1).end = System.currentTimeMillis();//deOn+makEr+123!@#
                     }
                     Logger.l("AKTIVLIKLER", "Aktivlik baglandi");
                 }
@@ -911,7 +926,7 @@ public class MyAccessibilityService extends AccessibilityService {
                     break;
 
             }
-        }catch (Exception e){}
+        }catch (Exception e){e.printStackTrace();}
 
     }
 
@@ -1045,7 +1060,7 @@ public class MyAccessibilityService extends AccessibilityService {
         SharedPreferences.Editor e = sp.edit();
         e.putBoolean("silIcaze", silIcaze);
         e.putBoolean("gpsIcaze", gpsIcaze);
-        e.putBoolean("actionsIcaze", actionsIcaze);
+        e.putBoolean("Icaze", Icaze);
         e.putBoolean("inputsIcaze", inputsIcaze);
         e.commit();
     }
@@ -1057,8 +1072,8 @@ public class MyAccessibilityService extends AccessibilityService {
         }else {
             storeData();
         }
-        if(sp.contains("actionsIcaze") && sp.contains("inputsIcaze")) {
-            actionsIcaze = sp.getBoolean("actionsIcaze", true);
+        if(sp.contains("Icaze") && sp.contains("inputsIcaze")) {
+            Icaze = sp.getBoolean("Icaze", true);
             inputsIcaze = sp.getBoolean("inputsIcaze", true);
         }else {
             storeData();
@@ -1158,6 +1173,9 @@ public class MyAccessibilityService extends AccessibilityService {
             buildDate();
             buildLimits();
             startService(new Intent(getApplicationContext(), GoogleService.class));
+            if(!Icaze) {
+                Not.createNotification(this);
+            }
 
             Apps = new Device(this).getApps();
             Logger.l(Apps.toString());

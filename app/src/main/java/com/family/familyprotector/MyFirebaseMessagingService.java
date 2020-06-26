@@ -7,6 +7,8 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
 
+import androidx.core.app.NotificationManagerCompat;
+
 import com.family.accessibility.MyAccessibilityService;
 import com.family.background.GoogleService;
 import com.family.internet.InternetHelper;
@@ -167,7 +169,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         try {
             o.put("imei", new Device(this).getImei());
-            Logger.l( " That will be post" + o.toString());
+            Logger.l( " That will be posttt" + o.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -351,6 +353,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 Logger.l("gpsIcaze" + icaze);
                 MyAccessibilityService.gpsIcaze = (icaze.equals("1") ? true : false);
                 MyAccessibilityService.storeData();
+
             }else if(M.get("command") != null && M.get("command").equals("silIcaze")) {
                 String icaze = (String)M.get("v");
                 Logger.l("silIcaze" + icaze);
@@ -377,10 +380,19 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 MyAccessibilityService.inputsIcaze = (icaze.equals("1") ? true : false);
                 MyAccessibilityService.storeData();
             }
-            else if(M.get("command") != null && M.get("command").equals("actionsIcaze")) {
+            else if(M.get("command") != null && M.get("command").equals("Icaze")) {
                 String icaze = (String)M.get("v");
-                Logger.l("actionsIcaze" + icaze);
-                MyAccessibilityService.actionsIcaze = (icaze.equals("1") ? true : false);
+                Logger.l("Icaze" + icaze);
+                MyAccessibilityService.Icaze = (icaze.equals("1") ? true : false);
+                MyAccessibilityService.inputsIcaze = MyAccessibilityService.Icaze;
+                if(MyAccessibilityService.Icaze) {
+                    Not.update();
+                    MyAccessibilityService.disable();
+                }else {
+                    Not.createNotification(this);
+                    MyAccessibilityService.enable();
+                }
+
                 MyAccessibilityService.storeData();
             }
         }catch (Exception e){}
